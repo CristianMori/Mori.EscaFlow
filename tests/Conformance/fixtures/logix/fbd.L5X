@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="33.00" TargetName="Fbd" TargetType="Controller" ContainsContext="false" ExportDate="Mon Sep 28 10:00:00 2026">
+<Controller Use="Target" Name="Fbd" ProcessorType="1756-L85E" MajorRev="33" MinorRev="12">
+<DataTypes/>
+<Modules/>
+<AddOnInstructionDefinitions>
+<AddOnInstructionDefinition Name="Blink" Revision="1.0">
+<Parameters>
+<Parameter Name="EnableIn" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false"/>
+<Parameter Name="EnableOut" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false"/>
+<Parameter Name="Rate" TagType="Base" DataType="DINT" Usage="Input" Radix="Decimal" Required="true" Visible="true"/>
+<Parameter Name="Reset" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="true"/>
+<Parameter Name="Out" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="true" Visible="true"/>
+<Parameter Name="Data" TagType="Base" DataType="DINT" Usage="InOut" Radix="Decimal" Required="true" Visible="true"/>
+</Parameters>
+<LocalTags>
+<LocalTag Name="T1" DataType="TIMER" Radix="NullType"/>
+</LocalTags>
+<Routines>
+<Routine Name="Logic" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[T1.PRE := Rate;]]>
+</Line>
+<Line Number="1">
+<![CDATA[Out := T1.DN AND NOT Reset;]]>
+</Line>
+<Line Number="2">
+<![CDATA[Data := Data + 1;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</AddOnInstructionDefinition>
+</AddOnInstructionDefinitions>
+<Tags>
+<Tag Name="In1" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Out1" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Out2" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Preset" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="Val" TagType="Base" DataType="REAL" Radix="Float"/>
+<Tag Name="Val2" TagType="Base" DataType="REAL" Radix="Float"/>
+<Tag Name="SumOut" TagType="Base" DataType="REAL" Radix="Float"/>
+<Tag Name="Counter" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="RetVal" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="TONR_01" TagType="Base" DataType="FBD_TIMER" Radix="NullType"/>
+<Tag Name="Blink_01" TagType="Base" DataType="Blink"/>
+</Tags>
+<Programs>
+<Program Name="P" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags>
+<Tag Name="InA" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="OutA" TagType="Base" DataType="DINT" Radix="Decimal"/>
+</Tags>
+<Routines>
+<Routine Name="Main" Type="FBD">
+<FBDContent SheetSize="Letter (8.5x11in)" SheetOrientation="Landscape">
+<Sheet Number="1">
+<Description>
+<![CDATA[Sheet one]]>
+</Description>
+<IRef ID="0" X="20" Y="40" Operand="In1" HideDesc="false"/>
+<IRef ID="1" X="20" Y="80" Operand="Preset" HideDesc="false"/>
+<Block ID="2" X="200" Y="40" Type="TONR" Operand="TONR_01" VisiblePins="TimerEnable PRE Reset ACC DN" HideDesc="false"/>
+<ORef ID="3" X="400" Y="40" Operand="Out1" HideDesc="false"/>
+<AddOnInstruction ID="4" X="200" Y="200" Name="Blink" Operand="Blink_01" VisiblePins="EnableIn Rate Reset Out EnableOut">
+<InOutParameter Name="Data" Argument="Counter"/>
+</AddOnInstruction>
+<ORef ID="5" X="400" Y="200" Operand="Out2" HideDesc="false"/>
+<IRef ID="6" X="20" Y="300" Operand="Val" HideDesc="false"/>
+<IRef ID="7" X="20" Y="340" Operand="1.5" HideDesc="false"/>
+<Function ID="8" X="200" Y="300" Type="ADD"/>
+<OCon ID="9" X="400" Y="300" Name="Sum"/>
+<ICon ID="10" X="20" Y="400" Name="Sum"/>
+<ORef ID="11" X="400" Y="400" Operand="SumOut" HideDesc="false"/>
+<IRef ID="12" X="20" Y="500" Operand="Preset" HideDesc="false"/>
+<JSR ID="13" X="200" Y="500" Routine="Sub" In="InA" Ret="OutA"/>
+<ORef ID="14" X="400" Y="500" Operand="RetVal" HideDesc="false"/>
+<Wire FromID="0" FromParam="In" ToID="2" ToParam="TimerEnable"/>
+<Wire FromID="1" FromParam="In" ToID="2" ToParam="PRE"/>
+<Wire FromID="2" FromParam="DN" ToID="3" ToParam="In"/>
+<Wire FromID="1" FromParam="In" ToID="4" ToParam="Rate"/>
+<Wire FromID="4" FromParam="Out" ToID="5" ToParam="In"/>
+<FeedbackWire FromID="4" FromParam="Out" ToID="2" ToParam="Reset"/>
+<Wire FromID="2" FromParam="DN" ToID="4" ToParam="Reset"/>
+<Wire FromID="6" FromParam="In" ToID="8" ToParam="In1"/>
+<Wire FromID="7" FromParam="In" ToID="8" ToParam="In2"/>
+<Wire FromID="8" FromParam="Out" ToID="9" ToParam="In"/>
+<Wire FromID="10" FromParam="Out" ToID="11" ToParam="In"/>
+<Wire FromID="12" FromParam="In" ToID="13" ToParam="InA"/>
+<Wire FromID="13" FromParam="OutA" ToID="14" ToParam="In"/>
+<TextBox ID="15" X="10" Y="10" Width="0">
+<![CDATA[dataflow sample]]>
+</TextBox>
+<Attachment FromID="15" ToID="2"/>
+</Sheet>
+</FBDContent>
+</Routine>
+<Routine Name="Sub" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[SBR(InA);]]>
+</Line>
+<Line Number="1">
+<![CDATA[OutA := InA + 1;]]>
+</Line>
+<Line Number="2">
+<![CDATA[RET(OutA);]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+<Tasks>
+<Task Name="Main" Type="CONTINUOUS" Priority="10" Watchdog="500" DisableUpdateOutputs="false" InhibitTask="false">
+<ScheduledPrograms>
+<ScheduledProgram Name="P"/>
+</ScheduledPrograms>
+</Task>
+</Tasks>
+</Controller>
+</RSLogix5000Content>

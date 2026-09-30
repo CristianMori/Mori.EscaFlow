@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Plc.Cli</RootNamespace>
+    <AssemblyName>Plc.Cli</AssemblyName>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\L5x\L5x.csproj" />
+    <ProjectReference Include="..\Plc.Ir.Logix.Build\Plc.Ir.Logix.Build.csproj" />
+    <ProjectReference Include="..\Plc.Ir.Validation\Plc.Ir.Validation.csproj" />
+  </ItemGroup>
+</Project>

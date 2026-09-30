@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="33.00" TargetName="Types" TargetType="Controller" ContainsContext="false" ExportDate="Mon Sep 28 10:00:00 2026">
+<Controller Use="Target" Name="Types" ProcessorType="1756-L85E" MajorRev="33" MinorRev="12">
+<Description>
+<![CDATA[Conformance: data types]]>
+</Description>
+<DataTypes>
+<DataType Name="Inner" Family="NoFamily" Class="User">
+<Description>
+<![CDATA[Bit overlays, arrays, packed BOOLs]]>
+</Description>
+<Members>
+<Member Name="ZZZZZZZZZZInner0" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="true"/>
+<Member Name="Bit0" DataType="BIT" Dimension="0" Radix="Decimal" Hidden="false" Target="ZZZZZZZZZZInner0" BitNumber="0"/>
+<Member Name="Bit1" DataType="BIT" Dimension="0" Radix="Decimal" Hidden="false" Target="ZZZZZZZZZZInner0" BitNumber="1">
+<Description>
+<![CDATA[second bit]]>
+</Description>
+</Member>
+<Member Name="Value" DataType="REAL" Dimension="0" Radix="Float" Hidden="false"/>
+<Member Name="Flags" DataType="BOOL" Dimension="32" Radix="Decimal" Hidden="false"/>
+<Member Name="Words" DataType="DINT" Dimension="4" Radix="Decimal" Hidden="false"/>
+</Members>
+</DataType>
+<DataType Name="STRING20" Family="StringFamily" Class="User">
+<Members>
+<Member Name="LEN" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="DATA" DataType="SINT" Dimension="20" Radix="ASCII" Hidden="false"/>
+</Members>
+</DataType>
+<DataType Name="Outer" Family="NoFamily" Class="User">
+<Members>
+<Member Name="In" DataType="Inner" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Items" DataType="Inner" Dimension="2" Radix="NullType" Hidden="false"/>
+<Member Name="Timer" DataType="TIMER" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Counter" DataType="COUNTER" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Control" DataType="CONTROL" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Msg" DataType="MESSAGE" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Name" DataType="STRING" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Short" DataType="STRING20" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Count" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+</Members>
+</DataType>
+</DataTypes>
+<Modules/>
+<AddOnInstructionDefinitions/>
+<Tags>
+<Tag Name="O" TagType="Base" DataType="Outer" Radix="NullType">
+<Description>
+<![CDATA[main structure]]>
+</Description>
+<Comments>
+<Comment Operand=".COUNT">
+<![CDATA[number of items]]>
+</Comment>
+<Comment Operand=".IN.BIT1">
+<![CDATA[the second bit]]>
+</Comment>
+</Comments>
+</Tag>
+<Tag Name="Matrix" TagType="Base" DataType="DINT" Dimensions="2 3" Radix="Decimal">
+<Data Format="Decorated">
+<Array DataType="DINT" Dimensions="2 3" Radix="Decimal">
+<Element Index="[0,0]" Value="1"/>
+<Element Index="[0,1]" Value="2"/>
+<Element Index="[0,2]" Value="3"/>
+<Element Index="[1,0]" Value="4"/>
+<Element Index="[1,1]" Value="5"/>
+<Element Index="[1,2]" Value="6"/>
+</Array>
+</Data>
+</Tag>
+<Tag Name="Word" TagType="Base" DataType="DINT" Radix="Decimal" Constant="true">
+<Data Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="42"/>
+</Data>
+</Tag>
+<Tag Name="Label" TagType="Base" DataType="STRING20" Radix="NullType">
+<Data Format="Decorated">
+<Structure DataType="STRING20">
+<DataValueMember Name="LEN" DataType="DINT" Radix="Decimal" Value="2"/>
+<DataValueMember Name="DATA" DataType="STRING20" Radix="ASCII">
+<![CDATA['Hi']]>
+</DataValueMember>
+</Structure>
+</Data>
+</Tag>
+<Tag Name="AlMember" TagType="Alias" AliasFor="O.In.Value"/>
+<Tag Name="AlBit" TagType="Alias" AliasFor="O.In.Bit1"/>
+<Tag Name="AlWordBit" TagType="Alias" AliasFor="Word.5"/>
+<Tag Name="AlElem" TagType="Alias" AliasFor="Matrix[1,2]"/>
+<Tag Name="AlFlag" TagType="Alias" AliasFor="O.In.Flags[3]"/>
+<Tag Name="AlItem" TagType="Alias" AliasFor="O.Items[1]"/>
+</Tags>
+<Programs>
+<Program Name="P" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags>
+<Tag Name="Local" TagType="Base" DataType="Outer" Radix="NullType"/>
+</Tags>
+<Routines>
+<Routine Name="Main" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[AlMember := AlMember + 1.0;]]>
+</Line>
+<Line Number="1">
+<![CDATA[IF AlBit AND AlWordBit AND AlFlag THEN AlElem := O.Count; END_IF;]]>
+</Line>
+<Line Number="2">
+<![CDATA[AlItem.Words[2] := Matrix[0,1] + Local.Items[0].Words[3];]]>
+</Line>
+<Line Number="3">
+<![CDATA[O.Name := Label;]]>
+</Line>
+<Line Number="4">
+<![CDATA[O.Count := O.Short.LEN + O.Timer.PRE + O.Counter.ACC + O.Control.POS;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+<Tasks>
+<Task Name="Main" Type="CONTINUOUS" Priority="10" Watchdog="500" DisableUpdateOutputs="false" InhibitTask="false">
+<ScheduledPrograms>
+<ScheduledProgram Name="P"/>
+</ScheduledPrograms>
+</Task>
+</Tasks>
+</Controller>
+</RSLogix5000Content>

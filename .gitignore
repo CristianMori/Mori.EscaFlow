@@ -1,0 +1,12 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.L5X
+*.l5x
+!tests/Conformance/fixtures/**/*.L5X
+*.pdf
+out/
+*.json.gz

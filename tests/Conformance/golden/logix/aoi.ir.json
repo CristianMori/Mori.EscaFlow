@@ -1,0 +1,2118 @@
+{
+  "format": "plc-ir",
+  "irVersion": "2.0",
+  "source": {
+    "vendor": "logix",
+    "dialect": "l5x",
+    "file": "aoi.L5X",
+    "exportDate": "Mon Sep 28 10:00:00 2026",
+    "softwareRevision": "33.00",
+    "generator": "conformance",
+    "generatedAt": "1970-01-01T00:00:00+00:00"
+  },
+  "configuration": {
+    "name": "Aoi",
+    "resources": [
+      {
+        "name": "Aoi",
+        "processorType": "1756-L85E",
+        "tasks": [
+          {
+            "name": "Main",
+            "kind": "continuous",
+            "priority": 10,
+            "watchdogMs": 500,
+            "programs": [
+              "P"
+            ],
+            "disabled": false,
+            "vendor": {
+              "logix": {
+                "type": "CONTINUOUS",
+                "inhibitTask": false,
+                "disableUpdateOutputs": false
+              }
+            }
+          }
+        ],
+        "programs": [
+          {
+            "name": "P",
+            "pou": "P",
+            "task": "Main",
+            "disabled": false
+          }
+        ]
+      }
+    ]
+  },
+  "types": [
+    {
+      "name": "MotorData",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Starts",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Hours",
+          "type": "REAL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Float",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "TIMER",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": false,
+      "members": [
+        {
+          "name": "PRE",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ACC",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 31,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "TT",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 30,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 29,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "stdFb": {
+        "fbs": [
+          "TON",
+          "TOF",
+          "TONR"
+        ],
+        "profile": "logix"
+      },
+      "vendor": {
+        "logix": {
+          "class": "predefined",
+          "hiddenMembers": [
+            {
+              "name": "ZZZZZZZZZZTIMER0",
+              "type": "DINT",
+              "position": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Aoi",
+      "vars": [
+        {
+          "id": "global/Aoi/Start",
+          "name": "Start",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Start",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Aoi/Spd",
+          "name": "Spd",
+          "section": "global",
+          "type": "REAL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Spd",
+              "scope": "controller",
+              "radix": "Float",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Aoi/Run1",
+          "name": "Run1",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Run1",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Aoi/Run2",
+          "name": "Run2",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Run2",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Aoi/MD1",
+          "name": "MD1",
+          "section": "global",
+          "type": "MotorData",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "MD1",
+              "scope": "controller",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Aoi/MD2",
+          "name": "MD2",
+          "section": "global",
+          "type": "MotorData",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "MD2",
+              "scope": "controller",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Aoi/M1",
+          "name": "M1",
+          "section": "global",
+          "type": "Motor",
+          "retain": "retain",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "EnableIn",
+                "value": {
+                  "kind": "scalar",
+                  "int": 1,
+                  "type": "BOOL"
+                }
+              },
+              {
+                "name": "EnableOut",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "BOOL"
+                }
+              },
+              {
+                "name": "Cmd",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "BOOL"
+                }
+              },
+              {
+                "name": "Speed",
+                "value": {
+                  "kind": "scalar",
+                  "real": 0,
+                  "type": "REAL"
+                }
+              },
+              {
+                "name": "Delay",
+                "value": {
+                  "kind": "scalar",
+                  "int": 500,
+                  "type": "DINT"
+                }
+              },
+              {
+                "name": "Running",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "BOOL"
+                }
+              },
+              {
+                "name": "Fault",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "BOOL"
+                }
+              },
+              {
+                "name": "T1",
+                "value": {
+                  "kind": "struct",
+                  "members": [
+                    {
+                      "name": "PRE",
+                      "value": {
+                        "kind": "scalar",
+                        "int": 0,
+                        "type": "DINT"
+                      }
+                    },
+                    {
+                      "name": "ACC",
+                      "value": {
+                        "kind": "scalar",
+                        "int": 0,
+                        "type": "DINT"
+                      }
+                    },
+                    {
+                      "name": "EN",
+                      "value": {
+                        "kind": "scalar",
+                        "int": 0,
+                        "type": "BOOL"
+                      }
+                    },
+                    {
+                      "name": "TT",
+                      "value": {
+                        "kind": "scalar",
+                        "int": 0,
+                        "type": "BOOL"
+                      }
+                    },
+                    {
+                      "name": "DN",
+                      "value": {
+                        "kind": "scalar",
+                        "int": 0,
+                        "type": "BOOL"
+                      }
+                    }
+                  ],
+                  "type": "TIMER"
+                }
+              },
+              {
+                "name": "Count",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "DINT"
+                }
+              },
+              {
+                "name": "Prev",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "BOOL"
+                }
+              }
+            ],
+            "type": "Motor"
+          },
+          "vendor": {
+            "logix": {
+              "path": "M1",
+              "scope": "controller",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Aoi/M2",
+          "name": "M2",
+          "section": "global",
+          "type": "Motor",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "M2",
+              "scope": "controller",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "description": "Controller-scoped tags"
+    }
+  ],
+  "io": {
+    "devices": [],
+    "channels": []
+  },
+  "pous": [
+    {
+      "name": "Motor",
+      "kind": "functionBlock",
+      "vars": [
+        {
+          "id": "pou/Motor/EnableIn",
+          "name": "EnableIn",
+          "section": "input",
+          "type": "BOOL",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.EnableIn",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "externalAccess": "Read Only",
+              "usage": "Input",
+              "required": false,
+              "visible": false,
+              "implicit": true
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/EnableOut",
+          "name": "EnableOut",
+          "section": "output",
+          "type": "BOOL",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.EnableOut",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "externalAccess": "Read Only",
+              "usage": "Output",
+              "required": false,
+              "visible": false,
+              "implicit": true
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/Cmd",
+          "name": "Cmd",
+          "section": "input",
+          "type": "BOOL",
+          "retain": "none",
+          "constant": false,
+          "description": "run command",
+          "vendor": {
+            "logix": {
+              "path": "Motor.Cmd",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "externalAccess": "Read/Write",
+              "usage": "Input",
+              "required": true,
+              "visible": true,
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/Speed",
+          "name": "Speed",
+          "section": "input",
+          "type": "REAL",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.Speed",
+              "scope": "aoiParameter",
+              "radix": "Float",
+              "externalAccess": "Read/Write",
+              "usage": "Input",
+              "required": true,
+              "visible": true,
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/Delay",
+          "name": "Delay",
+          "section": "input",
+          "type": "DINT",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "scalar",
+            "int": 500,
+            "type": "DINT"
+          },
+          "vendor": {
+            "logix": {
+              "path": "Motor.Delay",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "externalAccess": "Read/Write",
+              "usage": "Input",
+              "required": false,
+              "visible": true,
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/Running",
+          "name": "Running",
+          "section": "output",
+          "type": "BOOL",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.Running",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "externalAccess": "Read Only",
+              "usage": "Output",
+              "required": true,
+              "visible": true,
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/Fault",
+          "name": "Fault",
+          "section": "output",
+          "type": "BOOL",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.Fault",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "externalAccess": "Read Only",
+              "usage": "Output",
+              "required": false,
+              "visible": true,
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/Data",
+          "name": "Data",
+          "section": "inOut",
+          "type": "MotorData",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.Data",
+              "scope": "aoiParameter",
+              "usage": "InOut",
+              "required": true,
+              "visible": true,
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/T1",
+          "name": "T1",
+          "section": "local",
+          "type": "TIMER",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.T1",
+              "scope": "aoiLocal",
+              "radix": "NullType",
+              "externalAccess": "None",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/Count",
+          "name": "Count",
+          "section": "local",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.Count",
+              "scope": "aoiLocal",
+              "radix": "Decimal",
+              "externalAccess": "None",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Motor/Prev",
+          "name": "Prev",
+          "section": "local",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Motor.Prev",
+              "scope": "aoiLocal",
+              "radix": "Decimal",
+              "externalAccess": "None",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "body": {
+        "language": "ld",
+        "statements": [
+          {
+            "kind": "fbCall",
+            "instance": {
+              "op": "ref",
+              "root": {
+                "kind": "var",
+                "id": "pou/Motor/T1"
+              },
+              "path": [],
+              "io": false,
+              "opaque": false,
+              "type": "TIMER"
+            },
+            "fb": "TON",
+            "profile": "logix",
+            "inputs": {
+              "IN": {
+                "op": "ref",
+                "root": {
+                  "kind": "var",
+                  "id": "pou/Motor/Cmd"
+                },
+                "path": [],
+                "io": false,
+                "opaque": false,
+                "type": "BOOL"
+              }
+            },
+            "outputs": {},
+            "mode": "normal",
+            "src": {
+              "rung": 0,
+              "element": 1
+            }
+          },
+          {
+            "kind": "assign",
+            "target": {
+              "op": "ref",
+              "root": {
+                "kind": "var",
+                "id": "pou/Motor/Running"
+              },
+              "path": [],
+              "io": false,
+              "opaque": false,
+              "type": "BOOL"
+            },
+            "value": {
+              "op": "bin",
+              "operator": "and",
+              "left": {
+                "op": "ref",
+                "root": {
+                  "kind": "var",
+                  "id": "pou/Motor/Cmd"
+                },
+                "path": [],
+                "io": false,
+                "opaque": false,
+                "type": "BOOL"
+              },
+              "right": {
+                "op": "ref",
+                "root": {
+                  "kind": "var",
+                  "id": "pou/Motor/T1"
+                },
+                "path": [
+                  {
+                    "kind": "member",
+                    "name": "DN"
+                  }
+                ],
+                "io": false,
+                "opaque": false,
+                "type": "BOOL"
+              },
+              "type": "BOOL"
+            },
+            "nonRetentive": false,
+            "src": {
+              "rung": 0,
+              "element": 3
+            }
+          },
+          {
+            "kind": "assign",
+            "target": {
+              "op": "ref",
+              "root": {
+                "kind": "temp",
+                "name": "_rc1"
+              },
+              "path": [],
+              "io": false,
+              "opaque": false,
+              "type": "BOOL"
+            },
+            "value": {
+              "op": "edge",
+              "kind": "rising",
+              "clk": {
+                "op": "ref",
+                "root": {
+                  "kind": "var",
+                  "id": "pou/Motor/Cmd"
+                },
+                "path": [],
+                "io": false,
+                "opaque": false,
+                "type": "BOOL"
+              },
+              "storage": {
+                "op": "ref",
+                "root": {
+                  "kind": "var",
+                  "id": "pou/Motor/Prev"
+                },
+                "path": [],
+                "io": false,
+                "opaque": false,
+                "type": "BOOL"
+              },
+              "type": "BOOL"
+            },
+            "nonRetentive": false,
+            "src": {
+              "rung": 1,
+              "element": 2
+            }
+          },
+          {
+            "kind": "if",
+            "branches": [
+              {
+                "condition": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc1"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "body": [
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/Data"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Starts"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "value": {
+                      "op": "bin",
+                      "operator": "add",
+                      "left": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "pou/Motor/Data"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "Starts"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "right": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 1,
+                        "type": "DINT"
+                      },
+                      "type": "DINT"
+                    },
+                    "nonRetentive": false
+                  }
+                ]
+              }
+            ],
+            "src": {
+              "rung": 1,
+              "element": 2
+            }
+          },
+          {
+            "kind": "if",
+            "branches": [
+              {
+                "condition": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc1"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "body": [
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/Count"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "value": {
+                      "op": "bin",
+                      "operator": "add",
+                      "left": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "pou/Motor/Count"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "right": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 1,
+                        "type": "DINT"
+                      },
+                      "type": "DINT"
+                    },
+                    "nonRetentive": false
+                  }
+                ]
+              }
+            ],
+            "src": {
+              "rung": 1,
+              "element": 3
+            }
+          },
+          {
+            "kind": "assign",
+            "target": {
+              "op": "ref",
+              "root": {
+                "kind": "var",
+                "id": "pou/Motor/Fault"
+              },
+              "path": [],
+              "io": false,
+              "opaque": false,
+              "type": "BOOL"
+            },
+            "value": {
+              "op": "bin",
+              "operator": "and",
+              "left": {
+                "op": "ref",
+                "root": {
+                  "kind": "var",
+                  "id": "pou/Motor/Running"
+                },
+                "path": [],
+                "io": false,
+                "opaque": false,
+                "type": "BOOL"
+              },
+              "right": {
+                "op": "bin",
+                "operator": "gt",
+                "left": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Speed"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "REAL"
+                },
+                "right": {
+                  "op": "lit",
+                  "kind": "real",
+                  "real": 100,
+                  "type": "REAL"
+                },
+                "type": "BOOL"
+              },
+              "type": "BOOL"
+            },
+            "nonRetentive": false,
+            "src": {
+              "rung": 2,
+              "element": 2
+            }
+          }
+        ],
+        "temporaries": [
+          {
+            "name": "_rc1",
+            "type": "BOOL"
+          }
+        ],
+        "diagram": {
+          "kind": "ld",
+          "rungs": [
+            {
+              "number": 0,
+              "text": "XIC(Cmd)TON(T1,?,?)XIC(T1.DN)OTE(Running);",
+              "elements": [
+                {
+                  "kind": "contact",
+                  "operand": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/Motor/Cmd"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "negated": false,
+                  "name": "XIC"
+                },
+                {
+                  "kind": "block",
+                  "args": [
+                    {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/T1"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "TIMER"
+                    },
+                    {
+                      "op": "placeholder",
+                      "empty": false
+                    },
+                    {
+                      "op": "placeholder",
+                      "empty": false
+                    }
+                  ],
+                  "enable": "input",
+                  "eno": true,
+                  "isPou": false,
+                  "name": "TON"
+                },
+                {
+                  "kind": "contact",
+                  "operand": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/Motor/T1"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "DN"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "negated": false,
+                  "name": "XIC"
+                },
+                {
+                  "kind": "coil",
+                  "operand": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/Motor/Running"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "mode": "assign",
+                  "name": "OTE"
+                }
+              ]
+            },
+            {
+              "number": 1,
+              "text": "XIC(Cmd)ONS(Prev)ADD(Data.Starts,1,Data.Starts)ADD(Count,1,Count);",
+              "elements": [
+                {
+                  "kind": "contact",
+                  "operand": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/Motor/Cmd"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "negated": false,
+                  "name": "XIC"
+                },
+                {
+                  "kind": "contact",
+                  "negated": false,
+                  "edge": "rising",
+                  "storage": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/Motor/Prev"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "name": "ONS"
+                },
+                {
+                  "kind": "block",
+                  "args": [
+                    {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/Data"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Starts"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 1,
+                      "type": "DINT"
+                    },
+                    {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/Data"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Starts"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    }
+                  ],
+                  "enable": "gate",
+                  "eno": true,
+                  "isPou": false,
+                  "name": "ADD"
+                },
+                {
+                  "kind": "block",
+                  "args": [
+                    {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/Count"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 1,
+                      "type": "DINT"
+                    },
+                    {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/Count"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    }
+                  ],
+                  "enable": "gate",
+                  "eno": true,
+                  "isPou": false,
+                  "name": "ADD"
+                }
+              ]
+            },
+            {
+              "number": 2,
+              "text": "XIC(Running)GRT(Speed,100.0)OTE(Fault);",
+              "elements": [
+                {
+                  "kind": "contact",
+                  "operand": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/Motor/Running"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "negated": false,
+                  "name": "XIC"
+                },
+                {
+                  "kind": "contact",
+                  "operand": {
+                    "op": "bin",
+                    "operator": "gt",
+                    "left": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/Speed"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "REAL"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "kind": "real",
+                      "real": 100,
+                      "type": "REAL"
+                    },
+                    "type": "BOOL"
+                  },
+                  "negated": false,
+                  "args": [
+                    {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "pou/Motor/Speed"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "REAL"
+                    },
+                    {
+                      "op": "lit",
+                      "kind": "real",
+                      "real": 100,
+                      "type": "REAL"
+                    }
+                  ],
+                  "name": "GRT"
+                },
+                {
+                  "kind": "coil",
+                  "operand": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/Motor/Fault"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "mode": "assign",
+                  "name": "OTE"
+                }
+              ]
+            }
+          ]
+        },
+        "synthetic": false
+      },
+      "actions": [
+        {
+          "name": "Prescan",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Running"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 0,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Count"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 0,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 1,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Running := 0;",
+              "Count := 0;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST",
+              "scanMode": "Prescan"
+            }
+          }
+        },
+        {
+          "name": "Postscan",
+          "hook": "postscan",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Running"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 0,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Running := 0;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST",
+              "scanMode": "Postscan"
+            }
+          }
+        },
+        {
+          "name": "EnableInFalse",
+          "hook": "enableFalse",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Running"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 0,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Fault"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 0,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 1,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Running := 0;",
+              "Fault := 0;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST",
+              "scanMode": "EnableInFalse"
+            }
+          }
+        },
+        {
+          "name": "Init",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "fbCall",
+                "instance": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/T1"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "TIMER"
+                },
+                "fb": "TON",
+                "profile": "logix",
+                "inputs": {
+                  "IN": {
+                    "op": "lit",
+                    "kind": "bool",
+                    "bool": false,
+                    "type": "BOOL"
+                  }
+                },
+                "outputs": {},
+                "mode": "prescan",
+                "src": {
+                  "rung": 0
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Running"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "bool",
+                  "bool": false,
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "rung": 0
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Prev"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "bool",
+                  "bool": true,
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "rung": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/Motor/Fault"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "bool",
+                  "bool": false,
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "rung": 2
+                }
+              },
+              {
+                "kind": "actionCall",
+                "action": "Prescan",
+                "inputs": [],
+                "outputs": []
+              }
+            ],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "description": "Motor starter",
+      "vendor": {
+        "logix": {
+          "kind": "addOn",
+          "revision": "2.1",
+          "vendor": "Conformance",
+          "executePrescan": true,
+          "executePostscan": true,
+          "executeEnableInFalse": true,
+          "backingType": "Motor",
+          "disabled": false,
+          "folder": false
+        }
+      }
+    },
+    {
+      "name": "P",
+      "kind": "program",
+      "vars": [],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "ld",
+            "statements": [
+              {
+                "kind": "fbCall",
+                "instance": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Aoi/M1"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "Motor"
+                },
+                "pou": "Motor",
+                "inputs": {
+                  "Cmd": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/Start"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "Speed": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/Spd"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "REAL"
+                  },
+                  "Data": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/MD1"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MotorData"
+                  }
+                },
+                "outputs": {
+                  "Running": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/Run1"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  }
+                },
+                "en": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Aoi/Start"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "mode": "normal",
+                "src": {
+                  "rung": 0,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "actionCall",
+                "action": "Text",
+                "inputs": [],
+                "outputs": [],
+                "src": {
+                  "rung": 1,
+                  "element": 0
+                }
+              }
+            ],
+            "diagram": {
+              "kind": "ld",
+              "rungs": [
+                {
+                  "number": 0,
+                  "text": "XIC(Start)Motor(M1,Start,Spd,Run1,MD1);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Aoi/Start"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "name": "XIC"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Aoi/M1"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "Motor"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Aoi/Start"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "BOOL"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Aoi/Spd"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "REAL"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Aoi/Run1"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "BOOL"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Aoi/MD1"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "MotorData"
+                        }
+                      ],
+                      "enable": "input",
+                      "eno": true,
+                      "isPou": true,
+                      "name": "Motor"
+                    }
+                  ]
+                },
+                {
+                  "number": 1,
+                  "text": "JSR(Text,0);",
+                  "elements": [
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "keyword",
+                          "text": "Text",
+                          "kind": "action"
+                        },
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "JSR"
+                    }
+                  ]
+                }
+              ]
+            },
+            "synthetic": false
+          },
+          "calls": [
+            "Text"
+          ],
+          "vendor": {
+            "logix": {
+              "routineType": "RLL"
+            }
+          }
+        },
+        {
+          "name": "Text",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "fbCall",
+                "instance": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Aoi/M2"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "Motor"
+                },
+                "pou": "Motor",
+                "inputs": {
+                  "Cmd": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/Start"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "Speed": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/Spd"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "REAL"
+                  },
+                  "Data": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/MD2"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MotorData"
+                  }
+                },
+                "outputs": {
+                  "Running": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/Run2"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  }
+                },
+                "mode": "normal",
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Aoi/M2"
+                  },
+                  "path": [
+                    {
+                      "kind": "member",
+                      "name": "Delay"
+                    }
+                  ],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 250,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 1,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Aoi/Run2"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "and",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/M2"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Running"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "right": {
+                    "op": "un",
+                    "operator": "not",
+                    "operand": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Aoi/M2"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Fault"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "type": "BOOL"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 2,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Motor(M2, Start, Spd, Run2, MD2);",
+              "M2.Delay := 250;",
+              "Run2 := M2.Running AND NOT M2.Fault;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "fbCall",
+                "instance": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Aoi/M1"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "Motor"
+                },
+                "pou": "Motor",
+                "inputs": {},
+                "outputs": {},
+                "mode": "prescan",
+                "src": {
+                  "rung": 0
+                }
+              },
+              {
+                "kind": "fbCall",
+                "instance": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Aoi/M2"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "Motor"
+                },
+                "pou": "Motor",
+                "inputs": {},
+                "outputs": {},
+                "mode": "prescan",
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              }
+            ],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": false,
+          "folder": false,
+          "task": "Main"
+        }
+      }
+    }
+  ],
+  "diagnostics": [],
+  "vendor": {
+    "logix": {
+      "targetName": "Aoi",
+      "targetType": "Controller",
+      "majorRev": 33,
+      "minorRev": 12
+    }
+  }
+}

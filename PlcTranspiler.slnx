@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/L5x/L5x.csproj" />
+    <Project Path="src/Plc.Ir/Plc.Ir.csproj" />
+    <Project Path="src/Plc.Ir.Validation/Plc.Ir.Validation.csproj" />
+    <Project Path="src/Plc.Ir.Logix/Plc.Ir.Logix.csproj" />
+    <Project Path="src/Plc.Ir.Logix.Build/Plc.Ir.Logix.Build.csproj" />
+    <Project Path="src/Plc.Cli/Plc.Cli.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/L5x.Tests/L5x.Tests.csproj" />
+    <Project Path="tests/Plc.Ir.Tests/Plc.Ir.Tests.csproj" />
+    <Project Path="tests/Plc.Ir.Validation.Tests/Plc.Ir.Validation.Tests.csproj" />
+    <Project Path="tests/Plc.Ir.Logix.Tests/Plc.Ir.Logix.Tests.csproj" />
+  </Folder>
+</Solution>

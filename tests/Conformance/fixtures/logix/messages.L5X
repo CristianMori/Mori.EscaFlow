@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="33.00" TargetName="Messages" TargetType="Controller" ContainsContext="false" ExportDate="Mon Sep 28 10:00:00 2026">
+<Controller Use="Target" Name="Messages" ProcessorType="1756-L85E" MajorRev="33" MinorRev="12">
+<DataTypes>
+<DataType Name="SKT_Address" Family="NoFamily" Class="User"><Members>
+<Member Name="Family" DataType="INT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="Port" DataType="INT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="IP_4th_Octect" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="IP_3rd_Octect" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="IP_2nd_Octect" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="IP_1st_Octect" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+</Members></DataType>
+<DataType Name="SKT_Create_Source" Family="NoFamily" Class="User"><Members>
+<Member Name="Timeout" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="Type" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="Addr" DataType="SKT_Address" Dimension="0" Radix="NullType" Hidden="false"/>
+</Members></DataType>
+<DataType Name="SKT_Open_Connection" Family="NoFamily" Class="User"><Members>
+<Member Name="Timeout" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="Dest_Addr" DataType="STRING" Dimension="0" Radix="NullType" Hidden="false"/>
+</Members></DataType>
+<DataType Name="SKT_Write_Source" Family="NoFamily" Class="User"><Members>
+<Member Name="Timeout" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="ToAddr" DataType="SKT_Address" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Buffer" DataType="STRING" Dimension="0" Radix="NullType" Hidden="false"/>
+</Members></DataType>
+<DataType Name="SKT_Read_Source" Family="NoFamily" Class="User"><Members>
+<Member Name="Timeout" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="BufLen" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+</Members></DataType>
+<DataType Name="SKT_Read_Response" Family="NoFamily" Class="User"><Members>
+<Member Name="FromAddr" DataType="SKT_Address" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Buffer" DataType="STRING" Dimension="0" Radix="NullType" Hidden="false"/>
+</Members></DataType>
+<DataType Name="SKT_Data" Family="NoFamily" Class="User"><Members>
+<Member Name="Create_Source" DataType="SKT_Create_Source" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Instance" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="Open_Connection" DataType="SKT_Open_Connection" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Write_Source" DataType="SKT_Write_Source" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Read_Source" DataType="SKT_Read_Source" Dimension="0" Radix="NullType" Hidden="false"/>
+<Member Name="Read_Response" DataType="SKT_Read_Response" Dimension="0" Radix="NullType" Hidden="false"/>
+</Members></DataType>
+</DataTypes>
+<Modules>
+<Module Name="Local" CatalogNumber="1756-L85E" Vendor="1" ProductType="14" ProductCode="168" Major="33" Minor="12" ParentModule="Local" ParentModPortId="1" Inhibited="false" MajorFault="true">
+<Ports><Port Id="1" Address="0" Type="ICP" Upstream="false"><Bus Size="10"/></Port><Port Id="2" Type="Ethernet" Upstream="false"><Bus/></Port></Ports>
+</Module>
+<Module Name="Enet" CatalogNumber="1756-EN2T" Vendor="1" ProductType="12" ProductCode="166" Major="11" Minor="1" ParentModule="Local" ParentModPortId="1" Inhibited="false" MajorFault="false">
+<Ports><Port Id="1" Address="2" Type="ICP" Upstream="true"/><Port Id="2" Address="192.168.1.10" Type="Ethernet" Upstream="false"><Bus/></Port></Ports>
+</Module>
+</Modules>
+<AddOnInstructionDefinitions/>
+<Tags>
+<Tag Name="MsgData" TagType="Base" DataType="SKT_Data" Radix="NullType"/>
+<Tag Name="LocalArr" TagType="Base" DataType="DINT" Dimensions="10" Radix="Decimal"/>
+<Tag Name="Reply" TagType="Base" DataType="DINT" Dimensions="10" Radix="Decimal"/>
+<Tag Name="Trigger" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Read_Remote" TagType="Base" DataType="MESSAGE"><Data Format="Message">
+<MessageParameters MessageType="CIP Data Table Read" RequestedLength="10" ConnectionPath="1, 2, 2, 192.168.1.20, 1, 0" CommTypeCode="0" LocalIndex="0" LocalElement="LocalArr[0]" RemoteElement="RemoteArr[0]" RemoteIndex="0" CacheConnections="true" LargePacketUsage="false"/>
+</Data></Tag>
+<Tag Name="Get_Identity" TagType="Base" DataType="MESSAGE"><Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="0" ConnectedFlag="2" ConnectionPath="Enet" CommTypeCode="0" ServiceCode="16#000e" ObjectType="16#0001" TargetObject="1" AttributeNumber="16#0007" LocalIndex="0" DestinationTag="Reply" LargePacketUsage="false"/>
+</Data></Tag>
+<Tag Name="SKT_Create" TagType="Base" DataType="MESSAGE"><Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="14" ConnectedFlag="2" ConnectionPath="Enet" CommTypeCode="0" ServiceCode="16#004b" ObjectType="16#0342" TargetObject="0" AttributeNumber="16#0000" LocalIndex="0" LocalElement="MsgData.Create_Source"/>
+</Data></Tag>
+<Tag Name="SKT_Open" TagType="Base" DataType="MESSAGE"><Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="30" ConnectedFlag="2" ConnectionPath="Enet" CommTypeCode="0" ServiceCode="16#004c" ObjectType="16#0342" TargetObject="0" AttributeNumber="16#0000" LocalIndex="0" LocalElement="MsgData.Open_Connection"/>
+</Data></Tag>
+<Tag Name="SKT_Write" TagType="Base" DataType="MESSAGE"><Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="40" ConnectedFlag="2" ConnectionPath="Enet" CommTypeCode="0" ServiceCode="16#004e" ObjectType="16#0342" TargetObject="0" AttributeNumber="16#0000" LocalIndex="0" LocalElement="MsgData.Write_Source"/>
+</Data></Tag>
+<Tag Name="SKT_Read" TagType="Base" DataType="MESSAGE"><Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="8" ConnectedFlag="2" ConnectionPath="Enet" CommTypeCode="0" ServiceCode="16#004d" ObjectType="16#0342" TargetObject="0" AttributeNumber="16#0000" LocalIndex="0" LocalElement="MsgData.Read_Source" DestinationTag="MsgData.Read_Response"/>
+</Data></Tag>
+<Tag Name="SKT_Delete" TagType="Base" DataType="MESSAGE"><Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="0" ConnectedFlag="2" ConnectionPath="Enet" CommTypeCode="0" ServiceCode="16#004f" ObjectType="16#0342" TargetObject="0" AttributeNumber="16#0000" LocalIndex="0"/>
+</Data></Tag>
+<Tag Name="ProdCount" TagType="Produced" DataType="DINT" Radix="Decimal">
+<ProduceInfo ProduceCount="2" ProgrammaticallySendEventTrigger="false" UnicastPermitted="true" MinimumRPI="0.196" MaximumRPI="536870.9" DefaultRPI="20"/>
+</Tag>
+<Tag Name="ConsCount" TagType="Consumed" DataType="DINT" Radix="Decimal">
+<ConsumeInfo Producer="OtherPlc" RemoteTag="ProdCount" RemoteInstance="0" RPI="20" Unicast="true"/>
+</Tag>
+</Tags>
+<Programs>
+<Program Name="P" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags>
+<Tag Name="State" TagType="Base" DataType="DINT" Radix="Decimal"/>
+</Tags>
+<Routines>
+<Routine Name="Main" Type="RLL">
+<RLLContent>
+<Rung Number="0" Type="N">
+<Text>
+<![CDATA[XIC(Trigger)XIO(Read_Remote.EN)MSG(Read_Remote);]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Text>
+<![CDATA[EQU(State,0)MOV(1,MsgData.Create_Source.Type)MOV(2,MsgData.Create_Source.Addr.Family)MOV(5000,MsgData.Create_Source.Addr.Port)MSG(SKT_Create);]]>
+</Text>
+</Rung>
+<Rung Number="2" Type="N">
+<Text>
+<![CDATA[XIC(SKT_Create.DN)MOV(MsgData.Instance,SKT_Open.Instance)MOV(MsgData.Instance,SKT_Write.Instance)MOV(MsgData.Instance,SKT_Read.Instance)MOV(MsgData.Instance,SKT_Delete.Instance)MOV(1,State);]]>
+</Text>
+</Rung>
+<Rung Number="3" Type="N">
+<Text>
+<![CDATA[EQU(State,1)MSG(SKT_Open)XIC(SKT_Open.DN)MOV(2,State);]]>
+</Text>
+</Rung>
+<Rung Number="4" Type="N">
+<Text>
+<![CDATA[EQU(State,2)MSG(SKT_Write)XIC(SKT_Write.DN)MOV(3,State);]]>
+</Text>
+</Rung>
+<Rung Number="5" Type="N">
+<Text>
+<![CDATA[EQU(State,3)MSG(SKT_Read)XIC(SKT_Read.DN)MOV(4,State);]]>
+</Text>
+</Rung>
+<Rung Number="6" Type="N">
+<Text>
+<![CDATA[EQU(State,4)MSG(SKT_Delete)XIC(SKT_Delete.DN)MOV(0,State);]]>
+</Text>
+</Rung>
+<Rung Number="7" Type="N">
+<Text>
+<![CDATA[XIC(Trigger)MSG(Get_Identity)MOV(ConsCount,ProdCount);]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+<Tasks>
+<Task Name="Main" Type="CONTINUOUS" Priority="10" Watchdog="500" DisableUpdateOutputs="false" InhibitTask="false">
+<ScheduledPrograms>
+<ScheduledProgram Name="P"/>
+</ScheduledPrograms>
+</Task>
+</Tasks>
+</Controller>
+</RSLogix5000Content>

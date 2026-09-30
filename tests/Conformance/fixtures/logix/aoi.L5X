@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="33.00" TargetName="Aoi" TargetType="Controller" ContainsContext="false" ExportDate="Mon Sep 28 10:00:00 2026">
+<Controller Use="Target" Name="Aoi" ProcessorType="1756-L85E" MajorRev="33" MinorRev="12">
+<DataTypes>
+<DataType Name="MotorData" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Starts" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false"/>
+<Member Name="Hours" DataType="REAL" Dimension="0" Radix="Float" Hidden="false"/>
+</Members>
+</DataType>
+</DataTypes>
+<Modules/>
+<AddOnInstructionDefinitions>
+<AddOnInstructionDefinition Name="Motor" Revision="2.1" Vendor="Conformance" ExecutePrescan="true" ExecutePostscan="true" ExecuteEnableInFalse="true" CreatedDate="2026-09-28T10:00:00.000Z" CreatedBy="test" EditedDate="2026-09-28T10:00:00.000Z" EditedBy="test" SoftwareRevision="v33.00">
+<Description>
+<![CDATA[Motor starter]]>
+</Description>
+<Parameters>
+<Parameter Name="EnableIn" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only"/>
+<Parameter Name="EnableOut" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only"/>
+<Parameter Name="Cmd" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="true" Visible="true" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[run command]]>
+</Description>
+</Parameter>
+<Parameter Name="Speed" TagType="Base" DataType="REAL" Usage="Input" Radix="Float" Required="true" Visible="true" ExternalAccess="Read/Write"/>
+<Parameter Name="Delay" TagType="Base" DataType="DINT" Usage="Input" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read/Write">
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="500"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Running" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="true" Visible="true" ExternalAccess="Read Only"/>
+<Parameter Name="Fault" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only"/>
+<Parameter Name="Data" TagType="Base" DataType="MotorData" Usage="InOut" Required="true" Visible="true"/>
+</Parameters>
+<LocalTags>
+<LocalTag Name="T1" DataType="TIMER" Radix="NullType" ExternalAccess="None"/>
+<LocalTag Name="Count" DataType="DINT" Radix="Decimal" ExternalAccess="None"/>
+<LocalTag Name="Prev" DataType="BOOL" Radix="Decimal" ExternalAccess="None"/>
+</LocalTags>
+<Routines>
+<Routine Name="Logic" Type="RLL">
+<RLLContent>
+<Rung Number="0" Type="N">
+<Text>
+<![CDATA[XIC(Cmd)TON(T1,?,?)XIC(T1.DN)OTE(Running);]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Text>
+<![CDATA[XIC(Cmd)ONS(Prev)ADD(Data.Starts,1,Data.Starts)ADD(Count,1,Count);]]>
+</Text>
+</Rung>
+<Rung Number="2" Type="N">
+<Text>
+<![CDATA[XIC(Running)GRT(Speed,100.0)OTE(Fault);]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+<Routine Name="Prescan" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Running := 0;]]>
+</Line>
+<Line Number="1">
+<![CDATA[Count := 0;]]>
+</Line>
+</STContent>
+</Routine>
+<Routine Name="Postscan" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Running := 0;]]>
+</Line>
+</STContent>
+</Routine>
+<Routine Name="EnableInFalse" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Running := 0;]]>
+</Line>
+<Line Number="1">
+<![CDATA[Fault := 0;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</AddOnInstructionDefinition>
+</AddOnInstructionDefinitions>
+<Tags>
+<Tag Name="Start" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Spd" TagType="Base" DataType="REAL" Radix="Float"/>
+<Tag Name="Run1" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Run2" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="MD1" TagType="Base" DataType="MotorData" Radix="NullType"/>
+<Tag Name="MD2" TagType="Base" DataType="MotorData" Radix="NullType"/>
+<Tag Name="M1" TagType="Base" DataType="Motor">
+<Data Format="Decorated">
+<Structure DataType="Motor">
+<DataValueMember Name="EnableIn" DataType="BOOL" Value="1"/>
+<DataValueMember Name="EnableOut" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Cmd" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Speed" DataType="REAL" Radix="Float" Value="0.0"/>
+<DataValueMember Name="Delay" DataType="DINT" Radix="Decimal" Value="500"/>
+<DataValueMember Name="Running" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Fault" DataType="BOOL" Value="0"/>
+<StructureMember Name="T1" DataType="TIMER">
+<DataValueMember Name="PRE" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="ACC" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="EN" DataType="BOOL" Value="0"/>
+<DataValueMember Name="TT" DataType="BOOL" Value="0"/>
+<DataValueMember Name="DN" DataType="BOOL" Value="0"/>
+</StructureMember>
+<DataValueMember Name="Count" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Prev" DataType="BOOL" Value="0"/>
+</Structure>
+</Data>
+</Tag>
+<Tag Name="M2" TagType="Base" DataType="Motor"/>
+</Tags>
+<Programs>
+<Program Name="P" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags/>
+<Routines>
+<Routine Name="Main" Type="RLL">
+<RLLContent>
+<Rung Number="0" Type="N">
+<Text>
+<![CDATA[XIC(Start)Motor(M1,Start,Spd,Run1,MD1);]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Text>
+<![CDATA[JSR(Text,0);]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+<Routine Name="Text" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Motor(M2, Start, Spd, Run2, MD2);]]>
+</Line>
+<Line Number="1">
+<![CDATA[M2.Delay := 250;]]>
+</Line>
+<Line Number="2">
+<![CDATA[Run2 := M2.Running AND NOT M2.Fault;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+<Tasks>
+<Task Name="Main" Type="CONTINUOUS" Priority="10" Watchdog="500" DisableUpdateOutputs="false" InhibitTask="false">
+<ScheduledPrograms>
+<ScheduledProgram Name="P"/>
+</ScheduledPrograms>
+</Task>
+</Tasks>
+</Controller>
+</RSLogix5000Content>

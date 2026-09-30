@@ -1,0 +1,1552 @@
+{
+  "format": "plc-ir",
+  "irVersion": "2.0",
+  "source": {
+    "vendor": "logix",
+    "dialect": "l5x",
+    "file": "sfc.L5X",
+    "exportDate": "Mon Sep 28 10:00:00 2026",
+    "softwareRevision": "33.00",
+    "generator": "conformance",
+    "generatedAt": "1970-01-01T00:00:00+00:00"
+  },
+  "configuration": {
+    "name": "Sfc",
+    "resources": [
+      {
+        "name": "Sfc",
+        "processorType": "1756-L85E",
+        "tasks": [
+          {
+            "name": "Main",
+            "kind": "continuous",
+            "priority": 10,
+            "watchdogMs": 500,
+            "programs": [
+              "P"
+            ],
+            "disabled": false,
+            "vendor": {
+              "logix": {
+                "type": "CONTINUOUS",
+                "inhibitTask": false,
+                "disableUpdateOutputs": false
+              }
+            }
+          }
+        ],
+        "programs": [
+          {
+            "name": "P",
+            "pou": "P",
+            "task": "Main",
+            "disabled": false
+          }
+        ]
+      }
+    ]
+  },
+  "types": [
+    {
+      "name": "SFC_ACTION",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": true,
+      "members": [
+        {
+          "name": "Q",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "A",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "T",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "PRE",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Count",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Status",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined"
+        }
+      }
+    },
+    {
+      "name": "SFC_STEP",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": true,
+      "members": [
+        {
+          "name": "T",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "PRE",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "LimitLow",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "AlarmEn",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "AlarmLow",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "LimitHigh",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "AlarmHigh",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "X",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "FS",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "SA",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "LS",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Reset",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "TMax",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "OV",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Count",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Status",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined"
+        }
+      }
+    },
+    {
+      "name": "SFC_STOP",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": true,
+      "members": [
+        {
+          "name": "X",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Reset",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Count",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Status",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined"
+        }
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Sfc",
+      "vars": [
+        {
+          "id": "global/Sfc/Delay",
+          "name": "Delay",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Delay",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Sfc/Start",
+          "name": "Start",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Start",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Sfc/Fault",
+          "name": "Fault",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Fault",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Sfc/Done",
+          "name": "Done",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Done",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Sfc/Cmd",
+          "name": "Cmd",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Cmd",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Sfc/Count",
+          "name": "Count",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Count",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "description": "Controller-scoped tags"
+    }
+  ],
+  "io": {
+    "devices": [],
+    "channels": []
+  },
+  "pous": [
+    {
+      "name": "P",
+      "kind": "program",
+      "vars": [
+        {
+          "id": "pou/P/Step_000",
+          "name": "Step_000",
+          "section": "local",
+          "type": "SFC_STEP",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Step_000",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Step_001",
+          "name": "Step_001",
+          "section": "local",
+          "type": "SFC_STEP",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Step_001",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Step_002",
+          "name": "Step_002",
+          "section": "local",
+          "type": "SFC_STEP",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Step_002",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Step_003",
+          "name": "Step_003",
+          "section": "local",
+          "type": "SFC_STEP",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Step_003",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Step_004",
+          "name": "Step_004",
+          "section": "local",
+          "type": "SFC_STEP",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Step_004",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Tran_000",
+          "name": "Tran_000",
+          "section": "local",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Tran_000",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Tran_001",
+          "name": "Tran_001",
+          "section": "local",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Tran_001",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Tran_002",
+          "name": "Tran_002",
+          "section": "local",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Tran_002",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Tran_003",
+          "name": "Tran_003",
+          "section": "local",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Tran_003",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_000",
+          "name": "Action_000",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_000",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_001",
+          "name": "Action_001",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_001",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_002",
+          "name": "Action_002",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_002",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_003",
+          "name": "Action_003",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_003",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_004",
+          "name": "Action_004",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_004",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_005",
+          "name": "Action_005",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_005",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_006",
+          "name": "Action_006",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_006",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_007",
+          "name": "Action_007",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_007",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Action_008",
+          "name": "Action_008",
+          "section": "local",
+          "type": "SFC_ACTION",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Action_008",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/Stop_000",
+          "name": "Stop_000",
+          "section": "local",
+          "type": "SFC_STOP",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Stop_000",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "sfc",
+            "statements": [],
+            "diagram": {
+              "kind": "sfc",
+              "steps": [
+                {
+                  "id": 0,
+                  "name": "Step_000",
+                  "variable": "pou/P/Step_000",
+                  "initial": true,
+                  "preset": {
+                    "op": "bin",
+                    "operator": "mul",
+                    "left": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Sfc/Delay"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 2,
+                      "type": "DINT"
+                    },
+                    "type": "DINT"
+                  },
+                  "actions": [
+                    {
+                      "id": 10,
+                      "name": "Action_000",
+                      "variable": "pou/P/Action_000",
+                      "qualifier": "N",
+                      "boolean": false,
+                      "body": {
+                        "language": "st",
+                        "statements": [
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Cmd"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            },
+                            "value": {
+                              "op": "lit",
+                              "kind": "int",
+                              "int": 1,
+                              "type": "DINT"
+                            },
+                            "nonRetentive": true,
+                            "src": {
+                              "line": 0,
+                              "col": 1
+                            }
+                          },
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Count"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            },
+                            "value": {
+                              "op": "bin",
+                              "operator": "add",
+                              "left": {
+                                "op": "ref",
+                                "root": {
+                                  "kind": "var",
+                                  "id": "global/Sfc/Count"
+                                },
+                                "path": [],
+                                "io": false,
+                                "opaque": false,
+                                "type": "DINT"
+                              },
+                              "right": {
+                                "op": "lit",
+                                "kind": "int",
+                                "int": 1,
+                                "type": "DINT"
+                              },
+                              "type": "DINT"
+                            },
+                            "nonRetentive": false,
+                            "src": {
+                              "line": 1,
+                              "col": 1
+                            }
+                          }
+                        ],
+                        "text": [
+                          "Cmd [:=] 1;",
+                          "Count := Count \u002B 1;"
+                        ],
+                        "synthetic": false
+                      }
+                    },
+                    {
+                      "id": 11,
+                      "name": "Action_001",
+                      "variable": "pou/P/Action_001",
+                      "qualifier": "S",
+                      "boolean": true
+                    }
+                  ],
+                  "x": 300,
+                  "y": 80
+                },
+                {
+                  "id": 1,
+                  "name": "Step_001",
+                  "variable": "pou/P/Step_001",
+                  "initial": false,
+                  "actions": [
+                    {
+                      "id": 12,
+                      "name": "Action_002",
+                      "variable": "pou/P/Action_002",
+                      "qualifier": "R",
+                      "boolean": false,
+                      "body": {
+                        "language": "st",
+                        "statements": [
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Cmd"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            },
+                            "value": {
+                              "op": "lit",
+                              "kind": "int",
+                              "int": 2,
+                              "type": "DINT"
+                            },
+                            "nonRetentive": false,
+                            "src": {
+                              "line": 0,
+                              "col": 1
+                            }
+                          }
+                        ],
+                        "text": [
+                          "Cmd := 2;"
+                        ],
+                        "synthetic": false
+                      }
+                    },
+                    {
+                      "id": 13,
+                      "name": "Action_003",
+                      "variable": "pou/P/Action_003",
+                      "qualifier": "L",
+                      "boolean": false,
+                      "preset": {
+                        "op": "bin",
+                        "operator": "add",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Sfc/Delay"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 100,
+                          "type": "DINT"
+                        },
+                        "type": "DINT"
+                      },
+                      "body": {
+                        "language": "st",
+                        "statements": [
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Cmd"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            },
+                            "value": {
+                              "op": "lit",
+                              "kind": "int",
+                              "int": 3,
+                              "type": "DINT"
+                            },
+                            "nonRetentive": false,
+                            "src": {
+                              "line": 0,
+                              "col": 1
+                            }
+                          }
+                        ],
+                        "text": [
+                          "Cmd := 3;"
+                        ],
+                        "synthetic": false
+                      }
+                    }
+                  ],
+                  "x": 200,
+                  "y": 280
+                },
+                {
+                  "id": 2,
+                  "name": "Step_002",
+                  "variable": "pou/P/Step_002",
+                  "initial": false,
+                  "actions": [
+                    {
+                      "id": 14,
+                      "name": "Action_004",
+                      "variable": "pou/P/Action_004",
+                      "qualifier": "D",
+                      "boolean": false,
+                      "body": {
+                        "language": "st",
+                        "statements": [
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Cmd"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            },
+                            "value": {
+                              "op": "lit",
+                              "kind": "int",
+                              "int": 4,
+                              "type": "DINT"
+                            },
+                            "nonRetentive": false,
+                            "src": {
+                              "line": 0,
+                              "col": 1
+                            }
+                          }
+                        ],
+                        "text": [
+                          "Cmd := 4;"
+                        ],
+                        "synthetic": false
+                      }
+                    },
+                    {
+                      "id": 15,
+                      "name": "Action_005",
+                      "variable": "pou/P/Action_005",
+                      "qualifier": "P",
+                      "boolean": false,
+                      "body": {
+                        "language": "st",
+                        "statements": [
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Cmd"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            },
+                            "value": {
+                              "op": "lit",
+                              "kind": "int",
+                              "int": 5,
+                              "type": "DINT"
+                            },
+                            "nonRetentive": false,
+                            "src": {
+                              "line": 0,
+                              "col": 1
+                            }
+                          }
+                        ],
+                        "text": [
+                          "Cmd := 5;"
+                        ],
+                        "synthetic": false
+                      }
+                    }
+                  ],
+                  "x": 400,
+                  "y": 280
+                },
+                {
+                  "id": 3,
+                  "name": "Step_003",
+                  "variable": "pou/P/Step_003",
+                  "initial": false,
+                  "actions": [
+                    {
+                      "id": 16,
+                      "name": "Action_006",
+                      "variable": "pou/P/Action_006",
+                      "qualifier": "P1",
+                      "boolean": false,
+                      "body": {
+                        "language": "st",
+                        "statements": [
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Cmd"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            },
+                            "value": {
+                              "op": "lit",
+                              "kind": "int",
+                              "int": 6,
+                              "type": "DINT"
+                            },
+                            "nonRetentive": false,
+                            "src": {
+                              "line": 0,
+                              "col": 1
+                            }
+                          }
+                        ],
+                        "text": [
+                          "Cmd := 6;"
+                        ],
+                        "synthetic": false
+                      }
+                    },
+                    {
+                      "id": 17,
+                      "name": "Action_007",
+                      "variable": "pou/P/Action_007",
+                      "qualifier": "P0",
+                      "boolean": false,
+                      "body": {
+                        "language": "st",
+                        "statements": [
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Cmd"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            },
+                            "value": {
+                              "op": "lit",
+                              "kind": "int",
+                              "int": 7,
+                              "type": "DINT"
+                            },
+                            "nonRetentive": false,
+                            "src": {
+                              "line": 0,
+                              "col": 1
+                            }
+                          }
+                        ],
+                        "text": [
+                          "Cmd := 7;"
+                        ],
+                        "synthetic": false
+                      }
+                    }
+                  ],
+                  "x": 200,
+                  "y": 480
+                },
+                {
+                  "id": 4,
+                  "name": "Step_004",
+                  "variable": "pou/P/Step_004",
+                  "initial": false,
+                  "actions": [
+                    {
+                      "id": 18,
+                      "name": "Action_008",
+                      "variable": "pou/P/Action_008",
+                      "qualifier": "N",
+                      "boolean": false,
+                      "body": {
+                        "language": "st",
+                        "statements": [
+                          {
+                            "kind": "assign",
+                            "target": {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Sfc/Done"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "BOOL"
+                            },
+                            "value": {
+                              "op": "lit",
+                              "kind": "int",
+                              "int": 1,
+                              "type": "DINT"
+                            },
+                            "nonRetentive": false,
+                            "src": {
+                              "line": 0,
+                              "col": 1
+                            }
+                          }
+                        ],
+                        "text": [
+                          "Done := 1;"
+                        ],
+                        "synthetic": false
+                      }
+                    }
+                  ],
+                  "x": 400,
+                  "y": 480
+                }
+              ],
+              "transitions": [
+                {
+                  "id": 20,
+                  "name": "Tran_000",
+                  "variable": "pou/P/Tran_000",
+                  "condition": {
+                    "op": "bin",
+                    "operator": "and",
+                    "left": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Sfc/Start"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "right": {
+                      "op": "un",
+                      "operator": "not",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Sfc/Fault"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "type": "BOOL"
+                    },
+                    "type": "BOOL"
+                  },
+                  "x": 300,
+                  "y": 200
+                },
+                {
+                  "id": 21,
+                  "name": "Tran_001",
+                  "variable": "pou/P/Tran_001",
+                  "condition": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/P/Step_001"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "DN"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "x": 200,
+                  "y": 400
+                },
+                {
+                  "id": 22,
+                  "name": "Tran_002",
+                  "variable": "pou/P/Tran_002",
+                  "condition": {
+                    "op": "bin",
+                    "operator": "eq",
+                    "left": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Sfc/Cmd"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 5,
+                      "type": "DINT"
+                    },
+                    "type": "BOOL"
+                  },
+                  "x": 400,
+                  "y": 400
+                },
+                {
+                  "id": 23,
+                  "name": "Tran_003",
+                  "variable": "pou/P/Tran_003",
+                  "condition": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Sfc/Done"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "x": 300,
+                  "y": 600
+                }
+              ],
+              "branches": [
+                {
+                  "id": 30,
+                  "type": "simultaneous",
+                  "flow": "diverge",
+                  "priority": "Default",
+                  "legs": [
+                    31,
+                    32
+                  ]
+                },
+                {
+                  "id": 33,
+                  "type": "selection",
+                  "flow": "diverge",
+                  "priority": "Default",
+                  "legs": [
+                    34,
+                    35
+                  ]
+                },
+                {
+                  "id": 36,
+                  "type": "selection",
+                  "flow": "converge",
+                  "priority": "Default",
+                  "legs": [
+                    37,
+                    38
+                  ]
+                }
+              ],
+              "stops": [
+                {
+                  "id": 40,
+                  "name": "Stop_000",
+                  "variable": "pou/P/Stop_000"
+                }
+              ],
+              "links": [
+                {
+                  "from": 0,
+                  "to": 20
+                },
+                {
+                  "from": 20,
+                  "to": 30
+                },
+                {
+                  "from": 31,
+                  "to": 1
+                },
+                {
+                  "from": 32,
+                  "to": 2
+                },
+                {
+                  "from": 1,
+                  "to": 33
+                },
+                {
+                  "from": 34,
+                  "to": 21
+                },
+                {
+                  "from": 35,
+                  "to": 22
+                },
+                {
+                  "from": 21,
+                  "to": 3
+                },
+                {
+                  "from": 22,
+                  "to": 4
+                },
+                {
+                  "from": 3,
+                  "to": 37
+                },
+                {
+                  "from": 4,
+                  "to": 38
+                },
+                {
+                  "from": 36,
+                  "to": 23
+                },
+                {
+                  "from": 23,
+                  "to": 40
+                }
+              ]
+            },
+            "synthetic": false
+          },
+          "description": "Sequence",
+          "vendor": {
+            "logix": {
+              "routineType": "SFC"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": false,
+          "folder": false,
+          "task": "Main"
+        }
+      }
+    }
+  ],
+  "diagnostics": [],
+  "vendor": {
+    "logix": {
+      "targetName": "Sfc",
+      "targetType": "Controller",
+      "majorRev": 33,
+      "minorRev": 12
+    }
+  }
+}

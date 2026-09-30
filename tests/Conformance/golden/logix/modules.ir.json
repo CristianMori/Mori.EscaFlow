@@ -1,0 +1,1508 @@
+{
+  "format": "plc-ir",
+  "irVersion": "2.0",
+  "source": {
+    "vendor": "logix",
+    "dialect": "l5x",
+    "file": "modules.L5X",
+    "exportDate": "Mon Sep 28 10:00:00 2026",
+    "softwareRevision": "33.00",
+    "generator": "conformance",
+    "generatedAt": "1970-01-01T00:00:00+00:00"
+  },
+  "configuration": {
+    "name": "Modules",
+    "resources": [
+      {
+        "name": "Modules",
+        "processorType": "1756-L85E",
+        "tasks": [
+          {
+            "name": "Main",
+            "kind": "continuous",
+            "priority": 10,
+            "watchdogMs": 500,
+            "programs": [
+              "P"
+            ],
+            "disabled": false,
+            "vendor": {
+              "logix": {
+                "type": "CONTINUOUS",
+                "inhibitTask": false,
+                "disableUpdateOutputs": false
+              }
+            }
+          }
+        ],
+        "programs": [
+          {
+            "name": "P",
+            "pou": "P",
+            "task": "Main",
+            "disabled": false
+          }
+        ]
+      }
+    ]
+  },
+  "types": [
+    {
+      "name": "AB:1734_DI4:C:0",
+      "kind": "struct",
+      "class": "io",
+      "opaque": false,
+      "members": [
+        {
+          "name": "FilterOffOn",
+          "type": "SINT"
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "module",
+          "moduleType": {
+            "vendor": "AB",
+            "product": "1734_DI4",
+            "direction": "config",
+            "index": 0,
+            "thirdParty": false
+          }
+        }
+      }
+    },
+    {
+      "name": "AB:1756_DI:C:0",
+      "kind": "struct",
+      "class": "io",
+      "opaque": false,
+      "members": [
+        {
+          "name": "FilterOffOn_0_7",
+          "type": "SINT"
+        },
+        {
+          "name": "FilterOnOff_0_7",
+          "type": "SINT"
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "module",
+          "moduleType": {
+            "vendor": "AB",
+            "product": "1756_DI",
+            "direction": "config",
+            "index": 0,
+            "thirdParty": false
+          }
+        }
+      }
+    },
+    {
+      "name": "AB:1756_DI:I:0",
+      "kind": "struct",
+      "class": "io",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Fault",
+          "type": "DINT"
+        },
+        {
+          "name": "Data",
+          "type": "DINT"
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "module",
+          "moduleType": {
+            "vendor": "AB",
+            "product": "1756_DI",
+            "direction": "input",
+            "index": 0,
+            "thirdParty": false
+          }
+        }
+      }
+    },
+    {
+      "name": "AB:1756_DI:O:0",
+      "kind": "struct",
+      "class": "io",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Data",
+          "type": "DINT"
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "module",
+          "moduleType": {
+            "vendor": "AB",
+            "product": "1756_DI",
+            "direction": "output",
+            "index": 0,
+            "thirdParty": false
+          }
+        }
+      }
+    },
+    {
+      "name": "AB:ETHERNET_MODULE_DINT_2Bytes:I:0",
+      "kind": "struct",
+      "class": "io",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Data",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 1
+              }
+            ],
+            "element": "DINT"
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "module",
+          "moduleType": {
+            "vendor": "AB",
+            "product": "ETHERNET_MODULE_DINT_2Bytes",
+            "direction": "input",
+            "index": 0,
+            "thirdParty": false
+          }
+        }
+      }
+    },
+    {
+      "name": "AB:ETHERNET_MODULE_DINT_2Bytes:O:0",
+      "kind": "struct",
+      "class": "io",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Data",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 1
+              }
+            ],
+            "element": "DINT"
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "module",
+          "moduleType": {
+            "vendor": "AB",
+            "product": "ETHERNET_MODULE_DINT_2Bytes",
+            "direction": "output",
+            "index": 0,
+            "thirdParty": false
+          }
+        }
+      }
+    },
+    {
+      "name": "_0015:935700_001_90D03083:I:0",
+      "kind": "struct",
+      "class": "io",
+      "opaque": false,
+      "members": [
+        {
+          "name": "ConnectionFaulted",
+          "type": "BOOL"
+        },
+        {
+          "name": "Data",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 3
+              }
+            ],
+            "element": "SINT"
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "module",
+          "moduleType": {
+            "vendor": "_0015",
+            "product": "935700_001_90D03083",
+            "direction": "input",
+            "index": 0,
+            "thirdParty": true
+          }
+        }
+      }
+    },
+    {
+      "name": "_0015:935700_001_B2B4CBB0:C:0",
+      "kind": "struct",
+      "class": "io",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Channel_Mode_Port1",
+          "type": "SINT"
+        },
+        {
+          "name": "Channel_Mode_Port2",
+          "type": "SINT"
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "module",
+          "moduleType": {
+            "vendor": "_0015",
+            "product": "935700_001_B2B4CBB0",
+            "direction": "config",
+            "index": 0,
+            "thirdParty": true
+          }
+        }
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Modules",
+      "vars": [
+        {
+          "id": "global/Modules/Flag",
+          "name": "Flag",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Flag",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Modules/Word",
+          "name": "Word",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Word",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Modules/Cfg",
+          "name": "Cfg",
+          "section": "global",
+          "type": "SINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Cfg",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Modules/Byte0",
+          "name": "Byte0",
+          "section": "global",
+          "type": "SINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Byte0",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Modules/AlInput",
+          "name": "AlInput",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "alias": {
+            "text": "Local:3:I.Data.4",
+            "target": {
+              "root": {
+                "kind": "var",
+                "id": "global/IO/DI:I"
+              },
+              "path": [
+                {
+                  "kind": "member",
+                  "name": "Data"
+                }
+              ],
+              "io": true,
+              "opaque": false,
+              "type": "DINT"
+            }
+          },
+          "vendor": {
+            "logix": {
+              "path": "AlInput",
+              "scope": "controller",
+              "aliasFor": "Local:3:I.Data.4",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "description": "Controller-scoped tags"
+    },
+    {
+      "name": "IO",
+      "vars": [
+        {
+          "id": "global/IO/DI:C",
+          "name": "DI:C",
+          "section": "global",
+          "type": "AB:1756_DI:C:0",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "FilterOffOn_0_7",
+                "value": {
+                  "kind": "scalar",
+                  "int": 1,
+                  "type": "SINT"
+                }
+              },
+              {
+                "name": "FilterOnOff_0_7",
+                "value": {
+                  "kind": "scalar",
+                  "int": 1,
+                  "type": "SINT"
+                }
+              }
+            ],
+            "type": "AB:1756_DI:C:0"
+          },
+          "io": "io/DI/C",
+          "vendor": {
+            "logix": {
+              "path": "DI:C",
+              "scope": "moduleIo",
+              "externalAccess": "Read/Write",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/IO/DI:I",
+          "name": "DI:I",
+          "section": "global",
+          "type": "AB:1756_DI:I:0",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "Fault",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "DINT"
+                }
+              },
+              {
+                "name": "Data",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "DINT"
+                }
+              }
+            ],
+            "type": "AB:1756_DI:I:0"
+          },
+          "io": "io/DI/I",
+          "vendor": {
+            "logix": {
+              "path": "DI:I",
+              "scope": "moduleIo",
+              "externalAccess": "Read/Write",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/IO/DI:O",
+          "name": "DI:O",
+          "section": "global",
+          "type": "AB:1756_DI:O:0",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "Data",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "DINT"
+                }
+              }
+            ],
+            "type": "AB:1756_DI:O:0"
+          },
+          "io": "io/DI/O",
+          "vendor": {
+            "logix": {
+              "path": "DI:O",
+              "scope": "moduleIo",
+              "externalAccess": "Read/Write",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/IO/ENet:I",
+          "name": "ENet:I",
+          "section": "global",
+          "type": "AB:ETHERNET_MODULE_DINT_2Bytes:I:0",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "Data",
+                "value": {
+                  "kind": "array",
+                  "dims": [
+                    2
+                  ],
+                  "elements": [
+                    {
+                      "kind": "scalar",
+                      "int": 0,
+                      "type": "DINT"
+                    },
+                    {
+                      "kind": "scalar",
+                      "int": 0,
+                      "type": "DINT"
+                    }
+                  ],
+                  "type": "DINT"
+                }
+              }
+            ],
+            "type": "AB:ETHERNET_MODULE_DINT_2Bytes:I:0"
+          },
+          "io": "io/ENet/I",
+          "vendor": {
+            "logix": {
+              "path": "ENet:I",
+              "scope": "moduleIo",
+              "externalAccess": "Read/Write",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/IO/ENet:O",
+          "name": "ENet:O",
+          "section": "global",
+          "type": "AB:ETHERNET_MODULE_DINT_2Bytes:O:0",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "Data",
+                "value": {
+                  "kind": "array",
+                  "dims": [
+                    2
+                  ],
+                  "elements": [
+                    {
+                      "kind": "scalar",
+                      "int": 0,
+                      "type": "DINT"
+                    },
+                    {
+                      "kind": "scalar",
+                      "int": 0,
+                      "type": "DINT"
+                    }
+                  ],
+                  "type": "DINT"
+                }
+              }
+            ],
+            "type": "AB:ETHERNET_MODULE_DINT_2Bytes:O:0"
+          },
+          "io": "io/ENet/O",
+          "vendor": {
+            "logix": {
+              "path": "ENet:O",
+              "scope": "moduleIo",
+              "externalAccess": "Read/Write",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/IO/Point1:C",
+          "name": "Point1:C",
+          "section": "global",
+          "type": "AB:1734_DI4:C:0",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "FilterOffOn",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "SINT"
+                }
+              }
+            ],
+            "type": "AB:1734_DI4:C:0"
+          },
+          "io": "io/Point1/C",
+          "vendor": {
+            "logix": {
+              "path": "Point1:C",
+              "scope": "moduleIo",
+              "externalAccess": "Read/Write",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/IO/Turck:C",
+          "name": "Turck:C",
+          "section": "global",
+          "type": "_0015:935700_001_B2B4CBB0:C:0",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "Channel_Mode_Port1",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "SINT"
+                }
+              },
+              {
+                "name": "Channel_Mode_Port2",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "SINT"
+                }
+              }
+            ],
+            "type": "_0015:935700_001_B2B4CBB0:C:0"
+          },
+          "io": "io/Turck/C",
+          "vendor": {
+            "logix": {
+              "path": "Turck:C",
+              "scope": "moduleIo",
+              "externalAccess": "Read/Write",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/IO/Turck:I",
+          "name": "Turck:I",
+          "section": "global",
+          "type": "_0015:935700_001_90D03083:I:0",
+          "retain": "none",
+          "constant": false,
+          "initial": {
+            "kind": "struct",
+            "members": [
+              {
+                "name": "ConnectionFaulted",
+                "value": {
+                  "kind": "scalar",
+                  "int": 0,
+                  "type": "BOOL"
+                }
+              },
+              {
+                "name": "Data",
+                "value": {
+                  "kind": "array",
+                  "dims": [
+                    4
+                  ],
+                  "elements": [
+                    {
+                      "kind": "scalar",
+                      "int": 0,
+                      "type": "SINT"
+                    },
+                    {
+                      "kind": "scalar",
+                      "int": 0,
+                      "type": "SINT"
+                    },
+                    {
+                      "kind": "scalar",
+                      "int": 0,
+                      "type": "SINT"
+                    },
+                    {
+                      "kind": "scalar",
+                      "int": 0,
+                      "type": "SINT"
+                    }
+                  ],
+                  "type": "SINT"
+                }
+              }
+            ],
+            "type": "_0015:935700_001_90D03083:I:0"
+          },
+          "io": "io/Turck/I",
+          "vendor": {
+            "logix": {
+              "path": "Turck:I",
+              "scope": "moduleIo",
+              "externalAccess": "Read/Write",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "description": "Module input, output and configuration images"
+    }
+  ],
+  "io": {
+    "devices": [
+      {
+        "id": "device/Local",
+        "name": "Local",
+        "catalog": "1756-L85E",
+        "vendorName": "1",
+        "inhibited": false,
+        "vendor": {
+          "logix": {
+            "vendor": "1",
+            "productType": "14",
+            "productCode": "168",
+            "major": 33,
+            "minor": 12,
+            "parentModule": "Local",
+            "parentModPortId": 1,
+            "majorFault": true,
+            "ports": [
+              {
+                "id": 1,
+                "type": "ICP",
+                "address": "0",
+                "upstream": false
+              },
+              {
+                "id": 2,
+                "type": "Ethernet",
+                "upstream": false
+              }
+            ],
+            "connections": []
+          }
+        }
+      },
+      {
+        "id": "device/DI",
+        "name": "DI",
+        "catalog": "1756-IB16",
+        "vendorName": "1",
+        "parent": "device/Local",
+        "inhibited": false,
+        "description": "16 point input",
+        "vendor": {
+          "logix": {
+            "vendor": "1",
+            "productType": "7",
+            "productCode": "1",
+            "major": 3,
+            "minor": 1,
+            "parentModule": "Local",
+            "parentModPortId": 1,
+            "majorFault": false,
+            "ports": [
+              {
+                "id": 1,
+                "type": "ICP",
+                "address": "3",
+                "upstream": true
+              }
+            ],
+            "connections": [
+              {
+                "name": "Input",
+                "type": "Input",
+                "rpi": 20000,
+                "eventId": 0,
+                "unicast": false,
+                "inputChannel": "io/DI/I",
+                "outputChannel": "io/DI/O"
+              }
+            ],
+            "configChannel": "io/DI/C",
+            "commMethod": "536870913"
+          }
+        }
+      },
+      {
+        "id": "device/ENet",
+        "name": "ENet",
+        "catalog": "ETHERNET-MODULE",
+        "vendorName": "1",
+        "parent": "device/Local",
+        "inhibited": false,
+        "vendor": {
+          "logix": {
+            "vendor": "1",
+            "productType": "12",
+            "productCode": "0",
+            "major": 1,
+            "minor": 1,
+            "parentModule": "Local",
+            "parentModPortId": 2,
+            "majorFault": false,
+            "ports": [
+              {
+                "id": 1,
+                "type": "Ethernet",
+                "address": "192.168.1.30",
+                "upstream": true
+              },
+              {
+                "id": 2,
+                "type": "PointIO",
+                "upstream": false
+              }
+            ],
+            "connections": [
+              {
+                "name": "Standard",
+                "type": "Input",
+                "rpi": 20000,
+                "eventId": 0,
+                "unicast": true,
+                "inputChannel": "io/ENet/I",
+                "outputChannel": "io/ENet/O"
+              }
+            ],
+            "commMethod": "536870914",
+            "primCxnInputSize": 8,
+            "primCxnOutputSize": 8
+          }
+        }
+      },
+      {
+        "id": "device/Point1",
+        "name": "Point1",
+        "catalog": "1734-IB4",
+        "vendorName": "1",
+        "parent": "device/ENet",
+        "inhibited": false,
+        "vendor": {
+          "logix": {
+            "vendor": "1",
+            "productType": "7",
+            "productCode": "21",
+            "major": 3,
+            "minor": 1,
+            "parentModule": "ENet",
+            "parentModPortId": 2,
+            "majorFault": false,
+            "ports": [
+              {
+                "id": 1,
+                "type": "PointIO",
+                "address": "1",
+                "upstream": true
+              }
+            ],
+            "connections": [],
+            "configChannel": "io/Point1/C",
+            "commMethod": "536870913"
+          }
+        }
+      },
+      {
+        "id": "device/Turck",
+        "name": "Turck",
+        "catalog": "FEN20-4IOL",
+        "vendorName": "21",
+        "parent": "device/Local",
+        "inhibited": false,
+        "vendor": {
+          "logix": {
+            "vendor": "21",
+            "productType": "12",
+            "productCode": "9527",
+            "major": 1,
+            "minor": 2,
+            "parentModule": "Local",
+            "parentModPortId": 2,
+            "majorFault": false,
+            "ports": [
+              {
+                "id": 1,
+                "type": "Ethernet",
+                "address": "192.168.1.40",
+                "upstream": true
+              }
+            ],
+            "connections": [
+              {
+                "name": "Standard",
+                "type": "Input",
+                "rpi": 10000,
+                "eventId": 0,
+                "unicast": true,
+                "inputChannel": "io/Turck/I"
+              }
+            ],
+            "configChannel": "io/Turck/C",
+            "commMethod": "536870914"
+          }
+        }
+      }
+    ],
+    "channels": [
+      {
+        "id": "io/DI/C",
+        "device": "device/DI",
+        "name": "C",
+        "direction": "config",
+        "type": "AB:1756_DI:C:0",
+        "variable": "global/IO/DI:C"
+      },
+      {
+        "id": "io/DI/I",
+        "device": "device/DI",
+        "name": "I",
+        "direction": "input",
+        "type": "AB:1756_DI:I:0",
+        "variable": "global/IO/DI:I"
+      },
+      {
+        "id": "io/DI/O",
+        "device": "device/DI",
+        "name": "O",
+        "direction": "output",
+        "type": "AB:1756_DI:O:0",
+        "variable": "global/IO/DI:O"
+      },
+      {
+        "id": "io/ENet/I",
+        "device": "device/ENet",
+        "name": "I",
+        "direction": "input",
+        "type": "AB:ETHERNET_MODULE_DINT_2Bytes:I:0",
+        "variable": "global/IO/ENet:I"
+      },
+      {
+        "id": "io/ENet/O",
+        "device": "device/ENet",
+        "name": "O",
+        "direction": "output",
+        "type": "AB:ETHERNET_MODULE_DINT_2Bytes:O:0",
+        "variable": "global/IO/ENet:O"
+      },
+      {
+        "id": "io/Point1/C",
+        "device": "device/Point1",
+        "name": "C",
+        "direction": "config",
+        "type": "AB:1734_DI4:C:0",
+        "variable": "global/IO/Point1:C"
+      },
+      {
+        "id": "io/Turck/C",
+        "device": "device/Turck",
+        "name": "C",
+        "direction": "config",
+        "type": "_0015:935700_001_B2B4CBB0:C:0",
+        "variable": "global/IO/Turck:C"
+      },
+      {
+        "id": "io/Turck/I",
+        "device": "device/Turck",
+        "name": "I",
+        "direction": "input",
+        "type": "_0015:935700_001_90D03083:I:0",
+        "variable": "global/IO/Turck:I"
+      }
+    ]
+  },
+  "pous": [
+    {
+      "name": "P",
+      "kind": "program",
+      "vars": [],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Modules/Flag"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "and",
+                  "left": {
+                    "op": "bit",
+                    "of": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/IO/DI:I"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Data"
+                        }
+                      ],
+                      "io": true,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "bit": {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 4,
+                      "type": "DINT"
+                    },
+                    "type": "BOOL"
+                  },
+                  "right": {
+                    "op": "un",
+                    "operator": "not",
+                    "operand": {
+                      "op": "bit",
+                      "of": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/IO/DI:I"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "Fault"
+                          }
+                        ],
+                        "io": true,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "bit": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 0,
+                        "type": "DINT"
+                      },
+                      "type": "BOOL"
+                    },
+                    "type": "BOOL"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/IO/ENet:O"
+                  },
+                  "path": [
+                    {
+                      "kind": "member",
+                      "name": "Data"
+                    },
+                    {
+                      "kind": "index",
+                      "indices": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        }
+                      ]
+                    }
+                  ],
+                  "io": true,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Modules/Word"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 1,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Modules/Word"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "add",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/IO/ENet:I"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Data"
+                      },
+                      {
+                        "kind": "index",
+                        "indices": [
+                          {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 1,
+                            "type": "DINT"
+                          }
+                        ]
+                      }
+                    ],
+                    "io": true,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/IO/DI:I"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Data"
+                      }
+                    ],
+                    "io": true,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 2,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Modules/Cfg"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "SINT"
+                },
+                "value": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/IO/Turck:C"
+                  },
+                  "path": [
+                    {
+                      "kind": "member",
+                      "name": "Channel_Mode_Port1"
+                    }
+                  ],
+                  "io": true,
+                  "opaque": false,
+                  "type": "SINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 3,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Modules/Byte0"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "SINT"
+                },
+                "value": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/IO/Turck:I"
+                  },
+                  "path": [
+                    {
+                      "kind": "member",
+                      "name": "Data"
+                    },
+                    {
+                      "kind": "index",
+                      "indices": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        }
+                      ]
+                    }
+                  ],
+                  "io": true,
+                  "opaque": false,
+                  "type": "SINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 4,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Modules/Flag"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "or",
+                  "left": {
+                    "op": "bin",
+                    "operator": "or",
+                    "left": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/IO/Turck:I"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "ConnectionFaulted"
+                        }
+                      ],
+                      "io": true,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "right": {
+                      "op": "bit",
+                      "of": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/IO/ENet:I"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "Data"
+                          },
+                          {
+                            "kind": "index",
+                            "indices": [
+                              {
+                                "op": "lit",
+                                "kind": "int",
+                                "int": 1,
+                                "type": "DINT"
+                              }
+                            ]
+                          }
+                        ],
+                        "io": true,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "bit": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 0,
+                        "type": "DINT"
+                      },
+                      "type": "BOOL"
+                    },
+                    "type": "BOOL"
+                  },
+                  "right": {
+                    "op": "bit",
+                    "of": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/IO/DI:I"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Data"
+                        }
+                      ],
+                      "alias": "global/Modules/AlInput",
+                      "io": true,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "bit": {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 4,
+                      "type": "DINT"
+                    },
+                    "type": "BOOL"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 5,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "bit",
+                  "of": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/IO/DI:O"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Data"
+                      }
+                    ],
+                    "io": true,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "bit": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 0,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Modules/Flag"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 6,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Flag := Local:3:I.Data.4 AND NOT DI:I.Fault.0;",
+              "ENet:O.Data[0] := Word;",
+              "Word := ENet:I.Data[1] \u002B Local:3:I.Data;",
+              "Cfg := Turck:C.Channel_Mode_Port1;",
+              "Byte0 := Turck:I.Data[0];",
+              "Flag := Turck:I.ConnectionFaulted OR ENet:1:I.0 OR AlInput;",
+              "DI:O.Data.0 := Flag;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": false,
+          "folder": false,
+          "task": "Main"
+        }
+      }
+    }
+  ],
+  "diagnostics": [],
+  "vendor": {
+    "logix": {
+      "targetName": "Modules",
+      "targetType": "Controller",
+      "majorRev": 33,
+      "minorRev": 12
+    }
+  }
+}

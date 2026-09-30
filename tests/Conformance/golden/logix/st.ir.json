@@ -1,0 +1,2190 @@
+{
+  "format": "plc-ir",
+  "irVersion": "2.0",
+  "source": {
+    "vendor": "logix",
+    "dialect": "l5x",
+    "file": "st.L5X",
+    "exportDate": "Mon Sep 28 10:00:00 2026",
+    "softwareRevision": "33.00",
+    "generator": "conformance",
+    "generatedAt": "1970-01-01T00:00:00+00:00"
+  },
+  "configuration": {
+    "name": "St",
+    "resources": [
+      {
+        "name": "St",
+        "processorType": "1756-L85E",
+        "tasks": [
+          {
+            "name": "Main",
+            "kind": "continuous",
+            "priority": 10,
+            "watchdogMs": 500,
+            "programs": [
+              "P"
+            ],
+            "disabled": false,
+            "vendor": {
+              "logix": {
+                "type": "CONTINUOUS",
+                "inhibitTask": false,
+                "disableUpdateOutputs": false
+              }
+            }
+          }
+        ],
+        "programs": [
+          {
+            "name": "P",
+            "pou": "P",
+            "task": "Main",
+            "disabled": false
+          }
+        ]
+      }
+    ]
+  },
+  "types": [
+    {
+      "name": "STRING",
+      "kind": "string",
+      "class": "vendor",
+      "opaque": false,
+      "members": [
+        {
+          "name": "LEN",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DATA",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 81
+              }
+            ],
+            "element": "SINT"
+          },
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Ascii",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "length": 82,
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined",
+          "family": "StringFamily"
+        }
+      }
+    },
+    {
+      "name": "TIMER",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": false,
+      "members": [
+        {
+          "name": "PRE",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ACC",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 31,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "TT",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 30,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 29,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "stdFb": {
+        "fbs": [
+          "TON",
+          "TOF",
+          "TONR"
+        ],
+        "profile": "logix"
+      },
+      "vendor": {
+        "logix": {
+          "class": "predefined",
+          "hiddenMembers": [
+            {
+              "name": "ZZZZZZZZZZTIMER0",
+              "type": "DINT",
+              "position": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "St",
+      "vars": [
+        {
+          "id": "global/St/R",
+          "name": "R",
+          "section": "global",
+          "type": "REAL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "R",
+              "scope": "controller",
+              "radix": "Float",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/D",
+          "name": "D",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "D",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/S",
+          "name": "S",
+          "section": "global",
+          "type": "SINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "S",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/L",
+          "name": "L",
+          "section": "global",
+          "type": "LREAL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "L",
+              "scope": "controller",
+              "radix": "Float",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/Word",
+          "name": "Word",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Word",
+              "scope": "controller",
+              "radix": "Binary",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/I",
+          "name": "I",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "I",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/Flag",
+          "name": "Flag",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Flag",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/Str",
+          "name": "Str",
+          "section": "global",
+          "type": "STRING",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Str",
+              "scope": "controller",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/Str2",
+          "name": "Str2",
+          "section": "global",
+          "type": "STRING",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Str2",
+              "scope": "controller",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/Arr",
+          "name": "Arr",
+          "section": "global",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 4
+              }
+            ],
+            "element": "DINT"
+          },
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Arr",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/St/Blk",
+          "name": "Blk",
+          "section": "global",
+          "type": "Blink",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Blk",
+              "scope": "controller",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "description": "Controller-scoped tags"
+    }
+  ],
+  "io": {
+    "devices": [],
+    "channels": []
+  },
+  "pous": [
+    {
+      "name": "Blink",
+      "kind": "functionBlock",
+      "vars": [
+        {
+          "id": "pou/Blink/EnableIn",
+          "name": "EnableIn",
+          "section": "input",
+          "type": "BOOL",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Blink.EnableIn",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "usage": "Input",
+              "required": false,
+              "visible": false,
+              "implicit": true
+            }
+          }
+        },
+        {
+          "id": "pou/Blink/EnableOut",
+          "name": "EnableOut",
+          "section": "output",
+          "type": "BOOL",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Blink.EnableOut",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "usage": "Output",
+              "required": false,
+              "visible": false,
+              "implicit": true
+            }
+          }
+        },
+        {
+          "id": "pou/Blink/Rate",
+          "name": "Rate",
+          "section": "input",
+          "type": "DINT",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Blink.Rate",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "usage": "Input",
+              "required": true,
+              "visible": true,
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Blink/Out",
+          "name": "Out",
+          "section": "output",
+          "type": "BOOL",
+          "retain": "none",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Blink.Out",
+              "scope": "aoiParameter",
+              "radix": "Decimal",
+              "usage": "Output",
+              "required": true,
+              "visible": true,
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/Blink/T1",
+          "name": "T1",
+          "section": "local",
+          "type": "TIMER",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Blink.T1",
+              "scope": "aoiLocal",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "assign",
+            "target": {
+              "op": "ref",
+              "root": {
+                "kind": "var",
+                "id": "pou/Blink/T1"
+              },
+              "path": [
+                {
+                  "kind": "member",
+                  "name": "PRE"
+                }
+              ],
+              "io": false,
+              "opaque": false,
+              "type": "DINT"
+            },
+            "value": {
+              "op": "ref",
+              "root": {
+                "kind": "var",
+                "id": "pou/Blink/Rate"
+              },
+              "path": [],
+              "io": false,
+              "opaque": false,
+              "type": "DINT"
+            },
+            "nonRetentive": false,
+            "src": {
+              "line": 0,
+              "col": 1
+            }
+          },
+          {
+            "kind": "sysCall",
+            "catalog": "logix",
+            "service": "TONR",
+            "args": [
+              {
+                "op": "ref",
+                "root": {
+                  "kind": "var",
+                  "id": "pou/Blink/T1"
+                },
+                "path": [],
+                "io": false,
+                "opaque": false,
+                "type": "TIMER"
+              }
+            ],
+            "mode": "normal",
+            "src": {
+              "line": 1,
+              "col": 1
+            }
+          },
+          {
+            "kind": "assign",
+            "target": {
+              "op": "ref",
+              "root": {
+                "kind": "var",
+                "id": "pou/Blink/Out"
+              },
+              "path": [],
+              "io": false,
+              "opaque": false,
+              "type": "BOOL"
+            },
+            "value": {
+              "op": "ref",
+              "root": {
+                "kind": "var",
+                "id": "pou/Blink/T1"
+              },
+              "path": [
+                {
+                  "kind": "member",
+                  "name": "DN"
+                }
+              ],
+              "io": false,
+              "opaque": false,
+              "type": "BOOL"
+            },
+            "nonRetentive": false,
+            "src": {
+              "line": 2,
+              "col": 1
+            }
+          }
+        ],
+        "text": [
+          "T1.PRE := Rate;",
+          "TONR(T1);",
+          "Out := T1.DN;"
+        ],
+        "synthetic": false
+      },
+      "actions": [
+        {
+          "name": "Init",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "TONR",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/Blink/T1"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "TIMER"
+                  }
+                ],
+                "mode": "prescan",
+                "src": {
+                  "line": 1,
+                  "col": 1
+                }
+              }
+            ],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "addOn",
+          "revision": "1.0",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "backingType": "Blink",
+          "disabled": false,
+          "folder": false
+        }
+      }
+    },
+    {
+      "name": "P",
+      "kind": "program",
+      "vars": [
+        {
+          "id": "pou/P/InA",
+          "name": "InA",
+          "section": "local",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.InA",
+              "scope": "program",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "pou/P/OutA",
+          "name": "OutA",
+          "section": "local",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.OutA",
+              "scope": "program",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/D"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "conv",
+                  "to": "DINT",
+                  "mode": "roundEven",
+                  "operand": {
+                    "op": "bin",
+                    "operator": "mul",
+                    "left": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/R"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "REAL"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "kind": "real",
+                      "real": 2,
+                      "type": "REAL"
+                    },
+                    "type": "REAL"
+                  },
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 1,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/S"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "SINT"
+                },
+                "value": {
+                  "op": "conv",
+                  "to": "SINT",
+                  "mode": "wrap",
+                  "operand": {
+                    "op": "bin",
+                    "operator": "add",
+                    "left": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/D"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 1,
+                      "type": "DINT"
+                    },
+                    "type": "DINT"
+                  },
+                  "type": "SINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 2,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/R"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "REAL"
+                },
+                "value": {
+                  "op": "conv",
+                  "to": "REAL",
+                  "mode": "roundEven",
+                  "operand": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/L"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "LREAL"
+                  },
+                  "type": "REAL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 3,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/L"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "LREAL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "div",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/D"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 3,
+                    "type": "DINT"
+                  },
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 4,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "bin",
+                      "operator": "and",
+                      "left": {
+                        "op": "bin",
+                        "operator": "gt",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/D"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 10,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "right": {
+                        "op": "un",
+                        "operator": "not",
+                        "operand": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/Flag"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "BOOL"
+                        },
+                        "type": "BOOL"
+                      },
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/D"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false,
+                        "src": {
+                          "line": 6,
+                          "col": 5
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "condition": {
+                      "op": "bin",
+                      "operator": "or",
+                      "left": {
+                        "op": "bin",
+                        "operator": "lt",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/D"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/St/Flag"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/D"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 10,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false,
+                        "src": {
+                          "line": 8,
+                          "col": 5
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/D"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "value": {
+                      "op": "bin",
+                      "operator": "add",
+                      "left": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/St/D"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "right": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 1,
+                        "type": "DINT"
+                      },
+                      "type": "DINT"
+                    },
+                    "nonRetentive": false,
+                    "src": {
+                      "line": 10,
+                      "col": 5
+                    }
+                  }
+                ],
+                "src": {
+                  "line": 5,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "case",
+                "selector": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/D"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "arms": [
+                  {
+                    "labels": [
+                      {
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        }
+                      }
+                    ],
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/Flag"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "BOOL"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false,
+                        "src": {
+                          "line": 13,
+                          "col": 8
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "labels": [
+                      {
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 2,
+                          "type": "DINT"
+                        },
+                        "to": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 5,
+                          "type": "DINT"
+                        }
+                      },
+                      {
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 8,
+                          "type": "DINT"
+                        }
+                      }
+                    ],
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/Flag"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "BOOL"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false,
+                        "src": {
+                          "line": 14,
+                          "col": 14
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/Flag"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "value": {
+                      "op": "bit",
+                      "of": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/St/D"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "bit": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 0,
+                        "type": "DINT"
+                      },
+                      "type": "BOOL"
+                    },
+                    "nonRetentive": false,
+                    "src": {
+                      "line": 16,
+                      "col": 5
+                    }
+                  }
+                ],
+                "src": {
+                  "line": 12,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "for",
+                "variable": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/I"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "from": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 0,
+                  "type": "DINT"
+                },
+                "to": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 4,
+                  "type": "DINT"
+                },
+                "by": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 1,
+                  "type": "DINT"
+                },
+                "body": [
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/Arr"
+                      },
+                      "path": [
+                        {
+                          "kind": "index",
+                          "indices": [
+                            {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/St/I"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
+                            }
+                          ]
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "value": {
+                      "op": "bin",
+                      "operator": "mul",
+                      "left": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/St/I"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "right": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 2,
+                        "type": "DINT"
+                      },
+                      "type": "DINT"
+                    },
+                    "nonRetentive": false,
+                    "src": {
+                      "line": 19,
+                      "col": 5
+                    }
+                  },
+                  {
+                    "kind": "if",
+                    "branches": [
+                      {
+                        "condition": {
+                          "op": "bin",
+                          "operator": "gt",
+                          "left": {
+                            "op": "ref",
+                            "root": {
+                              "kind": "var",
+                              "id": "global/St/Arr"
+                            },
+                            "path": [
+                              {
+                                "kind": "index",
+                                "indices": [
+                                  {
+                                    "op": "ref",
+                                    "root": {
+                                      "kind": "var",
+                                      "id": "global/St/I"
+                                    },
+                                    "path": [],
+                                    "io": false,
+                                    "opaque": false,
+                                    "type": "DINT"
+                                  }
+                                ]
+                              }
+                            ],
+                            "io": false,
+                            "opaque": false,
+                            "type": "DINT"
+                          },
+                          "right": {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 6,
+                            "type": "DINT"
+                          },
+                          "type": "BOOL"
+                        },
+                        "body": [
+                          {
+                            "kind": "exit",
+                            "src": {
+                              "line": 20,
+                              "col": 24
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "src": {
+                      "line": 20,
+                      "col": 5
+                    }
+                  }
+                ],
+                "src": {
+                  "line": 18,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "while",
+                "condition": {
+                  "op": "bin",
+                  "operator": "gt",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/I"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 0,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "body": [
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/I"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "value": {
+                      "op": "bin",
+                      "operator": "sub",
+                      "left": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/St/I"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "right": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 1,
+                        "type": "DINT"
+                      },
+                      "type": "DINT"
+                    },
+                    "nonRetentive": false,
+                    "src": {
+                      "line": 22,
+                      "col": 16
+                    }
+                  }
+                ],
+                "src": {
+                  "line": 22,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "repeat",
+                "body": [
+                  {
+                    "kind": "assign",
+                    "target": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/I"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "value": {
+                      "op": "bin",
+                      "operator": "add",
+                      "left": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/St/I"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "right": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 1,
+                        "type": "DINT"
+                      },
+                      "type": "DINT"
+                    },
+                    "nonRetentive": false,
+                    "src": {
+                      "line": 23,
+                      "col": 8
+                    }
+                  }
+                ],
+                "until": {
+                  "op": "bin",
+                  "operator": "ge",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/I"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 3,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "src": {
+                  "line": 23,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/R"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "REAL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "sub",
+                  "left": {
+                    "op": "bin",
+                    "operator": "add",
+                    "left": {
+                      "op": "fn",
+                      "name": "ABS",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/R"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "REAL"
+                        }
+                      ],
+                      "type": "REAL"
+                    },
+                    "right": {
+                      "op": "fn",
+                      "name": "SQRT",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/R"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "REAL"
+                        }
+                      ],
+                      "type": "REAL"
+                    },
+                    "type": "REAL"
+                  },
+                  "right": {
+                    "op": "fn",
+                    "name": "SIN",
+                    "args": [
+                      {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/St/R"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "REAL"
+                      }
+                    ],
+                    "type": "REAL"
+                  },
+                  "type": "REAL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 24,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/D"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "fn",
+                  "name": "TRUNC",
+                  "args": [
+                    {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/R"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "REAL"
+                    }
+                  ],
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 25,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "bit",
+                  "of": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/Word"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "bit": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/I"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 1,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 26,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/Flag"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bit",
+                  "of": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/Word"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "bit": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/D"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 27,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/D"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/Str"
+                  },
+                  "path": [
+                    {
+                      "kind": "length"
+                    }
+                  ],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 28,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/Str"
+                  },
+                  "path": [
+                    {
+                      "kind": "char",
+                      "index": {
+                        "op": "lit",
+                        "kind": "int",
+                        "int": 0,
+                        "type": "DINT"
+                      }
+                    }
+                  ],
+                  "io": false,
+                  "opaque": false,
+                  "type": "SINT"
+                },
+                "value": {
+                  "op": "conv",
+                  "to": "SINT",
+                  "mode": "wrap",
+                  "operand": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 65,
+                    "type": "DINT"
+                  },
+                  "type": "SINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 29,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/Str2"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "STRING"
+                },
+                "value": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/Str"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "STRING"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 30,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "lit",
+                      "kind": "bool",
+                      "bool": true,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/InA"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/D"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false,
+                        "src": {
+                          "line": 31,
+                          "col": 1
+                        }
+                      },
+                      {
+                        "kind": "actionCall",
+                        "action": "Sub",
+                        "inputs": [],
+                        "outputs": [],
+                        "src": {
+                          "line": 31,
+                          "col": 1
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/St/Word"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/OutA"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false,
+                        "src": {
+                          "line": 31,
+                          "col": 1
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "line": 31,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "fbCall",
+                "instance": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/Blk"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "Blink"
+                },
+                "pou": "Blink",
+                "inputs": {
+                  "Rate": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 100,
+                    "type": "DINT"
+                  }
+                },
+                "outputs": {
+                  "Out": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/Flag"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  }
+                },
+                "mode": "normal",
+                "src": {
+                  "line": 32,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/Flag"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "xor",
+                  "left": {
+                    "op": "bin",
+                    "operator": "ge",
+                    "left": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/St/D"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "right": {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 5,
+                      "type": "DINT"
+                    },
+                    "type": "BOOL"
+                  },
+                  "right": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/St/Flag"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 33,
+                  "col": 21
+                }
+              }
+            ],
+            "text": [
+              "// implicit conversions",
+              "D := R * 2.0;",
+              "S := D \u002B 1;",
+              "R := L;",
+              "L := D / 3;",
+              "IF D \u003E 10 AND NOT Flag THEN",
+              "    D := 0;",
+              "ELSIF D \u003C 0 OR Flag THEN",
+              "    D := 10;",
+              "ELSE",
+              "    D := D \u002B 1;",
+              "END_IF;",
+              "CASE D OF",
+              "    1: Flag := 1;",
+              "    2..5, 8: Flag := 0;",
+              "ELSE",
+              "    Flag := D.0;",
+              "END_CASE;",
+              "FOR I := 0 TO 4 BY 1 DO",
+              "    Arr[I] := I * 2;",
+              "    IF Arr[I] \u003E 6 THEN EXIT; END_IF;",
+              "END_FOR;",
+              "WHILE I \u003E 0 DO I := I - 1; END_WHILE;",
+              "REPEAT I := I \u002B 1; UNTIL I \u003E= 3 END_REPEAT;",
+              "R := ABS(R) \u002B SQRT(R) - SIN(R);",
+              "D := TRUNC(R);",
+              "Word.[I] := 1;",
+              "Flag := Word.[D];",
+              "D := Str.LEN;",
+              "Str.DATA[0] := 65;",
+              "Str2 := Str;",
+              "JSR(Sub, 1, D, Word);",
+              "Blink(Blk, 100, Flag);",
+              "(* block comment *) Flag := D \u003E= 5 XOR Flag;"
+            ],
+            "comments": [
+              {
+                "text": "// implicit conversions",
+                "line": 0
+              },
+              {
+                "text": "(* block comment *)",
+                "line": 33
+              }
+            ],
+            "synthetic": false
+          },
+          "calls": [
+            "Sub"
+          ],
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Sub",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/P/OutA"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "mul",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/P/InA"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 2,
+                    "type": "DINT"
+                  },
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 1,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "return",
+                "src": {
+                  "line": 2,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "SBR(InA);",
+              "OutA := InA * 2;",
+              "RET(OutA);"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "fbCall",
+                "instance": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/St/Blk"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "Blink"
+                },
+                "pou": "Blink",
+                "inputs": {},
+                "outputs": {},
+                "mode": "prescan",
+                "src": {
+                  "line": 32,
+                  "col": 1
+                }
+              }
+            ],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": false,
+          "folder": false,
+          "task": "Main"
+        }
+      }
+    }
+  ],
+  "diagnostics": [],
+  "vendor": {
+    "logix": {
+      "targetName": "St",
+      "targetType": "Controller",
+      "majorRev": 33,
+      "minorRev": 12
+    }
+  }
+}

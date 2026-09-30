@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="33.00" TargetName="Tasks" TargetType="Controller" ContainsContext="false" ExportDate="Mon Sep 28 10:00:00 2026">
+<Controller Use="Target" Name="Tasks" ProcessorType="1756-L85E" MajorRev="33" MinorRev="12">
+<DataTypes/>
+<Modules/>
+<AddOnInstructionDefinitions/>
+<Tags>
+<Tag Name="Counter" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="Cons" TagType="Consumed" DataType="DINT" Radix="Decimal">
+<ConsumeInfo Producer="OtherPlc" RemoteTag="Prod" RemoteInstance="0" RPI="20" Unicast="true"/>
+</Tag>
+</Tags>
+<Programs>
+<Program Name="P1" TestEdits="false" MainRoutineName="Main" FaultRoutineName="Fault" Disabled="false" UseAsFolder="false">
+<Description>
+<![CDATA[main program]]>
+</Description>
+<Tags>
+<Tag Name="Local1" TagType="Base" DataType="DINT" Radix="Decimal"/>
+</Tags>
+<Routines>
+<Routine Name="Main" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Counter := Counter + 1;]]>
+</Line>
+</STContent>
+</Routine>
+<Routine Name="Fault" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Local1 := 0;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</Program>
+<Program Name="P2" TestEdits="false" MainRoutineName="Main" Disabled="true" UseAsFolder="false">
+<Tags/>
+<Routines>
+<Routine Name="Main" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Counter := 0;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</Program>
+<Program Name="P3" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags/>
+<Routines>
+<Routine Name="Main" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Counter := Counter - 1;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</Program>
+<Program Name="P4" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags/>
+<Routines>
+<Routine Name="Main" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Counter := Cons;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</Program>
+<Program Name="Folder" TestEdits="false" Disabled="false" UseAsFolder="true">
+<Tags/>
+<Routines/>
+<ChildPrograms>
+<ChildProgram Name="P3"/>
+<ChildProgram Name="P4"/>
+</ChildPrograms>
+</Program>
+</Programs>
+<Tasks>
+<Task Name="Main" Type="CONTINUOUS" Priority="10" Watchdog="500" DisableUpdateOutputs="false" InhibitTask="false">
+<ScheduledPrograms>
+<ScheduledProgram Name="P1"/>
+<ScheduledProgram Name="P2"/>
+</ScheduledPrograms>
+</Task>
+<Task Name="Fast" Type="PERIODIC" Rate="10" Priority="5" Watchdog="100" DisableUpdateOutputs="false" InhibitTask="false">
+<Description>
+<![CDATA[10 ms task]]>
+</Description>
+<ScheduledPrograms>
+<ScheduledProgram Name="P3"/>
+</ScheduledPrograms>
+</Task>
+<Task Name="Ev" Type="EVENT" Priority="3" Watchdog="50" DisableUpdateOutputs="true" InhibitTask="true">
+<EventInfo EventTrigger="Consumed Tag" EventTag="Cons"/>
+<ScheduledPrograms>
+<ScheduledProgram Name="P4"/>
+</ScheduledPrograms>
+</Task>
+</Tasks>
+</Controller>
+</RSLogix5000Content>

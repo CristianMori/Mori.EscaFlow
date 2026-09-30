@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="33.00" TargetName="Ladder" TargetType="Controller" ContainsContext="false" ExportDate="Mon Sep 28 10:00:00 2026">
+<Controller Use="Target" Name="Ladder" ProcessorType="1756-L85E" MajorRev="33" MinorRev="12">
+<DataTypes/>
+<Modules/>
+<AddOnInstructionDefinitions>
+<AddOnInstructionDefinition Name="Blink" Revision="1.0">
+<Parameters>
+<Parameter Name="EnableIn" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false"/>
+<Parameter Name="EnableOut" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false"/>
+<Parameter Name="Rate" TagType="Base" DataType="DINT" Usage="Input" Radix="Decimal" Required="true" Visible="true"/>
+<Parameter Name="Out" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="true" Visible="true"/>
+</Parameters>
+<LocalTags>
+<LocalTag Name="T1" DataType="TIMER" Radix="NullType"/>
+</LocalTags>
+<Routines>
+<Routine Name="Logic" Type="RLL">
+<RLLContent>
+<Rung Number="0" Type="N">
+<Text>
+<![CDATA[XIO(T1.DN)TON(T1,?,?)XIC(T1.DN)OTE(Out);]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+</Routines>
+</AddOnInstructionDefinition>
+</AddOnInstructionDefinitions>
+<Tags>
+<Tag Name="A" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="B" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="C" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Out1" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Out2" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Pulse" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Bits" TagType="Base" DataType="DINT" Radix="Binary"/>
+<Tag Name="X" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="Y" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="Z" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="Idx" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="R" TagType="Base" DataType="REAL" Radix="Float"/>
+<Tag Name="T1" TagType="Base" DataType="TIMER" Radix="NullType"/>
+<Tag Name="T2" TagType="Base" DataType="TIMER" Radix="NullType"/>
+<Tag Name="T3" TagType="Base" DataType="TIMER" Radix="NullType"/>
+<Tag Name="C1" TagType="Base" DataType="COUNTER" Radix="NullType"/>
+<Tag Name="C2" TagType="Base" DataType="COUNTER" Radix="NullType"/>
+<Tag Name="S1" TagType="Base" DataType="STRING" Radix="NullType"/>
+<Tag Name="S2" TagType="Base" DataType="STRING" Radix="NullType"/>
+<Tag Name="S3" TagType="Base" DataType="STRING" Radix="NullType"/>
+<Tag Name="Src" TagType="Base" DataType="DINT" Dimensions="10" Radix="Decimal"/>
+<Tag Name="Dst" TagType="Base" DataType="DINT" Dimensions="10" Radix="Decimal"/>
+<Tag Name="Clock" TagType="Base" DataType="DINT" Dimensions="7" Radix="Decimal"/>
+<Tag Name="Msg1" TagType="Base" DataType="MESSAGE">
+<Data Format="Message">
+<MessageParameters MessageType="CIP Data Table Read" RequestedLength="1" ConnectionPath="1, 3" CommTypeCode="0" LocalIndex="0" LocalElement="X" RemoteElement="RemoteX" RemoteIndex="0"/>
+</Data>
+</Tag>
+<Tag Name="Blk" TagType="Base" DataType="Blink"/>
+</Tags>
+<Programs>
+<Program Name="P" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags>
+<Tag Name="InA" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="InB" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="OutA" TagType="Base" DataType="DINT" Radix="Decimal"/>
+</Tags>
+<Routines>
+<Routine Name="Main" Type="RLL">
+<RLLContent>
+<Rung Number="0" Type="N">
+<Comment>
+<![CDATA[bits]]>
+</Comment>
+<Text>
+<![CDATA[XIC(A)XIO(B)OTE(Out1)OTL(Out2)OTU(Bits.3);]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Text>
+<![CDATA[XIC(A)ONS(Bits.0)OSR(Bits.1,Pulse)OSF(Bits.2,C);]]>
+</Text>
+</Rung>
+<Rung Number="2" Type="N">
+<Text>
+<![CDATA[EQU(X,Y)NEQ(X,1)GRT(X,2)GEQ(Y,X)LES(Z,X)LEQ(Z,Y)CMP(X+Y>Z)LIM(0,X,10)MEQ(Bits,16#00FF,Y)OTE(Out1);]]>
+</Text>
+</Rung>
+<Rung Number="3" Type="N">
+<Text>
+<![CDATA[XIC(A)TON(T1,?,?)TOF(T2,?,?)RTO(T3,?,?)CTU(C1,?,?)CTD(C2,?,?)XIC(B)RES(T3)RES(C1);]]>
+</Text>
+</Rung>
+<Rung Number="4" Type="N">
+<Text>
+<![CDATA[XIC(A)MOV(X,Y)CLR(Z)ADD(X,Y,Z)SUB(X,1,Z)MUL(X,2,Z)DIV(X,Y,Z)MOD(X,3,Z)AND(X,Y,Bits)OR(X,16#0F,Bits)XOR(Bits,Y,Bits)NOT(X,Y)NEG(X,Z)ABS(R,R)SQR(R,R)CPT(Z,(X+Y)*2-R);]]>
+</Text>
+</Rung>
+<Rung Number="5" Type="N">
+<Text>
+<![CDATA[XIC(B)COP(Src[0],Dst[0],10)CPS(Src[0],Dst[0],10)FLL(0,Dst[0],10);]]>
+</Text>
+</Rung>
+<Rung Number="6" Type="N">
+<Text>
+<![CDATA[XIC(A)JSR(Sub,2,X,Y,Z);]]>
+</Text>
+</Rung>
+<Rung Number="7" Type="N">
+<Text>
+<![CDATA[XIC(C)JMP(Skip);]]>
+</Text>
+</Rung>
+<Rung Number="8" Type="N">
+<Text>
+<![CDATA[XIC(A)[XIC(B) ,XIC(C) [XIO(A) ,XIC(Out1) ] ,EQU(X,Y) ]OTE(Out2);]]>
+</Text>
+</Rung>
+<Rung Number="9" Type="N">
+<Text>
+<![CDATA[LBL(Skip)XIC(A)MCR();]]>
+</Text>
+</Rung>
+<Rung Number="10" Type="N">
+<Text>
+<![CDATA[XIC(B)OTE(Out1)TON(T1,?,?);]]>
+</Text>
+</Rung>
+<Rung Number="11" Type="N">
+<Text>
+<![CDATA[MCR();]]>
+</Text>
+</Rung>
+<Rung Number="12" Type="N">
+<Text>
+<![CDATA[XIC(A)AFI()NOP()OTE(Out1);]]>
+</Text>
+</Rung>
+<Rung Number="13" Type="N">
+<Text>
+<![CDATA[XIC(A)GSV(WallClockTime,,DateTime,Clock[0])SSV(Program,P,DisableFlag,X)MSG(Msg1);]]>
+</Text>
+</Rung>
+<Rung Number="14" Type="N">
+<Text>
+<![CDATA[XIC(A)Blink(Blk,250,Out2);]]>
+</Text>
+</Rung>
+<Rung Number="15" Type="N">
+<Text>
+<![CDATA[XIC(A)BTD(X,0,Y,8,4)MVM(X,16#FF00,Bits)SWPB(X,REVERSE,Y);]]>
+</Text>
+</Rung>
+<Rung Number="16" Type="N">
+<Text>
+<![CDATA[XIC(A)CONCAT(S1,S2,S3)MID(S1,3,1,S2)FIND(S1,S2,1,Idx);]]>
+</Text>
+</Rung>
+<Rung Number="17" Type="N">
+<Text>
+<![CDATA[XIC(A)FOR(Loop,Idx,0,9,1);]]>
+</Text>
+</Rung>
+<Rung Number="18" Type="N">
+<Text>
+<![CDATA[XIC(B)TND();]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+<Routine Name="Sub" Type="RLL">
+<RLLContent>
+<Rung Number="0" Type="N">
+<Text>
+<![CDATA[SBR(InA,InB);]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Text>
+<![CDATA[ADD(InA,InB,OutA);]]>
+</Text>
+</Rung>
+<Rung Number="2" Type="N">
+<Text>
+<![CDATA[RET(OutA);]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+<Routine Name="Loop" Type="RLL">
+<RLLContent>
+<Rung Number="0" Type="N">
+<Text>
+<![CDATA[MOV(Idx,Dst[Idx]);]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Text>
+<![CDATA[EQU(Dst[Idx],5)BRK();]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+<Tasks>
+<Task Name="Main" Type="CONTINUOUS" Priority="10" Watchdog="500" DisableUpdateOutputs="false" InhibitTask="false">
+<ScheduledPrograms>
+<ScheduledProgram Name="P"/>
+</ScheduledPrograms>
+</Task>
+</Tasks>
+</Controller>
+</RSLogix5000Content>

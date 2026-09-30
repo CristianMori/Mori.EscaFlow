@@ -1,0 +1,39 @@
+{
+  "$comment": "Standard function blocks of plc-ir 2.0: IEC 61131-3 pin names and types, plus the per-vendor profiles that say how each pin maps onto the vendor's instance structure. A fbCall with fb = <name> and profile = <profile> is implemented by the backend's runtime interface for that profile.",
+  "fbs": [
+    { "name": "TON", "description": "On-delay timer", "inputs": { "IN": "BOOL", "PT": "TIME" }, "outputs": { "Q": "BOOL", "ET": "TIME" } },
+    { "name": "TOF", "description": "Off-delay timer", "inputs": { "IN": "BOOL", "PT": "TIME" }, "outputs": { "Q": "BOOL", "ET": "TIME" } },
+    { "name": "TP", "description": "Pulse timer", "inputs": { "IN": "BOOL", "PT": "TIME" }, "outputs": { "Q": "BOOL", "ET": "TIME" } },
+    { "name": "TONR", "description": "Retentive on-delay timer (accumulates while IN, holds when IN drops, cleared by R)", "inputs": { "IN": "BOOL", "R": "BOOL", "PT": "TIME" }, "outputs": { "Q": "BOOL", "ET": "TIME" } },
+    { "name": "CTU", "description": "Up counter", "inputs": { "CU": "BOOL", "R": "BOOL", "PV": "DINT" }, "outputs": { "Q": "BOOL", "CV": "DINT" } },
+    { "name": "CTD", "description": "Down counter", "inputs": { "CD": "BOOL", "LD": "BOOL", "PV": "DINT" }, "outputs": { "Q": "BOOL", "CV": "DINT" } },
+    { "name": "CTUD", "description": "Up/down counter", "inputs": { "CU": "BOOL", "CD": "BOOL", "R": "BOOL", "LD": "BOOL", "PV": "DINT" }, "outputs": { "QU": "BOOL", "QD": "BOOL", "CV": "DINT" } },
+    { "name": "R_TRIG", "description": "Rising edge detector", "inputs": { "CLK": "BOOL" }, "outputs": { "Q": "BOOL" } },
+    { "name": "F_TRIG", "description": "Falling edge detector", "inputs": { "CLK": "BOOL" }, "outputs": { "Q": "BOOL" } },
+    { "name": "RS", "description": "Reset-dominant bistable", "inputs": { "S": "BOOL", "R1": "BOOL" }, "outputs": { "Q1": "BOOL" } },
+    { "name": "SR", "description": "Set-dominant bistable", "inputs": { "S1": "BOOL", "R": "BOOL" }, "outputs": { "Q1": "BOOL" } }
+  ],
+  "profiles": {
+    "iec": {
+      "description": "IEC 61131-3 semantics; the instance type is the block itself; TIME pins.",
+      "instanceTypes": { "TON": "TON", "TOF": "TOF", "TP": "TP", "TONR": "TONR", "CTU": "CTU", "CTD": "CTD", "CTUD": "CTUD", "R_TRIG": "R_TRIG", "F_TRIG": "F_TRIG", "RS": "RS", "SR": "SR" },
+      "pins": {}
+    },
+    "logix": {
+      "description": "Rockwell Logix semantics: TIMER / COUNTER structures, DINT presets and accumulators in milliseconds, the enable pin is the rung condition (recorded in the EN / CU / CD member), extra status members.",
+      "instanceTypes": { "TON": "TIMER", "TOF": "TIMER", "TONR": "TIMER", "CTU": "COUNTER", "CTD": "COUNTER" },
+      "pins": {
+        "TON": { "IN": { "role": "enable", "member": "EN" }, "PT": { "member": "PRE", "type": "DINT", "unit": "ms" }, "Q": { "member": "DN" }, "ET": { "member": "ACC", "type": "DINT", "unit": "ms" }, "TT": { "member": "TT", "type": "BOOL", "extra": true } },
+        "TOF": { "IN": { "role": "enable", "member": "EN" }, "PT": { "member": "PRE", "type": "DINT", "unit": "ms" }, "Q": { "member": "DN" }, "ET": { "member": "ACC", "type": "DINT", "unit": "ms" }, "TT": { "member": "TT", "type": "BOOL", "extra": true } },
+        "TONR": { "IN": { "role": "enable", "member": "EN" }, "R": { "role": "reset", "member": null }, "PT": { "member": "PRE", "type": "DINT", "unit": "ms" }, "Q": { "member": "DN" }, "ET": { "member": "ACC", "type": "DINT", "unit": "ms" }, "TT": { "member": "TT", "type": "BOOL", "extra": true } },
+        "CTU": { "CU": { "role": "enable", "member": "CU" }, "R": { "role": "reset", "member": null }, "PV": { "member": "PRE", "type": "DINT" }, "Q": { "member": "DN" }, "CV": { "member": "ACC", "type": "DINT" }, "OV": { "member": "OV", "type": "BOOL", "extra": true }, "UN": { "member": "UN", "type": "BOOL", "extra": true } },
+        "CTD": { "CD": { "role": "enable", "member": "CD" }, "LD": { "role": "reset", "member": null }, "PV": { "member": "PRE", "type": "DINT" }, "Q": { "member": "DN" }, "CV": { "member": "ACC", "type": "DINT" }, "OV": { "member": "OV", "type": "BOOL", "extra": true }, "UN": { "member": "UN", "type": "BOOL", "extra": true } }
+      }
+    },
+    "s7": {
+      "description": "Siemens S7 IEC timers and counters (instance data blocks of the system types).",
+      "instanceTypes": { "TON": "IEC_TIMER", "TOF": "IEC_TIMER", "TP": "IEC_TIMER", "TONR": "IEC_TIMER", "CTU": "IEC_COUNTER", "CTD": "IEC_COUNTER", "CTUD": "IEC_COUNTER", "R_TRIG": "R_TRIG", "F_TRIG": "F_TRIG", "RS": "RS", "SR": "SR" },
+      "pins": {}
+    }
+  }
+}

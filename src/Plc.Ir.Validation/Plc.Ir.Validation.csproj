@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Plc.Ir.Validation</RootNamespace>
+    <AssemblyName>Plc.Ir.Validation</AssemblyName>
+    <Description>Validator for plc-ir 2.0 documents: structural (format, enums, ids), referential (types, variables, pous, actions, pins, services, labels, aliases, tasks) and typing passes.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Plc.Ir\Plc.Ir.csproj" />
+  </ItemGroup>
+</Project>

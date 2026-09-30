@@ -1,0 +1,662 @@
+{
+  "format": "plc-ir",
+  "irVersion": "2.0",
+  "source": {
+    "vendor": "logix",
+    "dialect": "l5x",
+    "file": "tasks.L5X",
+    "exportDate": "Mon Sep 28 10:00:00 2026",
+    "softwareRevision": "33.00",
+    "generator": "conformance",
+    "generatedAt": "1970-01-01T00:00:00+00:00"
+  },
+  "configuration": {
+    "name": "Tasks",
+    "resources": [
+      {
+        "name": "Tasks",
+        "processorType": "1756-L85E",
+        "tasks": [
+          {
+            "name": "Main",
+            "kind": "continuous",
+            "priority": 10,
+            "watchdogMs": 500,
+            "programs": [
+              "P1",
+              "P2"
+            ],
+            "disabled": false,
+            "vendor": {
+              "logix": {
+                "type": "CONTINUOUS",
+                "inhibitTask": false,
+                "disableUpdateOutputs": false
+              }
+            }
+          },
+          {
+            "name": "Fast",
+            "kind": "periodic",
+            "intervalMs": 10,
+            "priority": 5,
+            "watchdogMs": 100,
+            "programs": [
+              "P3"
+            ],
+            "disabled": false,
+            "description": "10 ms task",
+            "vendor": {
+              "logix": {
+                "type": "PERIODIC",
+                "inhibitTask": false,
+                "disableUpdateOutputs": false
+              }
+            }
+          },
+          {
+            "name": "Ev",
+            "kind": "event",
+            "priority": 3,
+            "watchdogMs": 50,
+            "event": {
+              "kind": "Consumed Tag",
+              "source": "global/Tasks/Cons"
+            },
+            "programs": [
+              "P4"
+            ],
+            "disabled": true,
+            "vendor": {
+              "logix": {
+                "type": "EVENT",
+                "eventTrigger": "Consumed Tag",
+                "eventTag": "Cons",
+                "inhibitTask": true,
+                "disableUpdateOutputs": true
+              }
+            }
+          }
+        ],
+        "programs": [
+          {
+            "name": "P1",
+            "pou": "P1",
+            "task": "Main",
+            "disabled": false
+          },
+          {
+            "name": "P2",
+            "pou": "P2",
+            "task": "Main",
+            "disabled": true
+          },
+          {
+            "name": "P3",
+            "pou": "P3",
+            "task": "Fast",
+            "disabled": false
+          },
+          {
+            "name": "P4",
+            "pou": "P4",
+            "task": "Ev",
+            "disabled": false
+          }
+        ]
+      }
+    ]
+  },
+  "types": [],
+  "globals": [
+    {
+      "name": "Tasks",
+      "vars": [
+        {
+          "id": "global/Tasks/Counter",
+          "name": "Counter",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Counter",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Tasks/Cons",
+          "name": "Cons",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Cons",
+              "scope": "controller",
+              "radix": "Decimal",
+              "consumed": {
+                "producer": "OtherPlc",
+                "remoteTag": "Prod",
+                "rpi": 20,
+                "attributes": {
+                  "Producer": "OtherPlc",
+                  "RemoteTag": "Prod",
+                  "RemoteInstance": "0",
+                  "RPI": "20",
+                  "Unicast": "true"
+                }
+              },
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "description": "Controller-scoped tags"
+    }
+  ],
+  "io": {
+    "devices": [],
+    "channels": []
+  },
+  "pous": [
+    {
+      "name": "P1",
+      "kind": "program",
+      "vars": [
+        {
+          "id": "pou/P1/Local1",
+          "name": "Local1",
+          "section": "local",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P1.Local1",
+              "scope": "program",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Tasks/Counter"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "add",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Tasks/Counter"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 1,
+                    "type": "DINT"
+                  },
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Counter := Counter \u002B 1;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Fault",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "pou/P1/Local1"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 0,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Local1 := 0;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "onFault": "Fault",
+      "description": "main program",
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "faultRoutine": "Fault",
+          "disabled": false,
+          "folder": false,
+          "task": "Main"
+        }
+      }
+    },
+    {
+      "name": "P2",
+      "kind": "program",
+      "vars": [],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Tasks/Counter"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "lit",
+                  "kind": "int",
+                  "int": 0,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Counter := 0;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": true,
+          "folder": false,
+          "task": "Main"
+        }
+      }
+    },
+    {
+      "name": "P3",
+      "kind": "program",
+      "vars": [],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Tasks/Counter"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "sub",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Tasks/Counter"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 1,
+                    "type": "DINT"
+                  },
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Counter := Counter - 1;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": false,
+          "folder": false,
+          "parentFolder": "Folder",
+          "task": "Fast"
+        }
+      }
+    },
+    {
+      "name": "P4",
+      "kind": "program",
+      "vars": [],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Tasks/Counter"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Tasks/Cons"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "Counter := Cons;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": false,
+          "folder": false,
+          "parentFolder": "Folder",
+          "task": "Ev"
+        }
+      }
+    },
+    {
+      "name": "Folder",
+      "kind": "program",
+      "vars": [],
+      "body": {
+        "language": "st",
+        "statements": [],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "disabled": false,
+          "folder": true,
+          "children": [
+            "P3",
+            "P4"
+          ]
+        }
+      }
+    }
+  ],
+  "diagnostics": [],
+  "vendor": {
+    "logix": {
+      "targetName": "Tasks",
+      "targetType": "Controller",
+      "majorRev": 33,
+      "minorRev": 12
+    }
+  }
+}

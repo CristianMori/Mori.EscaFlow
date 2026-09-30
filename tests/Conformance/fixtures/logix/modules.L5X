@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="33.00" TargetName="Modules" TargetType="Controller" ContainsContext="false" ExportDate="Mon Sep 28 10:00:00 2026">
+<Controller Use="Target" Name="Modules" ProcessorType="1756-L85E" MajorRev="33" MinorRev="12">
+<DataTypes/>
+<Modules>
+<Module Name="Local" CatalogNumber="1756-L85E" Vendor="1" ProductType="14" ProductCode="168" Major="33" Minor="12" ParentModule="Local" ParentModPortId="1" Inhibited="false" MajorFault="true">
+<Ports><Port Id="1" Address="0" Type="ICP" Upstream="false"><Bus Size="10"/></Port><Port Id="2" Type="Ethernet" Upstream="false"><Bus/></Port></Ports>
+</Module>
+<Module Name="DI" CatalogNumber="1756-IB16" Vendor="1" ProductType="7" ProductCode="1" Major="3" Minor="1" ParentModule="Local" ParentModPortId="1" Inhibited="false" MajorFault="false">
+<Description>
+<![CDATA[16 point input]]>
+</Description>
+<EKey State="CompatibleModule"/>
+<Ports><Port Id="1" Address="3" Type="ICP" Upstream="true"/></Ports>
+<Communications CommMethod="536870913">
+<ConfigTag ConfigSize="8" ExternalAccess="Read/Write">
+<Data Format="Decorated">
+<Structure DataType="AB:1756_DI:C:0">
+<DataValueMember Name="FilterOffOn_0_7" DataType="SINT" Radix="Decimal" Value="1"/>
+<DataValueMember Name="FilterOnOff_0_7" DataType="SINT" Radix="Decimal" Value="1"/>
+</Structure>
+</Data>
+</ConfigTag>
+<Connections>
+<Connection Name="Input" RPI="20000" Type="Input" EventID="0" ProgrammaticallySendEventTrigger="false" Unicast="false">
+<InputTag ExternalAccess="Read/Write">
+<Data Format="Decorated">
+<Structure DataType="AB:1756_DI:I:0">
+<DataValueMember Name="Fault" DataType="DINT" Radix="Binary" Value="2#0000_0000_0000_0000_0000_0000_0000_0000"/>
+<DataValueMember Name="Data" DataType="DINT" Radix="Binary" Value="2#0000_0000_0000_0000_0000_0000_0000_0000"/>
+</Structure>
+</Data>
+</InputTag>
+<OutputTag ExternalAccess="Read/Write">
+<Data Format="Decorated">
+<Structure DataType="AB:1756_DI:O:0">
+<DataValueMember Name="Data" DataType="DINT" Radix="Binary" Value="2#0000_0000_0000_0000_0000_0000_0000_0000"/>
+</Structure>
+</Data>
+</OutputTag>
+</Connection>
+</Connections>
+</Communications>
+</Module>
+<Module Name="ENet" CatalogNumber="ETHERNET-MODULE" Vendor="1" ProductType="12" ProductCode="0" Major="1" Minor="1" ParentModule="Local" ParentModPortId="2" Inhibited="false" MajorFault="false">
+<Ports><Port Id="1" Address="192.168.1.30" Type="Ethernet" Upstream="true"/><Port Id="2" Type="PointIO" Upstream="false"><Bus Size="4"/></Port></Ports>
+<Communications CommMethod="536870914" PrimCxnInputSize="8" PrimCxnOutputSize="8">
+<Connections>
+<Connection Name="Standard" RPI="20000" Type="Input" EventID="0" ProgrammaticallySendEventTrigger="false" Unicast="true">
+<InputTag ExternalAccess="Read/Write">
+<Data Format="Decorated">
+<Structure DataType="AB:ETHERNET_MODULE_DINT_2Bytes:I:0">
+<ArrayMember Name="Data" DataType="DINT" Dimensions="2" Radix="Decimal">
+<Element Index="[0]" Value="0"/>
+<Element Index="[1]" Value="0"/>
+</ArrayMember>
+</Structure>
+</Data>
+</InputTag>
+<OutputTag ExternalAccess="Read/Write">
+<Data Format="Decorated">
+<Structure DataType="AB:ETHERNET_MODULE_DINT_2Bytes:O:0">
+<ArrayMember Name="Data" DataType="DINT" Dimensions="2" Radix="Decimal">
+<Element Index="[0]" Value="0"/>
+<Element Index="[1]" Value="0"/>
+</ArrayMember>
+</Structure>
+</Data>
+</OutputTag>
+</Connection>
+</Connections>
+</Communications>
+</Module>
+<Module Name="Point1" CatalogNumber="1734-IB4" Vendor="1" ProductType="7" ProductCode="21" Major="3" Minor="1" ParentModule="ENet" ParentModPortId="2" Inhibited="false" MajorFault="false">
+<Ports><Port Id="1" Address="1" Type="PointIO" Upstream="true"/></Ports>
+<Communications CommMethod="536870913">
+<ConfigTag ConfigSize="4" ExternalAccess="Read/Write">
+<Data Format="Decorated">
+<Structure DataType="AB:1734_DI4:C:0">
+<DataValueMember Name="FilterOffOn" DataType="SINT" Radix="Decimal" Value="0"/>
+</Structure>
+</Data>
+</ConfigTag>
+<Connections/>
+</Communications>
+</Module>
+<Module Name="Turck" CatalogNumber="FEN20-4IOL" Vendor="21" ProductType="12" ProductCode="9527" Major="1" Minor="2" ParentModule="Local" ParentModPortId="2" Inhibited="false" MajorFault="false">
+<Ports><Port Id="1" Address="192.168.1.40" Type="Ethernet" Upstream="true"/></Ports>
+<Communications CommMethod="536870914">
+<ConfigTag ConfigSize="12" ExternalAccess="Read/Write">
+<Data Format="Decorated">
+<Structure DataType="_0015:935700_001_B2B4CBB0:C:0">
+<DataValueMember Name="Channel_Mode_Port1" DataType="SINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Channel_Mode_Port2" DataType="SINT" Radix="Decimal" Value="0"/>
+</Structure>
+</Data>
+</ConfigTag>
+<Connections>
+<Connection Name="Standard" RPI="10000" Type="Input" EventID="0" ProgrammaticallySendEventTrigger="false" Unicast="true">
+<InputTag ExternalAccess="Read/Write">
+<Data Format="Decorated">
+<Structure DataType="_0015:935700_001_90D03083:I:0">
+<DataValueMember Name="ConnectionFaulted" DataType="BOOL" Value="0"/>
+<ArrayMember Name="Data" DataType="SINT" Dimensions="4" Radix="Decimal">
+<Element Index="[0]" Value="0"/>
+<Element Index="[1]" Value="0"/>
+<Element Index="[2]" Value="0"/>
+<Element Index="[3]" Value="0"/>
+</ArrayMember>
+</Structure>
+</Data>
+</InputTag>
+</Connection>
+</Connections>
+</Communications>
+</Module>
+</Modules>
+<AddOnInstructionDefinitions/>
+<Tags>
+<Tag Name="Flag" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Word" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="Cfg" TagType="Base" DataType="SINT" Radix="Decimal"/>
+<Tag Name="Byte0" TagType="Base" DataType="SINT" Radix="Decimal"/>
+<Tag Name="AlInput" TagType="Alias" AliasFor="Local:3:I.Data.4"/>
+</Tags>
+<Programs>
+<Program Name="P" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags/>
+<Routines>
+<Routine Name="Main" Type="ST">
+<STContent>
+<Line Number="0">
+<![CDATA[Flag := Local:3:I.Data.4 AND NOT DI:I.Fault.0;]]>
+</Line>
+<Line Number="1">
+<![CDATA[ENet:O.Data[0] := Word;]]>
+</Line>
+<Line Number="2">
+<![CDATA[Word := ENet:I.Data[1] + Local:3:I.Data;]]>
+</Line>
+<Line Number="3">
+<![CDATA[Cfg := Turck:C.Channel_Mode_Port1;]]>
+</Line>
+<Line Number="4">
+<![CDATA[Byte0 := Turck:I.Data[0];]]>
+</Line>
+<Line Number="5">
+<![CDATA[Flag := Turck:I.ConnectionFaulted OR ENet:1:I.0 OR AlInput;]]>
+</Line>
+<Line Number="6">
+<![CDATA[DI:O.Data.0 := Flag;]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+<Tasks>
+<Task Name="Main" Type="CONTINUOUS" Priority="10" Watchdog="500" DisableUpdateOutputs="false" InhibitTask="false">
+<ScheduledPrograms>
+<ScheduledProgram Name="P"/>
+</ScheduledPrograms>
+</Task>
+</Tasks>
+</Controller>
+</RSLogix5000Content>

@@ -1,0 +1,236 @@
+# Ladder instruction operand roles, from 1756-RM014 pp. 211-222 (neutral text table).
+# Format: MNEMONIC|role,role,...   roles: tag, keyword, routine, label, expression, literal, any
+# A trailing "..." repeats the previous role for any further operands.
+# Positions that accept immediate numbers are still "tag": the classifier tries numeric literals first.
+#
+# --- Bit ---
+XIC|tag
+XIO|tag
+OTE|tag
+OTL|tag
+OTU|tag
+ONS|tag
+OSR|tag,tag
+OSF|tag,tag
+# --- Timer / counter ---
+TON|tag,tag,tag
+TOF|tag,tag,tag
+RTO|tag,tag,tag
+CTU|tag,tag,tag
+CTD|tag,tag,tag
+RES|tag
+# --- Compare ---
+CMP|expression
+EQU|tag,tag
+GEQ|tag,tag
+GRT|tag,tag
+LEQ|tag,tag
+LES|tag,tag
+LIM|tag,tag,tag
+MEQ|tag,tag,tag
+NEQ|tag,tag
+# --- Compute / math ---
+CPT|tag,expression
+ADD|tag,tag,tag
+SUB|tag,tag,tag
+MUL|tag,tag,tag
+DIV|tag,tag,tag
+MOD|tag,tag,tag
+SQR|tag,tag
+NEG|tag,tag
+ABS|tag,tag
+# --- Move / logical ---
+MOV|tag,tag
+MVM|tag,tag,tag
+BTD|tag,tag,tag,tag,tag
+CLR|tag
+SWPB|tag,keyword,tag
+AND|tag,tag,tag
+OR|tag,tag,tag
+XOR|tag,tag,tag
+NOT|tag,tag
+# --- Array (file) / misc ---
+FAL|tag,tag,tag,keyword,tag,expression
+FSC|tag,tag,tag,keyword,expression
+COP|tag,tag,tag
+CPS|tag,tag,tag
+FLL|tag,tag,tag
+AVE|tag,tag,tag,tag,tag,tag
+SRT|tag,tag,tag,tag,tag
+STD|tag,tag,tag,tag,tag,tag
+SIZE|tag,tag,tag
+# --- Array shift ---
+BSL|tag,tag,tag,tag
+BSR|tag,tag,tag,tag
+FFL|tag,tag,tag,tag,tag
+FFU|tag,tag,tag,tag,tag
+LFL|tag,tag,tag,tag,tag
+LFU|tag,tag,tag,tag,tag
+# --- Sequencer ---
+SQI|tag,tag,tag,tag,tag,tag
+SQO|tag,tag,tag,tag,tag,tag
+SQL|tag,tag,tag,tag,tag
+# --- Program control ---
+JMP|label
+LBL|label
+JSR|routine,tag,...
+JXR|routine,tag,tag,tag
+SBR|tag,...
+RET|tag,...
+TND|
+MCR|
+UID|
+UIE|
+AFI|
+NOP|
+EOT|tag
+SFP|routine,keyword
+SFR|routine,tag
+EVENT|tag
+# --- For / break ---
+FOR|routine,tag,tag,tag,tag
+BRK|
+# --- Special ---
+FBC|tag,tag,tag,tag,tag,tag,tag,tag,tag
+DDT|tag,tag,tag,tag,tag,tag,tag,tag,tag
+DTR|tag,tag,tag
+PID|tag,tag,tag,tag,tag,tag,tag
+# --- Trig / advanced math ---
+SIN|tag,tag
+COS|tag,tag
+TAN|tag,tag
+ASN|tag,tag
+ACS|tag,tag
+ATN|tag,tag
+LN|tag,tag
+LOG|tag,tag
+XPY|tag,tag,tag
+DEG|tag,tag
+RAD|tag,tag
+TOD|tag,tag
+FRD|tag,tag
+TRN|tag,tag
+# --- Input / output ---
+MSG|tag
+GSV|keyword,any,keyword,tag
+SSV|keyword,any,keyword,tag
+IOT|tag
+# --- ASCII serial port ---
+ABL|tag,tag,tag
+ACB|tag,tag,tag
+ACL|tag,tag,tag
+AHL|tag,tag,tag,tag,tag
+ARD|tag,tag,tag,tag,tag
+ARL|tag,tag,tag,tag,tag
+AWA|tag,tag,tag,tag,tag
+AWT|tag,tag,tag,tag,tag
+# --- ASCII string ---
+CONCAT|tag,tag,tag
+DELETE|tag,tag,tag,tag
+FIND|tag,tag,tag,tag
+INSERT|tag,tag,tag,tag
+MID|tag,tag,tag,tag
+# --- ASCII conversion ---
+STOD|tag,tag
+STOR|tag,tag
+DTOS|tag,tag
+RTOS|tag,tag
+UPPER|tag,tag
+LOWER|tag,tag
+# --- Alarms ---
+ALMA|tag,tag,tag,tag,tag
+ALMD|tag,tag,tag,tag,tag
+# --- Equipment phase / sequence ---
+PSC|
+PCMD|tag,keyword,tag
+POVR|tag,keyword,tag
+PATT|tag,tag
+PDET|tag
+PCLF|tag
+PFL|tag
+PPD|
+PRNP|
+PXRQ|tag,any,tag
+# --- Motion state ---
+MSO|tag,tag
+MSF|tag,tag
+MASD|tag,tag
+MASR|tag,tag
+MDO|tag,tag,tag,tag
+MDF|tag,tag
+MDW|tag,tag
+MDR|tag,tag
+MAFR|tag,tag
+# --- Motion move ---
+MAS|tag,tag,any,any,any,any
+MAH|tag,tag
+MAJ|tag,tag,any,any,any,any,any,any,any,any,any,any
+MAM|tag,tag,any,any,any,any,any,any,any,any,any,any,any
+MAG|tag,tag,tag,any,any,any,any,any,any,any,any,any
+MCD|tag,tag,any,any,any,any,any,any,any,any,any,any
+MRP|tag,tag,any,any,any
+MCCP|tag,tag,any,any,any,tag
+MCSV|tag,tag,any,any,any,any
+MAPC|tag,tag,tag,any,tag,any,any,any,any,any,any,any,any
+MATC|tag,tag,any,tag,any,any,any,any
+MDAC|tag,tag,tag,any
+MDCC|tag,tag,tag,any,any,any
+# --- Motion group ---
+MGS|tag,tag,any
+MGPS|tag,tag
+MGSD|tag,tag
+MGSR|tag,tag
+MGSP|tag,tag
+# --- Motion event ---
+MAW|tag,tag,any,any
+MDW|tag,tag
+MAR|tag,tag,any,any,any,any
+MDR|tag,tag
+MAOC|tag,any,tag,tag,tag,tag,any,any,any,any,any,any,any,any
+MDOC|tag,any,tag,any
+# --- Motion configuration ---
+MAAT|tag,tag
+MRAT|tag,tag
+MAHD|tag,tag,any,any
+MRHD|tag,tag,any
+# --- Motion multi-axis coordinated ---
+MCLM|tag,tag,any,tag,any,any,any,any,any,any,any,any,any,any
+MCCM|tag,tag,any,tag,any,tag,any,any,any,any,any,any,any,any,any,any,any
+MCCD|tag,tag,any,any,any,any,any,any,any,any,any,any,any
+MCS|tag,tag,any,any,any,any
+MCSD|tag,tag
+MCSR|tag,tag
+MCT|tag,tag,tag,any,any
+MCTP|tag,tag,tag,any,any,any,any,any
+MCTO|tag,tag,tag,any,any
+MCTPO|tag,tag,tag,any,any,any,any,any
+# --- Safety ---
+AVC|tag,any,any,any,any,tag,tag,tag,tag,tag,tag,tag
+CBCM|tag,any,any,any,tag,tag,tag,tag,tag,tag,tag,tag,tag,tag
+CBIM|tag,any,any,tag,tag,tag,tag,tag,tag,tag,tag
+CBSSM|tag,any,any,tag,tag,tag,tag,tag,tag,tag,tag
+CPM|tag,tag,tag,tag,tag,tag,tag,tag,tag,tag
+CROUT|tag,any,any,tag,tag,tag,tag,tag,tag
+CSM|tag,any,any,tag,tag,tag,tag,tag
+DCM|tag,any,any,any,tag,tag,tag,tag
+DCS|tag,any,any,any,any,any,tag,tag,tag,tag
+DCSRT|tag,any,any,any,tag,tag,tag,tag,tag
+DCST|tag,any,any,any,any,any,tag,tag,tag,tag,tag
+DCSTM|tag,any,any,any,any,any,any,any,tag,tag,tag,tag,tag,tag,tag
+DCSTL|tag,any,any,any,any,any,tag,tag,tag,tag,tag,tag,tag,tag
+DIN|tag,any,tag,tag,tag,tag
+ENPEN|tag,any,tag,tag,tag,tag
+EPMS|tag,tag,tag,tag,tag,tag,tag,tag,tag,tag,tag,tag
+ESTOP|tag,any,tag,tag,tag,tag
+FPMS|tag,tag,tag,tag,tag,tag,tag
+FSBM|tag,any,any,any,any,any,any,any,any,tag,tag,tag,tag,tag,tag,tag,tag,tag,tag
+LC|tag,any,tag,tag,any,tag,tag,tag
+MMVC|tag,tag,tag,tag,tag,tag,tag,tag,tag,tag
+MVC|tag,any,any,tag,tag,tag,tag,tag,tag
+RIN|tag,any,tag,tag,tag,tag
+ROUT|tag,any,tag,tag,tag,tag
+SMAT|tag,any,any,tag,tag,tag,tag
+THRS|tag,any,tag,tag,tag,tag,tag,tag
+THRSE|tag,any,tag,tag,tag,tag,tag,tag,tag,tag
+TSAM|tag,any,any,any,any,any,tag,tag,tag,tag,tag,tag,tag,tag
+TSSM|tag,any,any,any,any,any,any,tag,tag,tag,tag,tag,tag,tag,tag

@@ -1,0 +1,174 @@
+using System.Xml.Linq;
+using L5x.Model.Logic.Fbd;
+
+namespace L5x.Parsing.Xml;
+
+/// <summary>Reads a materialized <c>&lt;FBDContent&gt;</c> element (spec pp. 223–255).</summary>
+public sealed class FbdReader
+{
+    private readonly ReaderContext _ctx;
+
+    public FbdReader(ReaderContext ctx)
+    {
+        _ctx = ctx;
+    }
+
+    public FbdContent Read(XElement element)
+    {
+        var attrs = new AttributeBag(element);
+        var content = new FbdContent
+        {
+            OnlineEditType = attrs.Take("OnlineEditType"),
+            SheetSize = attrs.Take("SheetSize"),
+            SheetOrientation = attrs.Take("SheetOrientation"),
+            SourceLine = element.Line(),
+        };
+        content.UnknownAttributes = attrs.Remaining();
+        foreach (var child in element.Elements())
+        {
+            if (child.Name.LocalName == "Sheet") content.Sheets.Add(ReadSheet(child));
+            else (content.UnknownChildren ??= new()).Add(GenericElementReader.Read(child));
+        }
+        return content;
+    }
+
+    private FbdSheet ReadSheet(XElement e)
+    {
+        var a = new AttributeBag(e);
+        var sheet = new FbdSheet
+        {
+            Number = a.TakeInt("Number") ?? 0,
+            SourceLine = e.Line(),
+        };
+        sheet.UnknownAttributes = a.Remaining();
+        foreach (var child in e.Elements())
+        {
+            var b = new AttributeBag(child);
+            FbdElement? el = null;
+            switch (child.Name.LocalName)
+            {
+                case "Description":
+                    sheet.Description = child.OwnText();
+                    continue;
+                case "IRef":
+                    el = new FbdIRef { Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y"), Operand = b.Take("Operand"), HideDesc = b.TakeBool("HideDesc") };
+                    break;
+                case "ORef":
+                    el = new FbdORef { Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y"), Operand = b.Take("Operand"), HideDesc = b.TakeBool("HideDesc") };
+                    break;
+                case "ICon":
+                    el = new FbdICon { Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y"), Name = b.Take("Name") };
+                    break;
+                case "OCon":
+                    el = new FbdOCon { Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y"), Name = b.Take("Name") };
+                    break;
+                case "Block":
+                {
+                    var block = new FbdBlock
+                    {
+                        Type = b.TakeRequired("Type", "?"),
+                        Id = Id(b),
+                        X = b.TakeInt("X"),
+                        Y = b.TakeInt("Y"),
+                        Operand = b.Take("Operand"),
+                        HideDesc = b.TakeBool("HideDesc"),
+                        AutotuneTag = b.Take("AutotuneTag"),
+                    };
+                    block.VisiblePins.AddRange(SplitList(b.Take("VisiblePins")));
+                    foreach (var arr in child.Elements("Array"))
+                    {
+                        var n = arr.Attr("Name");
+                        var op = arr.Attr("Operand");
+                        if (n is not null && op is not null) (block.Arrays ??= new(StringComparer.OrdinalIgnoreCase))[n] = op;
+                    }
+                    el = block;
+                    break;
+                }
+                case "Function":
+                    el = new FbdFunction { Type = b.TakeRequired("Type", "?"), Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y") };
+                    break;
+                case "AddOnInstruction":
+                {
+                    var aoi = new FbdAddOnInstruction
+                    {
+                        Name = b.TakeRequired("Name", "?"),
+                        Id = Id(b),
+                        X = b.TakeInt("X"),
+                        Y = b.TakeInt("Y"),
+                        Operand = b.Take("Operand"),
+                        HideDesc = b.TakeBool("HideDesc"),
+                    };
+                    aoi.VisiblePins.AddRange(SplitList(b.Take("VisiblePins")));
+                    foreach (var p in child.Elements("InOutParameter"))
+                    {
+                        aoi.InOutParameters.Add(new KeyValuePair<string, string>(p.Attr("Name") ?? "", p.Attr("Argument") ?? ""));
+                    }
+                    el = aoi;
+                    break;
+                }
+                case "JSR":
+                {
+                    var jsr = new FbdJsr { Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y"), Routine = b.Take("Routine") };
+                    jsr.In.AddRange(SplitList(b.Take("In")));
+                    jsr.Ret.AddRange(SplitList(b.Take("Ret")));
+                    el = jsr;
+                    break;
+                }
+                case "SBR":
+                {
+                    var sbr = new FbdSbr { Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y"), Routine = b.Take("Routine") };
+                    sbr.In.AddRange(SplitList(b.Take("In")));
+                    el = sbr;
+                    break;
+                }
+                case "RET":
+                {
+                    var ret = new FbdRet { Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y"), Routine = b.Take("Routine") };
+                    ret.Ret.AddRange(SplitList(b.Take("Ret")));
+                    el = ret;
+                    break;
+                }
+                case "TextBox":
+                    el = new FbdTextBox { Id = Id(b), X = b.TakeInt("X"), Y = b.TakeInt("Y"), Width = b.TakeInt("Width"), Text = child.OwnText() };
+                    break;
+                case "Wire":
+                case "FeedbackWire":
+                    sheet.Wires.Add(new FbdWire
+                    {
+                        FromId = b.TakeInt("FromID") ?? -1,
+                        FromParam = b.Take("FromParam"),
+                        ToId = b.TakeInt("ToID") ?? -1,
+                        ToParam = b.Take("ToParam"),
+                        IsFeedback = child.Name.LocalName == "FeedbackWire",
+                        SourceLine = child.Line(),
+                        UnknownAttributes = b.Remaining(),
+                    });
+                    continue;
+                case "Attachment":
+                    sheet.Attachments.Add(new FbdAttachment
+                    {
+                        FromId = b.TakeInt("FromID") ?? -1,
+                        ToId = b.TakeInt("ToID") ?? -1,
+                        SourceLine = child.Line(),
+                        UnknownAttributes = b.Remaining(),
+                    });
+                    continue;
+                default:
+                    (sheet.UnknownChildren ??= new()).Add(GenericElementReader.Read(child));
+                    continue;
+            }
+            el.SourceLine = child.Line();
+            el.UnknownAttributes = b.Remaining();
+            sheet.Elements.Add(el);
+        }
+        return sheet;
+    }
+
+    private static int Id(AttributeBag b) => b.TakeInt("ID") ?? -1;
+
+    private static IEnumerable<string> SplitList(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return Array.Empty<string>();
+        return text.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    }
+}

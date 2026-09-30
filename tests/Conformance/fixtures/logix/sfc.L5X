@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="33.00" TargetName="Sfc" TargetType="Controller" ContainsContext="false" ExportDate="Mon Sep 28 10:00:00 2026">
+<Controller Use="Target" Name="Sfc" ProcessorType="1756-L85E" MajorRev="33" MinorRev="12">
+<DataTypes/>
+<Modules/>
+<AddOnInstructionDefinitions/>
+<Tags>
+<Tag Name="Delay" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="Start" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Fault" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Done" TagType="Base" DataType="BOOL" Radix="Decimal"/>
+<Tag Name="Cmd" TagType="Base" DataType="DINT" Radix="Decimal"/>
+<Tag Name="Count" TagType="Base" DataType="DINT" Radix="Decimal"/>
+</Tags>
+<Programs>
+<Program Name="P" TestEdits="false" MainRoutineName="Main" Disabled="false" UseAsFolder="false">
+<Tags>
+<Tag Name="Step_000" TagType="Base" DataType="SFC_STEP" Radix="NullType"/>
+<Tag Name="Step_001" TagType="Base" DataType="SFC_STEP" Radix="NullType"/>
+<Tag Name="Step_002" TagType="Base" DataType="SFC_STEP" Radix="NullType"/>
+<Tag Name="Step_003" TagType="Base" DataType="SFC_STEP" Radix="NullType"/>
+<Tag Name="Step_004" TagType="Base" DataType="SFC_STEP" Radix="NullType"/>
+<Tag Name="Tran_000" TagType="Base" DataType="BOOL" Radix="NullType"/>
+<Tag Name="Tran_001" TagType="Base" DataType="BOOL" Radix="NullType"/>
+<Tag Name="Tran_002" TagType="Base" DataType="BOOL" Radix="NullType"/>
+<Tag Name="Tran_003" TagType="Base" DataType="BOOL" Radix="NullType"/>
+<Tag Name="Action_000" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Action_001" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Action_002" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Action_003" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Action_004" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Action_005" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Action_006" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Action_007" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Action_008" TagType="Base" DataType="SFC_ACTION" Radix="NullType"/>
+<Tag Name="Stop_000" TagType="Base" DataType="SFC_STOP" Radix="NullType"/>
+</Tags>
+<Routines>
+<Routine Name="Main" Type="SFC">
+<Description>
+<![CDATA[Sequence]]>
+</Description>
+<SFCContent SheetSize="Letter - 8.5 x 11 in" SheetOrientation="Landscape">
+<Step ID="0" X="300" Y="80" Operand="Step_000" HideDesc="false" DescX="360" DescY="60" DescWidth="0" InitialStep="true" PresetUsesExpr="true" LimitHighUsesExpr="false" LimitLowUsesExpr="false" ShowActions="true">
+<Preset>
+<STContent>
+<Line Number="0">
+<![CDATA[Delay * 2]]>
+</Line>
+</STContent>
+</Preset>
+<Action ID="10" Operand="Action_000" Qualifier="NonStored" IsBoolean="false" PresetUsesExpr="false">
+<Body>
+<STContent>
+<Line Number="0">
+<![CDATA[Cmd [:=] 1;]]>
+</Line>
+<Line Number="1">
+<![CDATA[Count := Count + 1;]]>
+</Line>
+</STContent>
+</Body>
+</Action>
+<Action ID="11" Operand="Action_001" Qualifier="Stored" IsBoolean="true" PresetUsesExpr="false"/>
+</Step>
+<Step ID="1" X="200" Y="280" Operand="Step_001" HideDesc="false" DescX="260" DescY="260" DescWidth="0" InitialStep="false" PresetUsesExpr="false" LimitHighUsesExpr="false" LimitLowUsesExpr="false" ShowActions="true">
+<Action ID="12" Operand="Action_002" Qualifier="Reset" IsBoolean="false" PresetUsesExpr="false">
+<Body>
+<STContent>
+<Line Number="0">
+<![CDATA[Cmd := 2;]]>
+</Line>
+</STContent>
+</Body>
+</Action>
+<Action ID="13" Operand="Action_003" Qualifier="TimeLimited" IsBoolean="false" PresetUsesExpr="true">
+<Preset>
+<STContent>
+<Line Number="0">
+<![CDATA[Delay + 100]]>
+</Line>
+</STContent>
+</Preset>
+<Body>
+<STContent>
+<Line Number="0">
+<![CDATA[Cmd := 3;]]>
+</Line>
+</STContent>
+</Body>
+</Action>
+</Step>
+<Step ID="2" X="400" Y="280" Operand="Step_002" HideDesc="false" DescX="460" DescY="260" DescWidth="0" InitialStep="false" PresetUsesExpr="false" LimitHighUsesExpr="false" LimitLowUsesExpr="false" ShowActions="true">
+<Action ID="14" Operand="Action_004" Qualifier="TimeDelayed" IsBoolean="false" PresetUsesExpr="false">
+<Body>
+<STContent>
+<Line Number="0">
+<![CDATA[Cmd := 4;]]>
+</Line>
+</STContent>
+</Body>
+</Action>
+<Action ID="15" Operand="Action_005" Qualifier="Pulse" IsBoolean="false" PresetUsesExpr="false">
+<Body>
+<STContent>
+<Line Number="0">
+<![CDATA[Cmd := 5;]]>
+</Line>
+</STContent>
+</Body>
+</Action>
+</Step>
+<Step ID="3" X="200" Y="480" Operand="Step_003" HideDesc="false" DescX="260" DescY="460" DescWidth="0" InitialStep="false" PresetUsesExpr="false" LimitHighUsesExpr="false" LimitLowUsesExpr="false" ShowActions="true">
+<Action ID="16" Operand="Action_006" Qualifier="PulseRisingEdge" IsBoolean="false" PresetUsesExpr="false">
+<Body>
+<STContent>
+<Line Number="0">
+<![CDATA[Cmd := 6;]]>
+</Line>
+</STContent>
+</Body>
+</Action>
+<Action ID="17" Operand="Action_007" Qualifier="PulseFallingEdge" IsBoolean="false" PresetUsesExpr="false">
+<Body>
+<STContent>
+<Line Number="0">
+<![CDATA[Cmd := 7;]]>
+</Line>
+</STContent>
+</Body>
+</Action>
+</Step>
+<Step ID="4" X="400" Y="480" Operand="Step_004" HideDesc="false" DescX="460" DescY="460" DescWidth="0" InitialStep="false" PresetUsesExpr="false" LimitHighUsesExpr="false" LimitLowUsesExpr="false" ShowActions="true">
+<Action ID="18" Operand="Action_008" Qualifier="NonStored" IsBoolean="false" PresetUsesExpr="false">
+<Body>
+<STContent>
+<Line Number="0">
+<![CDATA[Done := 1;]]>
+</Line>
+</STContent>
+</Body>
+</Action>
+</Step>
+<Transition ID="20" X="300" Y="200" Operand="Tran_000" HideDesc="false" DescX="420" DescY="180" DescWidth="0">
+<Condition>
+<STContent>
+<Line Number="0">
+<![CDATA[Start AND NOT Fault]]>
+</Line>
+</STContent>
+</Condition>
+</Transition>
+<Transition ID="21" X="200" Y="400" Operand="Tran_001" HideDesc="false" DescX="320" DescY="380" DescWidth="0">
+<Condition>
+<STContent>
+<Line Number="0">
+<![CDATA[Step_001.DN]]>
+</Line>
+</STContent>
+</Condition>
+</Transition>
+<Transition ID="22" X="400" Y="400" Operand="Tran_002" HideDesc="false" DescX="520" DescY="380" DescWidth="0">
+<Condition>
+<STContent>
+<Line Number="0">
+<![CDATA[Cmd = 5]]>
+</Line>
+</STContent>
+</Condition>
+</Transition>
+<Transition ID="23" X="300" Y="600" Operand="Tran_003" HideDesc="false" DescX="420" DescY="580" DescWidth="0">
+<Condition>
+<STContent>
+<Line Number="0">
+<![CDATA[Done]]>
+</Line>
+</STContent>
+</Condition>
+</Transition>
+<Branch ID="30" Y="240" BranchType="Simultaneous" BranchFlow="Diverge" Priority="Default">
+<Leg ID="31"/>
+<Leg ID="32"/>
+</Branch>
+<Branch ID="33" Y="440" BranchType="Selection" BranchFlow="Diverge" Priority="Default">
+<Leg ID="34"/>
+<Leg ID="35"/>
+</Branch>
+<Branch ID="36" Y="560" BranchType="Selection" BranchFlow="Converge" Priority="Default">
+<Leg ID="37"/>
+<Leg ID="38"/>
+</Branch>
+<Stop ID="40" X="300" Y="700" Operand="Stop_000" HideDesc="false" DescX="420" DescY="680" DescWidth="0"/>
+<DirectedLink FromID="0" ToID="20" Show="true"/>
+<DirectedLink FromID="20" ToID="30" Show="true"/>
+<DirectedLink FromID="31" ToID="1" Show="true"/>
+<DirectedLink FromID="32" ToID="2" Show="true"/>
+<DirectedLink FromID="1" ToID="33" Show="true"/>
+<DirectedLink FromID="34" ToID="21" Show="true"/>
+<DirectedLink FromID="35" ToID="22" Show="true"/>
+<DirectedLink FromID="21" ToID="3" Show="true"/>
+<DirectedLink FromID="22" ToID="4" Show="true"/>
+<DirectedLink FromID="3" ToID="37" Show="true"/>
+<DirectedLink FromID="4" ToID="38" Show="true"/>
+<DirectedLink FromID="36" ToID="23" Show="true"/>
+<DirectedLink FromID="23" ToID="40" Show="true"/>
+</SFCContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+<Tasks>
+<Task Name="Main" Type="CONTINUOUS" Priority="10" Watchdog="500" DisableUpdateOutputs="false" InhibitTask="false">
+<ScheduledPrograms>
+<ScheduledProgram Name="P"/>
+</ScheduledPrograms>
+</Task>
+</Tasks>
+</Controller>
+</RSLogix5000Content>

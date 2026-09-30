@@ -1,0 +1,3480 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://plc-ir.dev/schema/2.0",
+  "title": "plc-ir 2.0",
+  "description": "Vendor-neutral intermediate representation of a PLC project: IEC 61131-3 core with a vendor extension slot on every node. Generated from the Plc.Ir C# model.",
+  "$ref": "#/$defs/Document",
+  "$defs": {
+    "Action": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "hook": {
+          "type": "string",
+          "enum": [
+            "init",
+            "exit",
+            "enableFalse",
+            "postscan"
+          ]
+        },
+        "synthetic": {
+          "type": "boolean"
+        },
+        "body": {
+          "$ref": "#/$defs/Body"
+        },
+        "calls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "ActionCall": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "actionCall"
+        },
+        "action": {
+          "type": "string",
+          "x-refKind": "action"
+        },
+        "pou": {
+          "type": "string",
+          "x-refKind": "pou"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "en": {
+          "$ref": "#/$defs/Expression"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "Alias": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/Ref"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "ArrayValue": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "array"
+        },
+        "dims": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Value"
+          }
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "Assign": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "assign"
+        },
+        "target": {
+          "$ref": "#/$defs/Expression"
+        },
+        "value": {
+          "$ref": "#/$defs/Expression"
+        },
+        "nonRetentive": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Binary": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "bin"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "add",
+            "sub",
+            "mul",
+            "div",
+            "mod",
+            "pow",
+            "eq",
+            "ne",
+            "lt",
+            "gt",
+            "le",
+            "ge",
+            "and",
+            "or",
+            "xor"
+          ]
+        },
+        "left": {
+          "$ref": "#/$defs/Expression"
+        },
+        "right": {
+          "$ref": "#/$defs/Expression"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op",
+        "operator"
+      ],
+      "additionalProperties": false
+    },
+    "BitAccess": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "bit"
+        },
+        "of": {
+          "$ref": "#/$defs/Expression"
+        },
+        "bit": {
+          "$ref": "#/$defs/Expression"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op"
+      ],
+      "additionalProperties": false
+    },
+    "Body": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "type": "string",
+          "enum": [
+            "st",
+            "ld",
+            "fbd",
+            "cfc",
+            "il",
+            "sfc",
+            "graph",
+            "encrypted",
+            "empty"
+          ]
+        },
+        "statements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "temporaries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Temporary"
+          }
+        },
+        "diagram": {
+          "$ref": "#/$defs/Diagram"
+        },
+        "text": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Comment"
+          }
+        },
+        "synthetic": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "language"
+      ],
+      "additionalProperties": false
+    },
+    "Case": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "case"
+        },
+        "selector": {
+          "$ref": "#/$defs/Expression"
+        },
+        "arms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CaseArm"
+          }
+        },
+        "else": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "CaseArm": {
+      "type": "object",
+      "properties": {
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CaseLabel"
+          }
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "CaseLabel": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/Expression"
+        },
+        "to": {
+          "$ref": "#/$defs/Expression"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CharSegment": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "char"
+        },
+        "index": {
+          "$ref": "#/$defs/Expression"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Comment": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "Configuration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Resource"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Continue": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "continue"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Conv": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "conv"
+        },
+        "to": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "wrap",
+            "saturate",
+            "roundEven",
+            "roundHalfUp",
+            "trunc",
+            "checked"
+          ]
+        },
+        "operand": {
+          "$ref": "#/$defs/Expression"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "Copy": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "copy"
+        },
+        "source": {
+          "$ref": "#/$defs/Expression"
+        },
+        "dest": {
+          "$ref": "#/$defs/Expression"
+        },
+        "count": {
+          "$ref": "#/$defs/Expression"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "typed",
+            "bytes"
+          ]
+        },
+        "atomic": {
+          "type": "boolean"
+        },
+        "en": {
+          "$ref": "#/$defs/Expression"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "DerefSegment": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "deref"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Diagnostic": {
+      "type": "object",
+      "properties": {
+        "severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "severity",
+        "code",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "Diagram": {
+      "description": "Discriminated by 'kind'.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LdDiagram"
+        },
+        {
+          "$ref": "#/$defs/NetDiagram"
+        },
+        {
+          "$ref": "#/$defs/SfcDiagram"
+        }
+      ]
+    },
+    "Dim": {
+      "type": "object",
+      "properties": {
+        "lower": {
+          "type": "integer"
+        },
+        "upper": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Document": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string"
+        },
+        "irVersion": {
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        },
+        "configuration": {
+          "$ref": "#/$defs/Configuration"
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Type"
+          }
+        },
+        "globals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GlobalVariableList"
+          }
+        },
+        "io": {
+          "$ref": "#/$defs/Io"
+        },
+        "pous": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Pou"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Diagnostic"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "format",
+        "irVersion"
+      ],
+      "additionalProperties": false
+    },
+    "Edge": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "edge"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "rising",
+            "falling"
+          ]
+        },
+        "clk": {
+          "$ref": "#/$defs/Expression"
+        },
+        "storage": {
+          "$ref": "#/$defs/Expression"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "EnumValue": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "ErrorExpression": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "error"
+        },
+        "text": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "ErrorStatement": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "error"
+        },
+        "text": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "Exit": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "exit"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Expression": {
+      "description": "Discriminated by 'op'.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Ref"
+        },
+        {
+          "$ref": "#/$defs/Literal"
+        },
+        {
+          "$ref": "#/$defs/Unary"
+        },
+        {
+          "$ref": "#/$defs/Binary"
+        },
+        {
+          "$ref": "#/$defs/Function"
+        },
+        {
+          "$ref": "#/$defs/Conv"
+        },
+        {
+          "$ref": "#/$defs/BitAccess"
+        },
+        {
+          "$ref": "#/$defs/Edge"
+        },
+        {
+          "$ref": "#/$defs/SysFn"
+        },
+        {
+          "$ref": "#/$defs/Keyword"
+        },
+        {
+          "$ref": "#/$defs/Placeholder"
+        },
+        {
+          "$ref": "#/$defs/ErrorExpression"
+        }
+      ]
+    },
+    "External": {
+      "type": "object",
+      "properties": {
+        "library": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "FbCall": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "fbCall"
+        },
+        "instance": {
+          "$ref": "#/$defs/Expression"
+        },
+        "fb": {
+          "type": "string"
+        },
+        "pou": {
+          "type": "string",
+          "x-refKind": "pou"
+        },
+        "method": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "outputs": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "en": {
+          "$ref": "#/$defs/Expression"
+        },
+        "eno": {
+          "$ref": "#/$defs/Expression"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "prescan",
+            "postscan",
+            "enableFalse"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "Fill": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "fill"
+        },
+        "value": {
+          "$ref": "#/$defs/Expression"
+        },
+        "dest": {
+          "$ref": "#/$defs/Expression"
+        },
+        "count": {
+          "$ref": "#/$defs/Expression"
+        },
+        "en": {
+          "$ref": "#/$defs/Expression"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "FnCall": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "fnCall"
+        },
+        "name": {
+          "type": "string"
+        },
+        "pou": {
+          "type": "string",
+          "x-refKind": "pou"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "outputs": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "en": {
+          "$ref": "#/$defs/Expression"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "For": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "for"
+        },
+        "variable": {
+          "$ref": "#/$defs/Expression"
+        },
+        "from": {
+          "$ref": "#/$defs/Expression"
+        },
+        "to": {
+          "$ref": "#/$defs/Expression"
+        },
+        "by": {
+          "$ref": "#/$defs/Expression"
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Function": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "fn"
+        },
+        "name": {
+          "type": "string"
+        },
+        "pou": {
+          "type": "string",
+          "x-refKind": "pou"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalVariableList": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "vars": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Variable"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "If": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "if"
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IfBranch"
+          }
+        },
+        "else": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "IfBranch": {
+      "type": "object",
+      "properties": {
+        "condition": {
+          "$ref": "#/$defs/Expression"
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "IndexSegment": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "index"
+        },
+        "indices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Io": {
+      "type": "object",
+      "properties": {
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IoDevice"
+          }
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IoChannel"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "IoChannel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "device": {
+          "type": "string",
+          "x-refKind": "device"
+        },
+        "name": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "input",
+            "output",
+            "config",
+            "inOut"
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "address": {
+          "type": "string"
+        },
+        "variable": {
+          "type": "string",
+          "x-refKind": "variable"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "id",
+        "device",
+        "name",
+        "direction"
+      ],
+      "additionalProperties": false
+    },
+    "IoDevice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "catalog": {
+          "type": "string"
+        },
+        "vendorName": {
+          "type": "string"
+        },
+        "parent": {
+          "type": "string",
+          "x-refKind": "device"
+        },
+        "inhibited": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Jump": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "jump"
+        },
+        "label": {
+          "type": "string"
+        },
+        "en": {
+          "$ref": "#/$defs/Expression"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "Keyword": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "keyword"
+        },
+        "text": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "enum",
+            "label",
+            "action",
+            "name"
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op",
+        "text",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Label": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "label"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "LdBlock": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "block"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "pins": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "enable": {
+          "type": "string",
+          "enum": [
+            "input",
+            "gate",
+            "none"
+          ]
+        },
+        "eno": {
+          "type": "boolean"
+        },
+        "isPou": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "enable"
+      ],
+      "additionalProperties": false
+    },
+    "LdBranch": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "branch"
+        },
+        "legs": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/LdElement"
+            }
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "LdCoil": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "coil"
+        },
+        "operand": {
+          "$ref": "#/$defs/Expression"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "assign",
+            "negated",
+            "set",
+            "reset",
+            "risingPulse",
+            "fallingPulse"
+          ]
+        },
+        "storage": {
+          "$ref": "#/$defs/Expression"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "LdContact": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "contact"
+        },
+        "operand": {
+          "$ref": "#/$defs/Expression"
+        },
+        "negated": {
+          "type": "boolean"
+        },
+        "edge": {
+          "type": "string",
+          "enum": [
+            "rising",
+            "falling"
+          ]
+        },
+        "storage": {
+          "$ref": "#/$defs/Expression"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "LdDiagram": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "ld"
+        },
+        "rungs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Rung"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "LdElement": {
+      "description": "Discriminated by 'kind'.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LdContact"
+        },
+        {
+          "$ref": "#/$defs/LdCoil"
+        },
+        {
+          "$ref": "#/$defs/LdBlock"
+        },
+        {
+          "$ref": "#/$defs/LdBranch"
+        },
+        {
+          "$ref": "#/$defs/LdJump"
+        },
+        {
+          "$ref": "#/$defs/LdLabel"
+        },
+        {
+          "$ref": "#/$defs/LdMcr"
+        },
+        {
+          "$ref": "#/$defs/LdReturn"
+        }
+      ]
+    },
+    "LdJump": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "jump"
+        },
+        "label": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "LdLabel": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "label"
+        },
+        "label": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "LdMcr": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "mcr"
+        },
+        "begin": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "LdReturn": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "return"
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "LengthSegment": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "length"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Literal": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "lit"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "int",
+            "real",
+            "bool",
+            "string",
+            "wstring",
+            "time",
+            "date",
+            "tod",
+            "dt",
+            "enum"
+          ]
+        },
+        "int": {
+          "type": "integer"
+        },
+        "real": {
+          "type": "number"
+        },
+        "string": {
+          "type": "string"
+        },
+        "bool": {
+          "type": "boolean"
+        },
+        "radix": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Member": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "initial": {
+          "$ref": "#/$defs/Value"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "MemberSegment": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "member"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Method": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "returnType": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "access": {
+          "type": "string",
+          "enum": [
+            "public",
+            "private",
+            "protected",
+            "internal"
+          ]
+        },
+        "vars": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Variable"
+          }
+        },
+        "body": {
+          "$ref": "#/$defs/Body"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "NamedValue": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/Value"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "NetDiagram": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "net"
+        },
+        "sheets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NetSheet"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "NetElement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "input",
+            "output",
+            "connectorIn",
+            "connectorOut",
+            "block",
+            "function",
+            "call",
+            "entry",
+            "exit",
+            "text"
+          ]
+        },
+        "type": {
+          "type": "string"
+        },
+        "isPou": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "operand": {
+          "$ref": "#/$defs/Expression"
+        },
+        "pins": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "text": {
+          "type": "string"
+        },
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "NetSheet": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NetElement"
+          }
+        },
+        "wires": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NetWire"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "NetWire": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "integer"
+        },
+        "fromPin": {
+          "type": "string"
+        },
+        "to": {
+          "type": "integer"
+        },
+        "toPin": {
+          "type": "string"
+        },
+        "feedback": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "PathSegment": {
+      "description": "Discriminated by 'kind'.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/MemberSegment"
+        },
+        {
+          "$ref": "#/$defs/IndexSegment"
+        },
+        {
+          "$ref": "#/$defs/LengthSegment"
+        },
+        {
+          "$ref": "#/$defs/CharSegment"
+        },
+        {
+          "$ref": "#/$defs/DerefSegment"
+        }
+      ]
+    },
+    "Placeholder": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "placeholder"
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op"
+      ],
+      "additionalProperties": false
+    },
+    "Pou": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "program",
+            "functionBlock",
+            "function",
+            "interface"
+          ]
+        },
+        "returnType": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "vars": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Variable"
+          }
+        },
+        "body": {
+          "$ref": "#/$defs/Body"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Action"
+          }
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Method"
+          }
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Property"
+          }
+        },
+        "extends": {
+          "type": "string",
+          "x-refKind": "pou"
+        },
+        "implements": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-refKind": "pou"
+          }
+        },
+        "onFault": {
+          "type": "string",
+          "x-refKind": "action"
+        },
+        "external": {
+          "$ref": "#/$defs/External"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "ProgramInstance": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "pou": {
+          "type": "string",
+          "x-refKind": "pou"
+        },
+        "task": {
+          "type": "string",
+          "x-refKind": "task"
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name",
+        "pou"
+      ],
+      "additionalProperties": false
+    },
+    "Property": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "get": {
+          "$ref": "#/$defs/Body"
+        },
+        "set": {
+          "$ref": "#/$defs/Body"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "ref"
+        },
+        "root": {
+          "$ref": "#/$defs/RefRoot"
+        },
+        "path": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PathSegment"
+          }
+        },
+        "alias": {
+          "type": "string",
+          "x-refKind": "variable"
+        },
+        "io": {
+          "type": "boolean"
+        },
+        "opaque": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op"
+      ],
+      "additionalProperties": false
+    },
+    "RefRoot": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "var",
+            "temp",
+            "system",
+            "this",
+            "unresolved"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "x-refKind": "variable"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Repeat": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "repeat"
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "until": {
+          "$ref": "#/$defs/Expression"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Resource": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "processorType": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Task"
+          }
+        },
+        "programs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProgramInstance"
+          }
+        },
+        "faultProgram": {
+          "type": "string",
+          "x-refKind": "programInstance"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Return": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "return"
+        },
+        "en": {
+          "$ref": "#/$defs/Expression"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Rung": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LdElement"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ScalarValue": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "scalar"
+        },
+        "int": {
+          "type": "integer"
+        },
+        "real": {
+          "type": "number"
+        },
+        "raw": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "SfcAction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "variable": {
+          "type": "string",
+          "x-refKind": "variable"
+        },
+        "qualifier": {
+          "type": "string",
+          "enum": [
+            "N",
+            "S",
+            "R",
+            "L",
+            "D",
+            "P",
+            "P1",
+            "P0",
+            "SL",
+            "SD",
+            "DS"
+          ]
+        },
+        "boolean": {
+          "type": "boolean"
+        },
+        "preset": {
+          "$ref": "#/$defs/Expression"
+        },
+        "body": {
+          "$ref": "#/$defs/Body"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name",
+        "qualifier"
+      ],
+      "additionalProperties": false
+    },
+    "SfcBranch": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "selection",
+            "simultaneous"
+          ]
+        },
+        "flow": {
+          "type": "string",
+          "enum": [
+            "diverge",
+            "converge"
+          ]
+        },
+        "priority": {
+          "type": "string"
+        },
+        "legs": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "type",
+        "flow"
+      ],
+      "additionalProperties": false
+    },
+    "SfcDiagram": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "sfc"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SfcStep"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SfcTransition"
+          }
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SfcBranch"
+          }
+        },
+        "stops": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SfcStop"
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SfcLink"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "SfcLink": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "integer"
+        },
+        "to": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SfcStep": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "variable": {
+          "type": "string",
+          "x-refKind": "variable"
+        },
+        "initial": {
+          "type": "boolean"
+        },
+        "preset": {
+          "$ref": "#/$defs/Expression"
+        },
+        "limitHigh": {
+          "$ref": "#/$defs/Expression"
+        },
+        "limitLow": {
+          "$ref": "#/$defs/Expression"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SfcAction"
+          }
+        },
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "SfcStop": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "variable": {
+          "type": "string",
+          "x-refKind": "variable"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "SfcTransition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "variable": {
+          "type": "string",
+          "x-refKind": "variable"
+        },
+        "condition": {
+          "$ref": "#/$defs/Expression"
+        },
+        "force": {
+          "type": "boolean"
+        },
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Source": {
+      "type": "object",
+      "properties": {
+        "vendor": {
+          "type": "string"
+        },
+        "dialect": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        },
+        "exportDate": {
+          "type": "string"
+        },
+        "softwareRevision": {
+          "type": "string"
+        },
+        "generator": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "vendor"
+      ],
+      "additionalProperties": false
+    },
+    "Src": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "type": "integer"
+        },
+        "col": {
+          "type": "integer"
+        },
+        "rung": {
+          "type": "integer"
+        },
+        "element": {
+          "type": "integer"
+        },
+        "sheet": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Statement": {
+      "description": "Discriminated by 'kind'.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Assign"
+        },
+        {
+          "$ref": "#/$defs/FbCall"
+        },
+        {
+          "$ref": "#/$defs/FnCall"
+        },
+        {
+          "$ref": "#/$defs/ActionCall"
+        },
+        {
+          "$ref": "#/$defs/SysCall"
+        },
+        {
+          "$ref": "#/$defs/Copy"
+        },
+        {
+          "$ref": "#/$defs/Fill"
+        },
+        {
+          "$ref": "#/$defs/If"
+        },
+        {
+          "$ref": "#/$defs/Case"
+        },
+        {
+          "$ref": "#/$defs/For"
+        },
+        {
+          "$ref": "#/$defs/While"
+        },
+        {
+          "$ref": "#/$defs/Repeat"
+        },
+        {
+          "$ref": "#/$defs/Exit"
+        },
+        {
+          "$ref": "#/$defs/Continue"
+        },
+        {
+          "$ref": "#/$defs/Return"
+        },
+        {
+          "$ref": "#/$defs/Jump"
+        },
+        {
+          "$ref": "#/$defs/Label"
+        },
+        {
+          "$ref": "#/$defs/ErrorStatement"
+        }
+      ]
+    },
+    "StdFbBinding": {
+      "type": "object",
+      "properties": {
+        "fbs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "additionalProperties": false
+    },
+    "StringValue": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "string"
+        },
+        "length": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "StructValue": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "struct"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NamedValue"
+          }
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "SysCall": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "sysCall"
+        },
+        "catalog": {
+          "type": "string"
+        },
+        "service": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "en": {
+          "$ref": "#/$defs/Expression"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "prescan",
+            "postscan"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind",
+        "catalog",
+        "service",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "SysFn": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "sysFn"
+        },
+        "catalog": {
+          "type": "string"
+        },
+        "service": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op",
+        "catalog",
+        "service"
+      ],
+      "additionalProperties": false
+    },
+    "Task": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "continuous",
+            "periodic",
+            "event",
+            "startup"
+          ]
+        },
+        "intervalMs": {
+          "type": "number"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "watchdogMs": {
+          "type": "number"
+        },
+        "event": {
+          "$ref": "#/$defs/TaskEvent"
+        },
+        "programs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "x-refKind": "programInstance"
+          }
+        },
+        "disabled": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "TaskEvent": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Temporary": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Type": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "struct",
+            "union",
+            "enum",
+            "alias",
+            "subrange",
+            "array",
+            "string"
+          ]
+        },
+        "class": {
+          "type": "string",
+          "enum": [
+            "user",
+            "vendor",
+            "io",
+            "library",
+            "unresolved"
+          ]
+        },
+        "opaque": {
+          "type": "boolean"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Member"
+          }
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EnumValue"
+          }
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "dims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Dim"
+          }
+        },
+        "lower": {
+          "type": "integer"
+        },
+        "upper": {
+          "type": "integer"
+        },
+        "length": {
+          "type": "integer"
+        },
+        "wide": {
+          "type": "boolean"
+        },
+        "stdFb": {
+          "$ref": "#/$defs/StdFbBinding"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "class"
+      ],
+      "additionalProperties": false
+    },
+    "TypeRef": {
+      "description": "A type reference: a plain string names an atomic, structure, POU or standard function block type; the object form describes arrays, anonymous strings, pointers, references and 'any'.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "named",
+                "array",
+                "string",
+                "pointer",
+                "reference",
+                "any"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "dims": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Dim"
+              }
+            },
+            "element": {
+              "$ref": "#/$defs/TypeRef"
+            },
+            "length": {
+              "type": "integer"
+            },
+            "wide": {
+              "type": "boolean"
+            },
+            "to": {
+              "$ref": "#/$defs/TypeRef"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Unary": {
+      "type": "object",
+      "properties": {
+        "op": {
+          "const": "un"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "neg",
+            "not"
+          ]
+        },
+        "operand": {
+          "$ref": "#/$defs/Expression"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "op",
+        "operator"
+      ],
+      "additionalProperties": false
+    },
+    "Value": {
+      "description": "Discriminated by 'kind'.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ScalarValue"
+        },
+        {
+          "$ref": "#/$defs/StringValue"
+        },
+        {
+          "$ref": "#/$defs/StructValue"
+        },
+        {
+          "$ref": "#/$defs/ArrayValue"
+        }
+      ]
+    },
+    "Variable": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "section": {
+          "type": "string",
+          "enum": [
+            "input",
+            "output",
+            "inOut",
+            "local",
+            "temp",
+            "static",
+            "global",
+            "external"
+          ]
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "retain": {
+          "type": "string",
+          "enum": [
+            "none",
+            "retain",
+            "persistent"
+          ]
+        },
+        "constant": {
+          "type": "boolean"
+        },
+        "initial": {
+          "$ref": "#/$defs/Value"
+        },
+        "address": {
+          "type": "string"
+        },
+        "io": {
+          "type": "string",
+          "x-refKind": "channel"
+        },
+        "alias": {
+          "$ref": "#/$defs/Alias"
+        },
+        "comments": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "section",
+        "retain"
+      ],
+      "additionalProperties": false
+    },
+    "While": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "while"
+        },
+        "condition": {
+          "$ref": "#/$defs/Expression"
+        },
+        "body": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "src": {
+          "$ref": "#/$defs/Src"
+        },
+        "vendor": {
+          "type": "object",
+          "description": "Vendor extension slot: one entry per vendor id, any content.",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

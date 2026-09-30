@@ -1,0 +1,2041 @@
+{
+  "format": "plc-ir",
+  "irVersion": "2.0",
+  "source": {
+    "vendor": "logix",
+    "dialect": "l5x",
+    "file": "types.L5X",
+    "exportDate": "Mon Sep 28 10:00:00 2026",
+    "softwareRevision": "33.00",
+    "generator": "conformance",
+    "generatedAt": "1970-01-01T00:00:00+00:00"
+  },
+  "configuration": {
+    "name": "Types",
+    "resources": [
+      {
+        "name": "Types",
+        "processorType": "1756-L85E",
+        "tasks": [
+          {
+            "name": "Main",
+            "kind": "continuous",
+            "priority": 10,
+            "watchdogMs": 500,
+            "programs": [
+              "P"
+            ],
+            "disabled": false,
+            "vendor": {
+              "logix": {
+                "type": "CONTINUOUS",
+                "inhibitTask": false,
+                "disableUpdateOutputs": false
+              }
+            }
+          }
+        ],
+        "programs": [
+          {
+            "name": "P",
+            "pou": "P",
+            "task": "Main",
+            "disabled": false
+          }
+        ]
+      }
+    ]
+  },
+  "types": [
+    {
+      "name": "CONTROL",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": false,
+      "members": [
+        {
+          "name": "LEN",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "POS",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCONTROL0",
+              "bitNumber": 31,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EU",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCONTROL0",
+              "bitNumber": 30,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCONTROL0",
+              "bitNumber": 29,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EM",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCONTROL0",
+              "bitNumber": 28,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ER",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCONTROL0",
+              "bitNumber": 27,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "UL",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCONTROL0",
+              "bitNumber": 26,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "IN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCONTROL0",
+              "bitNumber": 25,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "FD",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCONTROL0",
+              "bitNumber": 24,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined",
+          "hiddenMembers": [
+            {
+              "name": "ZZZZZZZZZZCONTROL0",
+              "type": "DINT",
+              "position": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "COUNTER",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": false,
+      "members": [
+        {
+          "name": "PRE",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ACC",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "CU",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCOUNTER0",
+              "bitNumber": 31,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "CD",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCOUNTER0",
+              "bitNumber": 30,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCOUNTER0",
+              "bitNumber": 29,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "OV",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCOUNTER0",
+              "bitNumber": 28,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "UN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZCOUNTER0",
+              "bitNumber": 27,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "stdFb": {
+        "fbs": [
+          "CTU",
+          "CTD"
+        ],
+        "profile": "logix"
+      },
+      "vendor": {
+        "logix": {
+          "class": "predefined",
+          "hiddenMembers": [
+            {
+              "name": "ZZZZZZZZZZCOUNTER0",
+              "type": "DINT",
+              "position": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Inner",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Bit0",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZInner0",
+              "bitNumber": 0,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Bit1",
+          "type": "BOOL",
+          "description": "second bit",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZInner0",
+              "bitNumber": 1,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Value",
+          "type": "REAL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Float",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Flags",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 31
+              }
+            ],
+            "element": "BOOL"
+          },
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": true
+            }
+          }
+        },
+        {
+          "name": "Words",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 3
+              }
+            ],
+            "element": "DINT"
+          },
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "description": "Bit overlays, arrays, packed BOOLs",
+      "vendor": {
+        "logix": {
+          "class": "user",
+          "hiddenMembers": [
+            {
+              "name": "ZZZZZZZZZZInner0",
+              "type": "SINT",
+              "position": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "MESSAGE",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": true,
+      "members": [
+        {
+          "name": "FLAGS",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ERR",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EXERR",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "REQ_LEN",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN_LEN",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EW",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ER",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ST",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "TO",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EN_CC",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ERR_SRC",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DestinationLink",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DestinationNode",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "SourceLink",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Class",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Attribute",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Instance",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "LocalIndex",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Channel",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Rack",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Group",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Slot",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Path",
+          "type": "STRING",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "RemoteIndex",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "RemoteElement",
+          "type": "STRING",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "UnconnectedTimeout",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ConnectionRate",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "TimeoutMultiplier",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined"
+        }
+      }
+    },
+    {
+      "name": "Outer",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "In",
+          "type": "Inner",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Items",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 1
+              }
+            ],
+            "element": "Inner"
+          },
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Timer",
+          "type": "TIMER",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Counter",
+          "type": "COUNTER",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Control",
+          "type": "CONTROL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Msg",
+          "type": "MESSAGE",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Name",
+          "type": "STRING",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Short",
+          "type": "STRING20",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Count",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "STRING",
+      "kind": "string",
+      "class": "vendor",
+      "opaque": false,
+      "members": [
+        {
+          "name": "LEN",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DATA",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 81
+              }
+            ],
+            "element": "SINT"
+          },
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Ascii",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "length": 82,
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined",
+          "family": "StringFamily"
+        }
+      }
+    },
+    {
+      "name": "STRING20",
+      "kind": "string",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "LEN",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DATA",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 19
+              }
+            ],
+            "element": "SINT"
+          },
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Ascii",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "length": 20,
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user",
+          "family": "StringFamily"
+        }
+      }
+    },
+    {
+      "name": "TIMER",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": false,
+      "members": [
+        {
+          "name": "PRE",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ACC",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 31,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "TT",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 30,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "bitHost": "ZZZZZZZZZZTIMER0",
+              "bitNumber": 29,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "stdFb": {
+        "fbs": [
+          "TON",
+          "TOF",
+          "TONR"
+        ],
+        "profile": "logix"
+      },
+      "vendor": {
+        "logix": {
+          "class": "predefined",
+          "hiddenMembers": [
+            {
+              "name": "ZZZZZZZZZZTIMER0",
+              "type": "DINT",
+              "position": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Types",
+      "vars": [
+        {
+          "id": "global/Types/O",
+          "name": "O",
+          "section": "global",
+          "type": "Outer",
+          "retain": "retain",
+          "constant": false,
+          "comments": {
+            ".COUNT": "number of items",
+            ".IN.BIT1": "the second bit"
+          },
+          "description": "main structure",
+          "vendor": {
+            "logix": {
+              "path": "O",
+              "scope": "controller",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/Matrix",
+          "name": "Matrix",
+          "section": "global",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 1
+              },
+              {
+                "lower": 0,
+                "upper": 2
+              }
+            ],
+            "element": "DINT"
+          },
+          "retain": "retain",
+          "constant": false,
+          "initial": {
+            "kind": "array",
+            "dims": [
+              2,
+              3
+            ],
+            "elements": [
+              {
+                "kind": "scalar",
+                "int": 1,
+                "type": "DINT"
+              },
+              {
+                "kind": "scalar",
+                "int": 2,
+                "type": "DINT"
+              },
+              {
+                "kind": "scalar",
+                "int": 3,
+                "type": "DINT"
+              },
+              {
+                "kind": "scalar",
+                "int": 4,
+                "type": "DINT"
+              },
+              {
+                "kind": "scalar",
+                "int": 5,
+                "type": "DINT"
+              },
+              {
+                "kind": "scalar",
+                "int": 6,
+                "type": "DINT"
+              }
+            ],
+            "type": "DINT"
+          },
+          "vendor": {
+            "logix": {
+              "path": "Matrix",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/Word",
+          "name": "Word",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": true,
+          "initial": {
+            "kind": "scalar",
+            "int": 42,
+            "type": "DINT"
+          },
+          "vendor": {
+            "logix": {
+              "path": "Word",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/Label",
+          "name": "Label",
+          "section": "global",
+          "type": "STRING20",
+          "retain": "retain",
+          "constant": false,
+          "initial": {
+            "kind": "string",
+            "length": 2,
+            "text": "Hi",
+            "type": "STRING20"
+          },
+          "vendor": {
+            "logix": {
+              "path": "Label",
+              "scope": "controller",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/AlMember",
+          "name": "AlMember",
+          "section": "global",
+          "type": "REAL",
+          "retain": "retain",
+          "constant": false,
+          "alias": {
+            "text": "O.In.Value",
+            "target": {
+              "root": {
+                "kind": "var",
+                "id": "global/Types/O"
+              },
+              "path": [
+                {
+                  "kind": "member",
+                  "name": "In"
+                },
+                {
+                  "kind": "member",
+                  "name": "Value"
+                }
+              ],
+              "io": false,
+              "opaque": false,
+              "type": "REAL"
+            }
+          },
+          "vendor": {
+            "logix": {
+              "path": "AlMember",
+              "scope": "controller",
+              "aliasFor": "O.In.Value",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/AlBit",
+          "name": "AlBit",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "alias": {
+            "text": "O.In.Bit1",
+            "target": {
+              "root": {
+                "kind": "var",
+                "id": "global/Types/O"
+              },
+              "path": [
+                {
+                  "kind": "member",
+                  "name": "In"
+                },
+                {
+                  "kind": "member",
+                  "name": "Bit1"
+                }
+              ],
+              "io": false,
+              "opaque": false,
+              "type": "BOOL"
+            }
+          },
+          "vendor": {
+            "logix": {
+              "path": "AlBit",
+              "scope": "controller",
+              "aliasFor": "O.In.Bit1",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/AlWordBit",
+          "name": "AlWordBit",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "alias": {
+            "text": "Word.5",
+            "target": {
+              "root": {
+                "kind": "var",
+                "id": "global/Types/Word"
+              },
+              "path": [],
+              "io": false,
+              "opaque": false,
+              "type": "DINT"
+            }
+          },
+          "vendor": {
+            "logix": {
+              "path": "AlWordBit",
+              "scope": "controller",
+              "aliasFor": "Word.5",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/AlElem",
+          "name": "AlElem",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "alias": {
+            "text": "Matrix[1,2]",
+            "target": {
+              "root": {
+                "kind": "var",
+                "id": "global/Types/Matrix"
+              },
+              "path": [
+                {
+                  "kind": "index",
+                  "indices": [
+                    {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 1,
+                      "type": "DINT"
+                    },
+                    {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 2,
+                      "type": "DINT"
+                    }
+                  ]
+                }
+              ],
+              "io": false,
+              "opaque": false,
+              "type": "DINT"
+            }
+          },
+          "vendor": {
+            "logix": {
+              "path": "AlElem",
+              "scope": "controller",
+              "aliasFor": "Matrix[1,2]",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/AlFlag",
+          "name": "AlFlag",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "alias": {
+            "text": "O.In.Flags[3]",
+            "target": {
+              "root": {
+                "kind": "var",
+                "id": "global/Types/O"
+              },
+              "path": [
+                {
+                  "kind": "member",
+                  "name": "In"
+                },
+                {
+                  "kind": "member",
+                  "name": "Flags"
+                },
+                {
+                  "kind": "index",
+                  "indices": [
+                    {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 3,
+                      "type": "DINT"
+                    }
+                  ]
+                }
+              ],
+              "io": false,
+              "opaque": false,
+              "type": "BOOL"
+            }
+          },
+          "vendor": {
+            "logix": {
+              "path": "AlFlag",
+              "scope": "controller",
+              "aliasFor": "O.In.Flags[3]",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Types/AlItem",
+          "name": "AlItem",
+          "section": "global",
+          "type": "Inner",
+          "retain": "retain",
+          "constant": false,
+          "alias": {
+            "text": "O.Items[1]",
+            "target": {
+              "root": {
+                "kind": "var",
+                "id": "global/Types/O"
+              },
+              "path": [
+                {
+                  "kind": "member",
+                  "name": "Items"
+                },
+                {
+                  "kind": "index",
+                  "indices": [
+                    {
+                      "op": "lit",
+                      "kind": "int",
+                      "int": 1,
+                      "type": "DINT"
+                    }
+                  ]
+                }
+              ],
+              "io": false,
+              "opaque": false,
+              "type": "Inner"
+            }
+          },
+          "vendor": {
+            "logix": {
+              "path": "AlItem",
+              "scope": "controller",
+              "aliasFor": "O.Items[1]",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "description": "Controller-scoped tags"
+    }
+  ],
+  "io": {
+    "devices": [],
+    "channels": []
+  },
+  "pous": [
+    {
+      "name": "P",
+      "kind": "program",
+      "vars": [
+        {
+          "id": "pou/P/Local",
+          "name": "Local",
+          "section": "local",
+          "type": "Outer",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.Local",
+              "scope": "program",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Types/O"
+                  },
+                  "path": [
+                    {
+                      "kind": "member",
+                      "name": "In"
+                    },
+                    {
+                      "kind": "member",
+                      "name": "Value"
+                    }
+                  ],
+                  "alias": "global/Types/AlMember",
+                  "io": false,
+                  "opaque": false,
+                  "type": "REAL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "add",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Types/O"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "In"
+                      },
+                      {
+                        "kind": "member",
+                        "name": "Value"
+                      }
+                    ],
+                    "alias": "global/Types/AlMember",
+                    "io": false,
+                    "opaque": false,
+                    "type": "REAL"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "real",
+                    "real": 1,
+                    "type": "REAL"
+                  },
+                  "type": "REAL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 0,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "bin",
+                      "operator": "and",
+                      "left": {
+                        "op": "bin",
+                        "operator": "and",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Types/O"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "In"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Bit1"
+                            }
+                          ],
+                          "alias": "global/Types/AlBit",
+                          "io": false,
+                          "opaque": false,
+                          "type": "BOOL"
+                        },
+                        "right": {
+                          "op": "bit",
+                          "of": {
+                            "op": "ref",
+                            "root": {
+                              "kind": "var",
+                              "id": "global/Types/Word"
+                            },
+                            "path": [],
+                            "alias": "global/Types/AlWordBit",
+                            "io": false,
+                            "opaque": false,
+                            "type": "DINT"
+                          },
+                          "bit": {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 5,
+                            "type": "DINT"
+                          },
+                          "type": "BOOL"
+                        },
+                        "type": "BOOL"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Types/O"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "In"
+                          },
+                          {
+                            "kind": "member",
+                            "name": "Flags"
+                          },
+                          {
+                            "kind": "index",
+                            "indices": [
+                              {
+                                "op": "lit",
+                                "kind": "int",
+                                "int": 3,
+                                "type": "DINT"
+                              }
+                            ]
+                          }
+                        ],
+                        "alias": "global/Types/AlFlag",
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Types/Matrix"
+                          },
+                          "path": [
+                            {
+                              "kind": "index",
+                              "indices": [
+                                {
+                                  "op": "lit",
+                                  "kind": "int",
+                                  "int": 1,
+                                  "type": "DINT"
+                                },
+                                {
+                                  "op": "lit",
+                                  "kind": "int",
+                                  "int": 2,
+                                  "type": "DINT"
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "global/Types/AlElem",
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Types/O"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Count"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false,
+                        "src": {
+                          "line": 1,
+                          "col": 40
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "line": 1,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Types/O"
+                  },
+                  "path": [
+                    {
+                      "kind": "member",
+                      "name": "Items"
+                    },
+                    {
+                      "kind": "index",
+                      "indices": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "member",
+                      "name": "Words"
+                    },
+                    {
+                      "kind": "index",
+                      "indices": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 2,
+                          "type": "DINT"
+                        }
+                      ]
+                    }
+                  ],
+                  "alias": "global/Types/AlItem",
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "add",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Types/Matrix"
+                    },
+                    "path": [
+                      {
+                        "kind": "index",
+                        "indices": [
+                          {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 0,
+                            "type": "DINT"
+                          },
+                          {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 1,
+                            "type": "DINT"
+                          }
+                        ]
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/P/Local"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Items"
+                      },
+                      {
+                        "kind": "index",
+                        "indices": [
+                          {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 0,
+                            "type": "DINT"
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "member",
+                        "name": "Words"
+                      },
+                      {
+                        "kind": "index",
+                        "indices": [
+                          {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 3,
+                            "type": "DINT"
+                          }
+                        ]
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 2,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Types/O"
+                  },
+                  "path": [
+                    {
+                      "kind": "member",
+                      "name": "Name"
+                    }
+                  ],
+                  "io": false,
+                  "opaque": false,
+                  "type": "STRING"
+                },
+                "value": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Types/Label"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "STRING20"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 3,
+                  "col": 1
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Types/O"
+                  },
+                  "path": [
+                    {
+                      "kind": "member",
+                      "name": "Count"
+                    }
+                  ],
+                  "io": false,
+                  "opaque": false,
+                  "type": "DINT"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "add",
+                  "left": {
+                    "op": "bin",
+                    "operator": "add",
+                    "left": {
+                      "op": "bin",
+                      "operator": "add",
+                      "left": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Types/O"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "Short"
+                          },
+                          {
+                            "kind": "length"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Types/O"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "Timer"
+                          },
+                          {
+                            "kind": "member",
+                            "name": "PRE"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "DINT"
+                      },
+                      "type": "DINT"
+                    },
+                    "right": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Types/O"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Counter"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "ACC"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Types/O"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Control"
+                      },
+                      {
+                        "kind": "member",
+                        "name": "POS"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "type": "DINT"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "line": 4,
+                  "col": 1
+                }
+              }
+            ],
+            "text": [
+              "AlMember := AlMember \u002B 1.0;",
+              "IF AlBit AND AlWordBit AND AlFlag THEN AlElem := O.Count; END_IF;",
+              "AlItem.Words[2] := Matrix[0,1] \u002B Local.Items[0].Words[3];",
+              "O.Name := Label;",
+              "O.Count := O.Short.LEN \u002B O.Timer.PRE \u002B O.Counter.ACC \u002B O.Control.POS;"
+            ],
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "ST"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": false,
+          "folder": false,
+          "task": "Main"
+        }
+      }
+    }
+  ],
+  "diagnostics": [],
+  "description": "Conformance: data types",
+  "vendor": {
+    "logix": {
+      "targetName": "Types",
+      "targetType": "Controller",
+      "majorRev": 33,
+      "minorRev": 12
+    }
+  }
+}

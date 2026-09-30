@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Plc.Ir.Logix</RootNamespace>
+    <AssemblyName>Plc.Ir.Logix</AssemblyName>
+    <Description>Rockwell Logix vendor extension for plc-ir 2.0: typed views of the vendor.logix slots, the MESSAGE / socket binding model, the Logix service catalog and pin profile helpers.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Plc.Ir\Plc.Ir.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="catalog\logix-services.json" LogicalName="Plc.Ir.Logix.catalog.logix-services.json" />
+  </ItemGroup>
+</Project>

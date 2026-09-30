@@ -1,0 +1,4542 @@
+{
+  "format": "plc-ir",
+  "irVersion": "2.0",
+  "source": {
+    "vendor": "logix",
+    "dialect": "l5x",
+    "file": "messages.L5X",
+    "exportDate": "Mon Sep 28 10:00:00 2026",
+    "softwareRevision": "33.00",
+    "generator": "conformance",
+    "generatedAt": "1970-01-01T00:00:00+00:00"
+  },
+  "configuration": {
+    "name": "Messages",
+    "resources": [
+      {
+        "name": "Messages",
+        "processorType": "1756-L85E",
+        "tasks": [
+          {
+            "name": "Main",
+            "kind": "continuous",
+            "priority": 10,
+            "watchdogMs": 500,
+            "programs": [
+              "P"
+            ],
+            "disabled": false,
+            "vendor": {
+              "logix": {
+                "type": "CONTINUOUS",
+                "inhibitTask": false,
+                "disableUpdateOutputs": false
+              }
+            }
+          }
+        ],
+        "programs": [
+          {
+            "name": "P",
+            "pou": "P",
+            "task": "Main",
+            "disabled": false
+          }
+        ]
+      }
+    ]
+  },
+  "types": [
+    {
+      "name": "MESSAGE",
+      "kind": "struct",
+      "class": "vendor",
+      "opaque": true,
+      "members": [
+        {
+          "name": "FLAGS",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ERR",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EXERR",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "REQ_LEN",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN_LEN",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EW",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ER",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ST",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EN",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "TO",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "EN_CC",
+          "type": "BOOL",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ERR_SRC",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DestinationLink",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DestinationNode",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "SourceLink",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Class",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Attribute",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Instance",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "LocalIndex",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Channel",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Rack",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Group",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Slot",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Path",
+          "type": "STRING",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "RemoteIndex",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "RemoteElement",
+          "type": "STRING",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "UnconnectedTimeout",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ConnectionRate",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "TimeoutMultiplier",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined"
+        }
+      }
+    },
+    {
+      "name": "SKT_Address",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Family",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Port",
+          "type": "INT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "IP_4th_Octect",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "IP_3rd_Octect",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "IP_2nd_Octect",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "IP_1st_Octect",
+          "type": "SINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "SKT_Create_Source",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Timeout",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Type",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Addr",
+          "type": "SKT_Address",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "SKT_Data",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Create_Source",
+          "type": "SKT_Create_Source",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Instance",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Open_Connection",
+          "type": "SKT_Open_Connection",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Write_Source",
+          "type": "SKT_Write_Source",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Read_Source",
+          "type": "SKT_Read_Source",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Read_Response",
+          "type": "SKT_Read_Response",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "SKT_Open_Connection",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Timeout",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Dest_Addr",
+          "type": "STRING",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "SKT_Read_Response",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "FromAddr",
+          "type": "SKT_Address",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Buffer",
+          "type": "STRING",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "SKT_Read_Source",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Timeout",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "BufLen",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "SKT_Write_Source",
+      "kind": "struct",
+      "class": "user",
+      "opaque": false,
+      "members": [
+        {
+          "name": "Timeout",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "ToAddr",
+          "type": "SKT_Address",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "Buffer",
+          "type": "STRING",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "NullType",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "user"
+        }
+      }
+    },
+    {
+      "name": "STRING",
+      "kind": "string",
+      "class": "vendor",
+      "opaque": false,
+      "members": [
+        {
+          "name": "LEN",
+          "type": "DINT",
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Decimal",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "DATA",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 81
+              }
+            ],
+            "element": "SINT"
+          },
+          "vendor": {
+            "logix": {
+              "hidden": false,
+              "radix": "Ascii",
+              "packed": false
+            }
+          }
+        }
+      ],
+      "length": 82,
+      "wide": false,
+      "vendor": {
+        "logix": {
+          "class": "predefined",
+          "family": "StringFamily"
+        }
+      }
+    }
+  ],
+  "globals": [
+    {
+      "name": "Messages",
+      "vars": [
+        {
+          "id": "global/Messages/MsgData",
+          "name": "MsgData",
+          "section": "global",
+          "type": "SKT_Data",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "MsgData",
+              "scope": "controller",
+              "radix": "NullType",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/LocalArr",
+          "name": "LocalArr",
+          "section": "global",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 9
+              }
+            ],
+            "element": "DINT"
+          },
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "LocalArr",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/Reply",
+          "name": "Reply",
+          "section": "global",
+          "type": {
+            "kind": "array",
+            "dims": [
+              {
+                "lower": 0,
+                "upper": 9
+              }
+            ],
+            "element": "DINT"
+          },
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Reply",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/Trigger",
+          "name": "Trigger",
+          "section": "global",
+          "type": "BOOL",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Trigger",
+              "scope": "controller",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/Read_Remote",
+          "name": "Read_Remote",
+          "section": "global",
+          "type": "MESSAGE",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Read_Remote",
+              "scope": "controller",
+              "message": {
+                "messageType": "CIP Data Table Read",
+                "requestedLength": 10,
+                "connectionPath": "1, 2, 2, 192.168.1.20, 1, 0",
+                "connectionPathSegments": [
+                  "1",
+                  "2",
+                  "2",
+                  "192.168.1.20",
+                  "1",
+                  "0"
+                ],
+                "commTypeCode": 0,
+                "localElement": "LocalArr[0]",
+                "localElementVariable": "global/Messages/LocalArr",
+                "remoteElement": "RemoteArr[0]",
+                "cacheConnections": true,
+                "largePacketUsage": false,
+                "attributes": {
+                  "MessageType": "CIP Data Table Read",
+                  "RequestedLength": "10",
+                  "ConnectionPath": "1, 2, 2, 192.168.1.20, 1, 0",
+                  "CommTypeCode": "0",
+                  "LocalIndex": "0",
+                  "LocalElement": "LocalArr[0]",
+                  "RemoteElement": "RemoteArr[0]",
+                  "RemoteIndex": "0",
+                  "CacheConnections": "true",
+                  "LargePacketUsage": "false"
+                }
+              },
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/Get_Identity",
+          "name": "Get_Identity",
+          "section": "global",
+          "type": "MESSAGE",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Get_Identity",
+              "scope": "controller",
+              "message": {
+                "messageType": "CIP Generic",
+                "requestedLength": 0,
+                "connectedFlag": 2,
+                "connectionPath": "Enet",
+                "connectionPathSegments": [
+                  "Enet"
+                ],
+                "commTypeCode": 0,
+                "serviceCode": 14,
+                "objectType": 1,
+                "targetObject": 1,
+                "attributeNumber": 7,
+                "destinationTag": "Reply",
+                "destinationVariable": "global/Messages/Reply",
+                "largePacketUsage": false,
+                "attributes": {
+                  "MessageType": "CIP Generic",
+                  "RequestedLength": "0",
+                  "ConnectedFlag": "2",
+                  "ConnectionPath": "Enet",
+                  "CommTypeCode": "0",
+                  "ServiceCode": "16#000e",
+                  "ObjectType": "16#0001",
+                  "TargetObject": "1",
+                  "AttributeNumber": "16#0007",
+                  "LocalIndex": "0",
+                  "DestinationTag": "Reply",
+                  "LargePacketUsage": "false"
+                }
+              },
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/SKT_Create",
+          "name": "SKT_Create",
+          "section": "global",
+          "type": "MESSAGE",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "SKT_Create",
+              "scope": "controller",
+              "message": {
+                "messageType": "CIP Generic",
+                "requestedLength": 14,
+                "connectedFlag": 2,
+                "connectionPath": "Enet",
+                "connectionPathSegments": [
+                  "Enet"
+                ],
+                "commTypeCode": 0,
+                "serviceCode": 75,
+                "objectType": 834,
+                "targetObject": 0,
+                "attributeNumber": 0,
+                "localElement": "MsgData.Create_Source",
+                "localElementVariable": "global/Messages/MsgData",
+                "socketService": "createSocket",
+                "socket": {
+                  "session": "global/Messages/MsgData",
+                  "request": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/MsgData"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Create_Source"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "SKT_Create_Source"
+                  },
+                  "instance": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Create"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Instance"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "fields": {
+                    "timeout": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Create_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Timeout"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "type": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Create_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Type"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "localFamily": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Create_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Addr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Family"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "INT"
+                    },
+                    "localPort": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Create_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Addr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Port"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "INT"
+                    },
+                    "localAddressOctet1": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Create_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Addr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "IP_1st_Octect"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "SINT"
+                    },
+                    "localAddressOctet2": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Create_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Addr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "IP_2nd_Octect"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "SINT"
+                    },
+                    "localAddressOctet3": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Create_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Addr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "IP_3rd_Octect"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "SINT"
+                    },
+                    "localAddressOctet4": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Create_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Addr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "IP_4th_Octect"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "SINT"
+                    }
+                  }
+                },
+                "attributes": {
+                  "MessageType": "CIP Generic",
+                  "RequestedLength": "14",
+                  "ConnectedFlag": "2",
+                  "ConnectionPath": "Enet",
+                  "CommTypeCode": "0",
+                  "ServiceCode": "16#004b",
+                  "ObjectType": "16#0342",
+                  "TargetObject": "0",
+                  "AttributeNumber": "16#0000",
+                  "LocalIndex": "0",
+                  "LocalElement": "MsgData.Create_Source"
+                }
+              },
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/SKT_Open",
+          "name": "SKT_Open",
+          "section": "global",
+          "type": "MESSAGE",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "SKT_Open",
+              "scope": "controller",
+              "message": {
+                "messageType": "CIP Generic",
+                "requestedLength": 30,
+                "connectedFlag": 2,
+                "connectionPath": "Enet",
+                "connectionPathSegments": [
+                  "Enet"
+                ],
+                "commTypeCode": 0,
+                "serviceCode": 76,
+                "objectType": 834,
+                "targetObject": 0,
+                "attributeNumber": 0,
+                "localElement": "MsgData.Open_Connection",
+                "localElementVariable": "global/Messages/MsgData",
+                "socketService": "openConnection",
+                "socket": {
+                  "session": "global/Messages/MsgData",
+                  "request": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/MsgData"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Open_Connection"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "SKT_Open_Connection"
+                  },
+                  "instance": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Open"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Instance"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "fields": {
+                    "timeout": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Open_Connection"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Timeout"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "destination": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Open_Connection"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Dest_Addr"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "STRING"
+                    }
+                  }
+                },
+                "attributes": {
+                  "MessageType": "CIP Generic",
+                  "RequestedLength": "30",
+                  "ConnectedFlag": "2",
+                  "ConnectionPath": "Enet",
+                  "CommTypeCode": "0",
+                  "ServiceCode": "16#004c",
+                  "ObjectType": "16#0342",
+                  "TargetObject": "0",
+                  "AttributeNumber": "16#0000",
+                  "LocalIndex": "0",
+                  "LocalElement": "MsgData.Open_Connection"
+                }
+              },
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/SKT_Write",
+          "name": "SKT_Write",
+          "section": "global",
+          "type": "MESSAGE",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "SKT_Write",
+              "scope": "controller",
+              "message": {
+                "messageType": "CIP Generic",
+                "requestedLength": 40,
+                "connectedFlag": 2,
+                "connectionPath": "Enet",
+                "connectionPathSegments": [
+                  "Enet"
+                ],
+                "commTypeCode": 0,
+                "serviceCode": 78,
+                "objectType": 834,
+                "targetObject": 0,
+                "attributeNumber": 0,
+                "localElement": "MsgData.Write_Source",
+                "localElementVariable": "global/Messages/MsgData",
+                "socketService": "writeSocket",
+                "socket": {
+                  "session": "global/Messages/MsgData",
+                  "request": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/MsgData"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Write_Source"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "SKT_Write_Source"
+                  },
+                  "instance": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Write"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Instance"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "fields": {
+                    "timeout": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Write_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Timeout"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "buffer": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Write_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Buffer"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "STRING"
+                    },
+                    "toFamily": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Write_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "ToAddr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Family"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "INT"
+                    },
+                    "toPort": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Write_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "ToAddr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Port"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "INT"
+                    },
+                    "toAddressOctet1": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Write_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "ToAddr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "IP_1st_Octect"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "SINT"
+                    },
+                    "toAddressOctet2": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Write_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "ToAddr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "IP_2nd_Octect"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "SINT"
+                    },
+                    "toAddressOctet3": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Write_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "ToAddr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "IP_3rd_Octect"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "SINT"
+                    },
+                    "toAddressOctet4": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Write_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "ToAddr"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "IP_4th_Octect"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "SINT"
+                    }
+                  }
+                },
+                "attributes": {
+                  "MessageType": "CIP Generic",
+                  "RequestedLength": "40",
+                  "ConnectedFlag": "2",
+                  "ConnectionPath": "Enet",
+                  "CommTypeCode": "0",
+                  "ServiceCode": "16#004e",
+                  "ObjectType": "16#0342",
+                  "TargetObject": "0",
+                  "AttributeNumber": "16#0000",
+                  "LocalIndex": "0",
+                  "LocalElement": "MsgData.Write_Source"
+                }
+              },
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/SKT_Read",
+          "name": "SKT_Read",
+          "section": "global",
+          "type": "MESSAGE",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "SKT_Read",
+              "scope": "controller",
+              "message": {
+                "messageType": "CIP Generic",
+                "requestedLength": 8,
+                "connectedFlag": 2,
+                "connectionPath": "Enet",
+                "connectionPathSegments": [
+                  "Enet"
+                ],
+                "commTypeCode": 0,
+                "serviceCode": 77,
+                "objectType": 834,
+                "targetObject": 0,
+                "attributeNumber": 0,
+                "localElement": "MsgData.Read_Source",
+                "localElementVariable": "global/Messages/MsgData",
+                "destinationTag": "MsgData.Read_Response",
+                "destinationVariable": "global/Messages/MsgData",
+                "socketService": "readSocket",
+                "socket": {
+                  "session": "global/Messages/MsgData",
+                  "request": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/MsgData"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Read_Source"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "SKT_Read_Source"
+                  },
+                  "response": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/MsgData"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Read_Response"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "SKT_Read_Response"
+                  },
+                  "instance": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Read"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Instance"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "fields": {
+                    "timeout": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Read_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "Timeout"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    },
+                    "bufferLength": {
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/MsgData"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "Read_Source"
+                        },
+                        {
+                          "kind": "member",
+                          "name": "BufLen"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "DINT"
+                    }
+                  }
+                },
+                "attributes": {
+                  "MessageType": "CIP Generic",
+                  "RequestedLength": "8",
+                  "ConnectedFlag": "2",
+                  "ConnectionPath": "Enet",
+                  "CommTypeCode": "0",
+                  "ServiceCode": "16#004d",
+                  "ObjectType": "16#0342",
+                  "TargetObject": "0",
+                  "AttributeNumber": "16#0000",
+                  "LocalIndex": "0",
+                  "LocalElement": "MsgData.Read_Source",
+                  "DestinationTag": "MsgData.Read_Response"
+                }
+              },
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/SKT_Delete",
+          "name": "SKT_Delete",
+          "section": "global",
+          "type": "MESSAGE",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "SKT_Delete",
+              "scope": "controller",
+              "message": {
+                "messageType": "CIP Generic",
+                "requestedLength": 0,
+                "connectedFlag": 2,
+                "connectionPath": "Enet",
+                "connectionPathSegments": [
+                  "Enet"
+                ],
+                "commTypeCode": 0,
+                "serviceCode": 79,
+                "objectType": 834,
+                "targetObject": 0,
+                "attributeNumber": 0,
+                "socketService": "deleteSocket",
+                "socket": {
+                  "session": "global/Messages/MsgData",
+                  "instance": {
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Delete"
+                    },
+                    "path": [
+                      {
+                        "kind": "member",
+                        "name": "Instance"
+                      }
+                    ],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "fields": {}
+                },
+                "attributes": {
+                  "MessageType": "CIP Generic",
+                  "RequestedLength": "0",
+                  "ConnectedFlag": "2",
+                  "ConnectionPath": "Enet",
+                  "CommTypeCode": "0",
+                  "ServiceCode": "16#004f",
+                  "ObjectType": "16#0342",
+                  "TargetObject": "0",
+                  "AttributeNumber": "16#0000",
+                  "LocalIndex": "0"
+                }
+              },
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/ProdCount",
+          "name": "ProdCount",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "ProdCount",
+              "scope": "controller",
+              "radix": "Decimal",
+              "produced": {
+                "produceCount": 2,
+                "attributes": {
+                  "ProduceCount": "2",
+                  "ProgrammaticallySendEventTrigger": "false",
+                  "UnicastPermitted": "true",
+                  "MinimumRPI": "0.196",
+                  "MaximumRPI": "536870.9",
+                  "DefaultRPI": "20"
+                }
+              },
+              "implicit": false
+            }
+          }
+        },
+        {
+          "id": "global/Messages/ConsCount",
+          "name": "ConsCount",
+          "section": "global",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "ConsCount",
+              "scope": "controller",
+              "radix": "Decimal",
+              "consumed": {
+                "producer": "OtherPlc",
+                "remoteTag": "ProdCount",
+                "rpi": 20,
+                "attributes": {
+                  "Producer": "OtherPlc",
+                  "RemoteTag": "ProdCount",
+                  "RemoteInstance": "0",
+                  "RPI": "20",
+                  "Unicast": "true"
+                }
+              },
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "description": "Controller-scoped tags"
+    }
+  ],
+  "io": {
+    "devices": [
+      {
+        "id": "device/Local",
+        "name": "Local",
+        "catalog": "1756-L85E",
+        "vendorName": "1",
+        "inhibited": false,
+        "vendor": {
+          "logix": {
+            "vendor": "1",
+            "productType": "14",
+            "productCode": "168",
+            "major": 33,
+            "minor": 12,
+            "parentModule": "Local",
+            "parentModPortId": 1,
+            "majorFault": true,
+            "ports": [
+              {
+                "id": 1,
+                "type": "ICP",
+                "address": "0",
+                "upstream": false
+              },
+              {
+                "id": 2,
+                "type": "Ethernet",
+                "upstream": false
+              }
+            ],
+            "connections": []
+          }
+        }
+      },
+      {
+        "id": "device/Enet",
+        "name": "Enet",
+        "catalog": "1756-EN2T",
+        "vendorName": "1",
+        "parent": "device/Local",
+        "inhibited": false,
+        "vendor": {
+          "logix": {
+            "vendor": "1",
+            "productType": "12",
+            "productCode": "166",
+            "major": 11,
+            "minor": 1,
+            "parentModule": "Local",
+            "parentModPortId": 1,
+            "majorFault": false,
+            "ports": [
+              {
+                "id": 1,
+                "type": "ICP",
+                "address": "2",
+                "upstream": true
+              },
+              {
+                "id": 2,
+                "type": "Ethernet",
+                "address": "192.168.1.10",
+                "upstream": false
+              }
+            ],
+            "connections": []
+          }
+        }
+      }
+    ],
+    "channels": []
+  },
+  "pous": [
+    {
+      "name": "P",
+      "kind": "program",
+      "vars": [
+        {
+          "id": "pou/P/State",
+          "name": "State",
+          "section": "local",
+          "type": "DINT",
+          "retain": "retain",
+          "constant": false,
+          "vendor": {
+            "logix": {
+              "path": "Program:P.State",
+              "scope": "program",
+              "radix": "Decimal",
+              "implicit": false
+            }
+          }
+        }
+      ],
+      "body": {
+        "language": "st",
+        "statements": [
+          {
+            "kind": "actionCall",
+            "action": "Main",
+            "inputs": [],
+            "outputs": []
+          }
+        ],
+        "synthetic": true
+      },
+      "actions": [
+        {
+          "name": "Main",
+          "synthetic": false,
+          "body": {
+            "language": "ld",
+            "statements": [
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/Read_Remote"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "en": {
+                  "op": "bin",
+                  "operator": "and",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/Trigger"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "BOOL"
+                  },
+                  "right": {
+                    "op": "un",
+                    "operator": "not",
+                    "operand": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/Read_Remote"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "EN"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "type": "BOOL"
+                  },
+                  "type": "BOOL"
+                },
+                "mode": "normal",
+                "src": {
+                  "rung": 0,
+                  "element": 2
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc1"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "eq",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/P/State"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 0,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "rung": 1,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "temp",
+                        "name": "_rc1"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Create_Source"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Type"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 1,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "temp",
+                        "name": "_rc1"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Create_Source"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Addr"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Family"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "INT"
+                        },
+                        "value": {
+                          "op": "conv",
+                          "to": "INT",
+                          "mode": "wrap",
+                          "operand": {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 2,
+                            "type": "DINT"
+                          },
+                          "type": "INT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 1,
+                  "element": 2
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "temp",
+                        "name": "_rc1"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Create_Source"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Addr"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Port"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "INT"
+                        },
+                        "value": {
+                          "op": "conv",
+                          "to": "INT",
+                          "mode": "wrap",
+                          "operand": {
+                            "op": "lit",
+                            "kind": "int",
+                            "int": 5000,
+                            "type": "DINT"
+                          },
+                          "type": "INT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 1,
+                  "element": 3
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Create"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "en": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc1"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "mode": "normal",
+                "src": {
+                  "rung": 1,
+                  "element": 4
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/SKT_Create"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "DN"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Open"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 2,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/SKT_Create"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "DN"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Write"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 2,
+                  "element": 2
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/SKT_Create"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "DN"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Read"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 2,
+                  "element": 3
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/SKT_Create"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "DN"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Delete"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 2,
+                  "element": 4
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/SKT_Create"
+                      },
+                      "path": [
+                        {
+                          "kind": "member",
+                          "name": "DN"
+                        }
+                      ],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 2,
+                  "element": 5
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc2"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "eq",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/P/State"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 1,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "rung": 3,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Open"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "en": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc2"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "mode": "normal",
+                "src": {
+                  "rung": 3,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "bin",
+                      "operator": "and",
+                      "left": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Open"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 2,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 3,
+                  "element": 3
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc3"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "eq",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/P/State"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 2,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "rung": 4,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Write"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "en": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc3"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "mode": "normal",
+                "src": {
+                  "rung": 4,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "bin",
+                      "operator": "and",
+                      "left": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 2,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Write"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 3,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 4,
+                  "element": 3
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc4"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "eq",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/P/State"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 3,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "rung": 5,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Read"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "en": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc4"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "mode": "normal",
+                "src": {
+                  "rung": 5,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "bin",
+                      "operator": "and",
+                      "left": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 3,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Read"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 4,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 5,
+                  "element": 3
+                }
+              },
+              {
+                "kind": "assign",
+                "target": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc5"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "value": {
+                  "op": "bin",
+                  "operator": "eq",
+                  "left": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "pou/P/State"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  },
+                  "right": {
+                    "op": "lit",
+                    "kind": "int",
+                    "int": 4,
+                    "type": "DINT"
+                  },
+                  "type": "BOOL"
+                },
+                "nonRetentive": false,
+                "src": {
+                  "rung": 6,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Delete"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "en": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "temp",
+                    "name": "_rc5"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "mode": "normal",
+                "src": {
+                  "rung": 6,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "bin",
+                      "operator": "and",
+                      "left": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 4,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "right": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Delete"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 6,
+                  "element": 3
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/Get_Identity"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "en": {
+                  "op": "ref",
+                  "root": {
+                    "kind": "var",
+                    "id": "global/Messages/Trigger"
+                  },
+                  "path": [],
+                  "io": false,
+                  "opaque": false,
+                  "type": "BOOL"
+                },
+                "mode": "normal",
+                "src": {
+                  "rung": 7,
+                  "element": 1
+                }
+              },
+              {
+                "kind": "if",
+                "branches": [
+                  {
+                    "condition": {
+                      "op": "ref",
+                      "root": {
+                        "kind": "var",
+                        "id": "global/Messages/Trigger"
+                      },
+                      "path": [],
+                      "io": false,
+                      "opaque": false,
+                      "type": "BOOL"
+                    },
+                    "body": [
+                      {
+                        "kind": "assign",
+                        "target": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/ProdCount"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "value": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/ConsCount"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "nonRetentive": false
+                      }
+                    ]
+                  }
+                ],
+                "src": {
+                  "rung": 7,
+                  "element": 2
+                }
+              }
+            ],
+            "temporaries": [
+              {
+                "name": "_rc1",
+                "type": "BOOL"
+              },
+              {
+                "name": "_rc2",
+                "type": "BOOL"
+              },
+              {
+                "name": "_rc3",
+                "type": "BOOL"
+              },
+              {
+                "name": "_rc4",
+                "type": "BOOL"
+              },
+              {
+                "name": "_rc5",
+                "type": "BOOL"
+              }
+            ],
+            "diagram": {
+              "kind": "ld",
+              "rungs": [
+                {
+                  "number": 0,
+                  "text": "XIC(Trigger)XIO(Read_Remote.EN)MSG(Read_Remote);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/Trigger"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "name": "XIC"
+                    },
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/Read_Remote"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "EN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": true,
+                      "name": "XIO"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/Read_Remote"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "MESSAGE"
+                        }
+                      ],
+                      "enable": "input",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MSG"
+                    }
+                  ]
+                },
+                {
+                  "number": 1,
+                  "text": "EQU(State,0)MOV(1,MsgData.Create_Source.Type)MOV(2,MsgData.Create_Source.Addr.Family)MOV(5000,MsgData.Create_Source.Addr.Port)MSG(SKT_Create);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        }
+                      ],
+                      "name": "EQU"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Create_Source"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Type"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 2,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Create_Source"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Addr"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Family"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "INT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 5000,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Create_Source"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Addr"
+                            },
+                            {
+                              "kind": "member",
+                              "name": "Port"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "INT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Create"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "MESSAGE"
+                        }
+                      ],
+                      "enable": "input",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MSG"
+                    }
+                  ]
+                },
+                {
+                  "number": 2,
+                  "text": "XIC(SKT_Create.DN)MOV(MsgData.Instance,SKT_Open.Instance)MOV(MsgData.Instance,SKT_Write.Instance)MOV(MsgData.Instance,SKT_Read.Instance)MOV(MsgData.Instance,SKT_Delete.Instance)MOV(1,State);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Create"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "name": "XIC"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Open"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Write"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Read"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/MsgData"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Delete"
+                          },
+                          "path": [
+                            {
+                              "kind": "member",
+                              "name": "Instance"
+                            }
+                          ],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    }
+                  ]
+                },
+                {
+                  "number": 3,
+                  "text": "EQU(State,1)MSG(SKT_Open)XIC(SKT_Open.DN)MOV(2,State);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 1,
+                          "type": "DINT"
+                        }
+                      ],
+                      "name": "EQU"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Open"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "MESSAGE"
+                        }
+                      ],
+                      "enable": "input",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MSG"
+                    },
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Open"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "name": "XIC"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 2,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    }
+                  ]
+                },
+                {
+                  "number": 4,
+                  "text": "EQU(State,2)MSG(SKT_Write)XIC(SKT_Write.DN)MOV(3,State);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 2,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 2,
+                          "type": "DINT"
+                        }
+                      ],
+                      "name": "EQU"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Write"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "MESSAGE"
+                        }
+                      ],
+                      "enable": "input",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MSG"
+                    },
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Write"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "name": "XIC"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 3,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    }
+                  ]
+                },
+                {
+                  "number": 5,
+                  "text": "EQU(State,3)MSG(SKT_Read)XIC(SKT_Read.DN)MOV(4,State);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 3,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 3,
+                          "type": "DINT"
+                        }
+                      ],
+                      "name": "EQU"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Read"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "MESSAGE"
+                        }
+                      ],
+                      "enable": "input",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MSG"
+                    },
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Read"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "name": "XIC"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 4,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    }
+                  ]
+                },
+                {
+                  "number": 6,
+                  "text": "EQU(State,4)MSG(SKT_Delete)XIC(SKT_Delete.DN)MOV(0,State);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "bin",
+                        "operator": "eq",
+                        "left": {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        "right": {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 4,
+                          "type": "DINT"
+                        },
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 4,
+                          "type": "DINT"
+                        }
+                      ],
+                      "name": "EQU"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/SKT_Delete"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "MESSAGE"
+                        }
+                      ],
+                      "enable": "input",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MSG"
+                    },
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/SKT_Delete"
+                        },
+                        "path": [
+                          {
+                            "kind": "member",
+                            "name": "DN"
+                          }
+                        ],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "name": "XIC"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "lit",
+                          "kind": "int",
+                          "int": 0,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "pou/P/State"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    }
+                  ]
+                },
+                {
+                  "number": 7,
+                  "text": "XIC(Trigger)MSG(Get_Identity)MOV(ConsCount,ProdCount);",
+                  "elements": [
+                    {
+                      "kind": "contact",
+                      "operand": {
+                        "op": "ref",
+                        "root": {
+                          "kind": "var",
+                          "id": "global/Messages/Trigger"
+                        },
+                        "path": [],
+                        "io": false,
+                        "opaque": false,
+                        "type": "BOOL"
+                      },
+                      "negated": false,
+                      "name": "XIC"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/Get_Identity"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "MESSAGE"
+                        }
+                      ],
+                      "enable": "input",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MSG"
+                    },
+                    {
+                      "kind": "block",
+                      "args": [
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/ConsCount"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        },
+                        {
+                          "op": "ref",
+                          "root": {
+                            "kind": "var",
+                            "id": "global/Messages/ProdCount"
+                          },
+                          "path": [],
+                          "io": false,
+                          "opaque": false,
+                          "type": "DINT"
+                        }
+                      ],
+                      "enable": "gate",
+                      "eno": true,
+                      "isPou": false,
+                      "name": "MOV"
+                    }
+                  ]
+                }
+              ]
+            },
+            "synthetic": false
+          },
+          "vendor": {
+            "logix": {
+              "routineType": "RLL"
+            }
+          }
+        },
+        {
+          "name": "Prescan",
+          "hook": "init",
+          "synthetic": true,
+          "body": {
+            "language": "st",
+            "statements": [
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/Read_Remote"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "mode": "prescan",
+                "src": {
+                  "rung": 0
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Create"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "mode": "prescan",
+                "src": {
+                  "rung": 1
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Open"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "mode": "prescan",
+                "src": {
+                  "rung": 3
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Write"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "mode": "prescan",
+                "src": {
+                  "rung": 4
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Read"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "mode": "prescan",
+                "src": {
+                  "rung": 5
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/SKT_Delete"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "mode": "prescan",
+                "src": {
+                  "rung": 6
+                }
+              },
+              {
+                "kind": "sysCall",
+                "catalog": "logix",
+                "service": "MSG",
+                "args": [
+                  {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Messages/Get_Identity"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MESSAGE"
+                  }
+                ],
+                "mode": "prescan",
+                "src": {
+                  "rung": 7
+                }
+              }
+            ],
+            "synthetic": true
+          }
+        }
+      ],
+      "methods": [],
+      "properties": [],
+      "vendor": {
+        "logix": {
+          "kind": "program",
+          "executePrescan": false,
+          "executePostscan": false,
+          "executeEnableInFalse": false,
+          "mainRoutine": "Main",
+          "disabled": false,
+          "folder": false,
+          "task": "Main"
+        }
+      }
+    }
+  ],
+  "diagnostics": [],
+  "vendor": {
+    "logix": {
+      "targetName": "Messages",
+      "targetType": "Controller",
+      "majorRev": 33,
+      "minorRev": 12
+    }
+  }
+}
