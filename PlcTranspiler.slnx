@@ -5,6 +5,10 @@
     <Project Path="src/Plc.Ir.Validation/Plc.Ir.Validation.csproj" />
     <Project Path="src/Plc.Ir.Logix/Plc.Ir.Logix.csproj" />
     <Project Path="src/Plc.Ir.Logix.Build/Plc.Ir.Logix.Build.csproj" />
+    <Project Path="src/Plc.Generator.Core/Plc.Generator.Core.csproj" />
+    <Project Path="src/Plc.Generator.CSharp/Plc.Generator.CSharp.csproj" />
+    <Project Path="src/Plc.Runtime.CSharp/Plc.Runtime.CSharp.csproj" />
+    <Project Path="src/Plc.Runtime.Host/Plc.Runtime.Host.csproj" />
     <Project Path="src/Plc.Cli/Plc.Cli.csproj" />
   </Folder>
   <Folder Name="/tests/">
@@ -12,5 +16,15 @@
     <Project Path="tests/Plc.Ir.Tests/Plc.Ir.Tests.csproj" />
     <Project Path="tests/Plc.Ir.Validation.Tests/Plc.Ir.Validation.Tests.csproj" />
     <Project Path="tests/Plc.Ir.Logix.Tests/Plc.Ir.Logix.Tests.csproj" />
+    <Project Path="tests/Plc.Generator.Tests/Plc.Generator.Tests.csproj" />
+    <Project Path="tests/Plc.Runtime.Tests/Plc.Runtime.Tests.csproj" />
+    <Project Path="tests/Plc.Runtime.Host.Tests/Plc.Runtime.Host.Tests.csproj" />
+  </Folder>
+  <Folder Name="/external/">
+    <Project Path="external/EthernetIpSharp/src/EthernetIPSharp.Cip/EthernetIPSharp.Cip.csproj" />
+    <Project Path="external/EthernetIpSharp/src/EthernetIPSharp.Connections/EthernetIPSharp.Connections.csproj" />
+    <Project Path="external/EthernetIpSharp/src/EthernetIPSharp.Device/EthernetIPSharp.Device.csproj" />
+    <Project Path="external/EthernetIpSharp/src/EthernetIPSharp.Logix/EthernetIPSharp.Logix.csproj" />
+    <Project Path="external/EthernetIpSharp/src/EthernetIPSharp.Protocol/EthernetIPSharp.Protocol.csproj" />
   </Folder>
 </Solution>

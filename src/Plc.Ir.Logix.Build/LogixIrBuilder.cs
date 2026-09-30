@@ -662,7 +662,7 @@ public sealed class LogixIrBuilder
         return list;
     }
 
-    private static void CollectPrescan(IEnumerable<IrStatement> statements, List<IrStatement> list)
+    private void CollectPrescan(IEnumerable<IrStatement> statements, List<IrStatement> list)
     {
         foreach (var s in statements)
         {
@@ -672,8 +672,15 @@ public sealed class LogixIrBuilder
                 {
                     var p = new IrFbCall { Instance = c.Instance, Fb = c.Fb, Pou = c.Pou, Profile = c.Profile, Mode = "prescan", Src = c.Src };
                     if (c.Fb is not null)
+                    {
                         foreach (var (pin, value) in c.Inputs)
                             if (value.IsBool) p.Inputs[pin] = IrLiteral.False;
+                    }
+                    else if (c.Pou is not null && _c.FindAoi(c.Pou) is { } aoi)
+                    {
+                        foreach (var (pin, value) in c.Inputs)
+                            if (aoi.FindParameter(pin) is { ParameterUsage: AoiParameterUsage.InOut }) p.Inputs[pin] = value;
+                    }
                     list.Add(p);
                     break;
                 }

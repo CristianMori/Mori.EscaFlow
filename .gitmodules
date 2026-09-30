@@ -1,0 +1,4 @@
+[submodule "external/EthernetIpSharp"]
+	path = external/EthernetIpSharp
+	url = https://github.com/CristianMori/EthernetIpSharp.git
+	branch = feature/transpiler-gaps

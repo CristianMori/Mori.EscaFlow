@@ -1786,7 +1786,19 @@
                   "type": "Blink"
                 },
                 "pou": "Blink",
-                "inputs": {},
+                "inputs": {
+                  "Data": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Fbd/Counter"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "DINT"
+                  }
+                },
                 "outputs": {},
                 "mode": "prescan",
                 "src": {

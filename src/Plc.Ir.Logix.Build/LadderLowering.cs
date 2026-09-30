@@ -327,6 +327,10 @@ public sealed class LadderLowering
                 case "BTD":
                     Emit(When(condition, Assign(Arg(args, 2), Fn("BIT_FIELD_DISTRIBUTE", args, Arg(args, 2).Type))), index);
                     return;
+                case "MVM":
+                    // dest := MASKED_MOVE(source, mask, dest): bits outside the mask keep the destination's value.
+                    Emit(When(condition, Assign(Arg(args, 2), Fn("MASKED_MOVE", args, Arg(args, 2).Type))), index);
+                    return;
             }
             if (LogixInstructionMap.BinaryOperatorFor(name) is { } op)
             {
@@ -385,8 +389,19 @@ public sealed class LadderLowering
                             s = new IrAssign { Target = _x.Operand(instr.Arguments[0]), Value = IrLiteral.True };
                             break;
                         case LadderRole.BlockInput when instr.IsAddOn:
-                            s = new IrFbCall { Instance = instr.Arguments.Count > 0 ? _x.Operand(instr.Arguments[0]) : null, Pou = instr.Mnemonic, Mode = "prescan" };
+                        {
+                            // The prescan call keeps the InOut bindings: the instance's InOut parameters must alias their arguments during prescan too.
+                            var args = instr.Arguments.Select(a => (IrExpression?)_x.Operand(a)).ToList();
+                            var call = new IrFbCall { Instance = args.Count > 0 ? args[0] : null, Pou = instr.Mnemonic, Mode = "prescan" };
+                            if (_x.Owner.Controller.FindAoi(instr.Mnemonic) is { } aoi)
+                            {
+                                var required = aoi.Parameters.Where(p => p.Required).ToList();
+                                for (var i = 0; i < required.Count && i + 1 < args.Count; i++)
+                                    if (required[i].ParameterUsage == L5x.Model.Aoi.AoiParameterUsage.InOut && args[i + 1] is { } a && a is not IrPlaceholder) call.Inputs[required[i].Name] = a;
+                            }
+                            s = call;
                             break;
+                        }
                         case LadderRole.BlockInput when LogixProfiles.StandardBlockFor(name) is { } fb:
                         {
                             var call = new IrFbCall { Instance = _x.Operand(instr.Arguments[0]), Fb = fb, Profile = Logix.Id, Mode = "prescan" };

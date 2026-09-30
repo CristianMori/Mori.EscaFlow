@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PLC console</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --panel: #ffffff; --text: #1d2430; --muted: #6b7382; --line: #d9dde3;
+    --accent: #2563eb; --accent-text: #ffffff; --ok: #15803d; --warn: #b45309; --bad: #b91c1c;
+    --badge-stopped: #6b7382; --badge-running: #15803d; --badge-faulted: #b91c1c; --row-hover: #eef2ff; --row-selected: #dbe4ff;
+    --mono: ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12161c; --panel: #1b2129; --text: #e6e9ee; --muted: #98a2b3; --line: #2b3440;
+      --accent: #60a5fa; --accent-text: #0b1220; --ok: #4ade80; --warn: #fbbf24; --bad: #f87171;
+      --badge-stopped: #64748b; --badge-running: #16a34a; --badge-faulted: #dc2626; --row-hover: #243042; --row-selected: #2c3d5a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12161c; --panel: #1b2129; --text: #e6e9ee; --muted: #98a2b3; --line: #2b3440;
+    --accent: #60a5fa; --accent-text: #0b1220; --ok: #4ade80; --warn: #fbbf24; --bad: #f87171;
+    --badge-stopped: #64748b; --badge-running: #16a34a; --badge-faulted: #dc2626; --row-hover: #243042; --row-selected: #2c3d5a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 18px; margin: 0; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; color: #fff; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .badge.stopped { background: var(--badge-stopped); } .badge.running { background: var(--badge-running); } .badge.faulted { background: var(--badge-faulted); }
+  .mode { color: var(--muted); }
+  .spacer { flex: 1; }
+  button { font: inherit; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  button:disabled { opacity: .5; cursor: default; }
+  input[type=text], input[type=search] { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  main { padding: 16px; display: grid; gap: 16px; grid-template-columns: 1fr; max-width: 1400px; margin: 0 auto; }
+  @media (min-width: 900px) { main { grid-template-columns: 1fr 1fr; } .wide { grid-column: 1 / -1; } }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+  section h2 { font-size: 14px; margin: 0 0 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .mono { font-family: var(--mono); }
+  .table-wrap { overflow-x: auto; }
+  #tags tbody tr { cursor: pointer; } #tags tbody tr:hover { background: var(--row-hover); } #tags tbody tr.selected { background: var(--row-selected); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .toolbar input[type=search] { flex: 1; min-width: 160px; }
+  .msg { font-size: 13px; margin-top: 8px; min-height: 1.2em; } .msg.err { color: var(--bad); } .msg.ok { color: var(--ok); }
+  #detail { display: none; border-top: 1px dashed var(--line); margin-top: 12px; padding-top: 12px; }
+  #detail.open { display: block; }
+  #detail dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0 0 10px; }
+  #detail dt { color: var(--muted); } #detail dd { margin: 0; word-break: break-all; }
+  .writebox { display: flex; gap: 8px; } .writebox input { flex: 1; min-width: 0; }
+  ul.files { list-style: none; padding: 0; margin: 0; } ul.files li { display: flex; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  ul.files li span { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .fault { color: var(--bad); }
+  footer { color: var(--muted); text-align: center; padding: 12px; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="name">Controller</h1>
+  <span id="state" class="badge stopped">stopped</span>
+  <span id="mode" class="mode">Program</span>
+  <span class="spacer"></span>
+  <button id="btnStart" class="primary" onclick="post('/api/start')">Start</button>
+  <button id="btnStop" onclick="post('/api/stop')">Stop</button>
+</header>
+<main>
+  <section>
+    <h2>Scan statistics</h2>
+    <div id="fault" class="fault"></div>
+    <div class="table-wrap">
+      <table id="stats"><thead><tr><th>Task</th><th>Kind</th><th class="num">Scans</th><th class="num">Last ms</th><th class="num">Avg ms</th><th class="num">Max ms</th><th class="num">Interval</th><th class="num">Overruns</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="msg" id="started"></div>
+  </section>
+  <section>
+    <h2>Snapshots</h2>
+    <div class="toolbar">
+      <input type="text" id="snapName" placeholder="snapshot name" value="snapshot">
+      <button onclick="saveNamed()">Save to server</button>
+      <a id="download" href="/api/snapshot"><button>Download</button></a>
+      <button onclick="document.getElementById('upload').click()">Upload</button>
+      <input type="file" id="upload" style="display:none" onchange="uploadFile(this)">
+    </div>
+    <ul class="files" id="snapshots"></ul>
+    <div class="msg" id="snapMsg"></div>
+  </section>
+  <section class="wide">
+    <h2>Tags</h2>
+    <div class="toolbar">
+      <input type="search" id="filter" placeholder="filter by path (e.g. Program:P or Timer)">
+      <button onclick="pageMove(-1)">&lsaquo;</button>
+      <span id="pageInfo" class="mono"></span>
+      <button onclick="pageMove(1)">&rsaquo;</button>
+    </div>
+    <div class="table-wrap">
+      <table id="tags"><thead><tr><th>Path</th><th>Type</th><th>Program</th><th>Value</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div id="detail">
+      <dl><dt>Path</dt><dd id="dPath" class="mono"></dd><dt>Type</dt><dd id="dType"></dd><dt>Value</dt><dd id="dValue" class="mono"></dd></dl>
+      <div class="writebox"><input type="text" id="writeText" placeholder="new value (Enter writes)"><button class="primary" onclick="writeTag()">Write</button><button onclick="closeDetail()">Close</button></div>
+      <div class="msg" id="writeMsg"></div>
+    </div>
+  </section>
+</main>
+<footer>PLC console</footer>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const api = async (url, opts) => {
+    const r = await fetch(url, opts);
+    let body = null;
+    try { body = await r.json(); } catch (e) { body = null; }
+    if (!r.ok) throw new Error((body && body.error) || (r.status + ' ' + r.statusText));
+    return body;
+  };
+  const fmt = n => (n === null || n === undefined) ? '' : (typeof n === 'number' ? (Number.isInteger(n) ? n : n.toFixed(3)) : n);
+  let page = { skip: 0, take: 50, total: 0, items: [] };
+  let selected = null;
+  let filterTimer = null;
+
+  window.post = async function (url) {
+    try { await api(url, { method: 'POST' }); await refreshState(); }
+    catch (e) { $('started').className = 'msg err'; $('started').textContent = e.message; }
+  };
+
+  async function refreshState() {
+    try {
+      const s = await api('/api/state');
+      $('name').textContent = s.name;
+      document.title = s.name + ' - PLC console';
+      $('state').textContent = s.state;
+      $('state').className = 'badge ' + s.state;
+      $('mode').textContent = s.mode === 'run' ? 'Run' : 'Program';
+      $('btnStart').disabled = s.state === 'running';
+      $('btnStop').disabled = s.state !== 'running';
+      $('fault').textContent = (s.statistics && s.statistics.fault) ? 'Fault: ' + s.statistics.fault : '';
+      const st = s.statistics || {};
+      $('started').className = 'msg';
+      $('started').textContent = st.startedAt ? 'Running since ' + new Date(st.startedAt).toLocaleString() : '';
+      const rows = (st.tasks || []).map(t => '<tr><td>' + esc(t.name) + '</td><td>' + esc(t.kind) + '</td><td class="num">' + fmt(t.scans) + '</td><td class="num">' + fmt(t.lastScanMs) + '</td><td class="num">' + fmt(t.averageScanMs) + '</td><td class="num">' + fmt(t.maxScanMs) + '</td><td class="num">' + fmt(t.intervalMs) + '</td><td class="num">' + fmt(t.overruns) + '</td></tr>').join('');
+      $('stats').querySelector('tbody').innerHTML = rows || '<tr><td colspan="8" class="mono">no tasks</td></tr>';
+    } catch (e) {
+      $('state').textContent = 'offline'; $('state').className = 'badge faulted';
+    }
+  }
+
+  function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+  async function loadTags() {
+    const f = $('filter').value.trim();
+    try {
+      page = await api('/api/tags?filter=' + encodeURIComponent(f) + '&skip=' + page.skip + '&take=' + page.take);
+      const tb = $('tags').querySelector('tbody');
+      tb.innerHTML = page.items.map(t => '<tr data-path="' + esc(t.path) + '"' + (selected === t.path ? ' class="selected"' : '') + '><td class="mono">' + esc(t.path) + (t.dims && t.dims.length ? '[' + t.dims.join(',') + ']' : '') + '</td><td>' + esc(t.type) + '</td><td>' + esc(t.program || '') + '</td><td class="mono val"></td></tr>').join('') || '<tr><td colspan="4">no tags</td></tr>';
+      tb.querySelectorAll('tr[data-path]').forEach(tr => tr.onclick = () => openDetail(tr.dataset.path));
+      const from = page.total ? page.skip + 1 : 0, to = Math.min(page.skip + page.take, page.total);
+      $('pageInfo').textContent = from + '-' + to + ' / ' + page.total;
+      await refreshValues();
+    } catch (e) { $('pageInfo').textContent = e.message; }
+  }
+
+  async function refreshValues() {
+    const rows = Array.from($('tags').querySelectorAll('tr[data-path]'));
+    await Promise.all(rows.map(async tr => {
+      const p = tr.dataset.path;
+      if (tr.querySelector('td.val') === null) return;
+      try { const v = await api('/api/tag?path=' + encodeURIComponent(p)); tr.querySelector('td.val').textContent = v.text; }
+      catch (e) { tr.querySelector('td.val').textContent = '?'; }
+    }));
+    if (selected) {
+      try { const v = await api('/api/tag?path=' + encodeURIComponent(selected)); $('dValue').textContent = v.text; $('dType').textContent = v.type; } catch (e) { }
+    }
+  }
+
+  window.pageMove = function (dir) {
+    const next = page.skip + dir * page.take;
+    if (next < 0 || next >= page.total) return;
+    page.skip = next; loadTags();
+  };
+
+  function openDetail(path) {
+    selected = path;
+    $('tags').querySelectorAll('tr[data-path]').forEach(tr => tr.classList.toggle('selected', tr.dataset.path === path));
+    $('dPath').textContent = path; $('dValue').textContent = ''; $('dType').textContent = '';
+    $('writeText').value = ''; $('writeMsg').textContent = ''; $('writeMsg').className = 'msg';
+    $('detail').classList.add('open');
+    refreshValues();
+    $('writeText').focus();
+  }
+  window.closeDetail = function () { selected = null; $('detail').classList.remove('open'); $('tags').querySelectorAll('tr.selected').forEach(tr => tr.classList.remove('selected')); };
+
+  window.writeTag = async function () {
+    if (!selected) return;
+    try {
+      const v = await api('/api/tag', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: selected, text: $('writeText').value }) });
+      $('writeMsg').className = 'msg ok'; $('writeMsg').textContent = 'written: ' + (v && v.text !== undefined ? v.text : 'ok');
+      await refreshValues();
+    } catch (e) { $('writeMsg').className = 'msg err'; $('writeMsg').textContent = e.message; }
+  };
+  $('writeText').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); writeTag(); } });
+  $('filter').addEventListener('input', () => { clearTimeout(filterTimer); filterTimer = setTimeout(() => { page.skip = 0; loadTags(); }, 250); });
+
+  async function loadSnapshots() {
+    try {
+      const s = await api('/api/snapshots');
+      $('snapshots').innerHTML = s.items.map(f => '<li><span class="mono">' + esc(f.name) + '</span><small>' + Math.round(f.bytes / 1024) + ' KB</small><button onclick="loadNamed(\'' + esc(f.name) + '\')">Load</button></li>').join('') || '<li><span>no server snapshots</span></li>';
+    } catch (e) { $('snapshots').innerHTML = '<li><span>' + esc(e.message) + '</span></li>'; }
+  }
+  window.saveNamed = async function () {
+    const n = $('snapName').value.trim() || 'snapshot';
+    try { const r = await api('/api/snapshots/' + encodeURIComponent(n) + '/save', { method: 'POST' }); snapMsg('saved ' + r.saved + ' (' + r.bytes + ' bytes)', true); await loadSnapshots(); }
+    catch (e) { snapMsg(e.message, false); }
+  };
+  window.loadNamed = async function (name) {
+    try { const r = await api('/api/snapshots/' + encodeURIComponent(name) + '/load', { method: 'POST' }); snapMsg('loaded ' + r.loaded, true); await refreshValues(); }
+    catch (e) { snapMsg(e.message, false); }
+  };
+  window.uploadFile = async function (input) {
+    if (!input.files || !input.files[0]) return;
+    const fd = new FormData(); fd.append('file', input.files[0]);
+    try { const r = await api('/api/snapshot', { method: 'POST', body: fd }); snapMsg('uploaded and loaded (' + r.bytes + ' bytes)', true); await refreshValues(); }
+    catch (e) { snapMsg(e.message, false); }
+    input.value = '';
+  };
+  function snapMsg(text, ok) { $('snapMsg').className = 'msg ' + (ok ? 'ok' : 'err'); $('snapMsg').textContent = text; }
+
+  refreshState(); loadTags(); loadSnapshots();
+  setInterval(refreshState, 1000);
+  setInterval(() => { if (!document.hidden) refreshValues(); }, 1000);
+})();
+</script>
+</body>
+</html>

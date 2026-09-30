@@ -72,8 +72,8 @@ ACTION Text
 END_ACTION
 
 ACTION Prescan (* hook: init *)
-    M1(); (* Motor, mode: prescan *)
-    M2(); (* Motor, mode: prescan *)
+    M1(Data := MD1); (* Motor, mode: prescan *)
+    M2(Data := MD2); (* Motor, mode: prescan *)
 END_ACTION
 END_PROGRAM
 

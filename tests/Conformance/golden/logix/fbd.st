@@ -58,7 +58,7 @@ END_ACTION
 
 ACTION Prescan (* hook: init *)
     TONR(TONR_01); (* logix *)
-    Blink_01(); (* Blink, mode: prescan *)
+    Blink_01(Data := Counter); (* Blink, mode: prescan *)
 END_ACTION
 END_PROGRAM
 

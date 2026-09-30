@@ -155,7 +155,7 @@ ACTION Main
         Y := BIT_FIELD_DISTRIBUTE(X, 0, Y, 8, 4);
     END_IF;
     IF A THEN
-        Bits := MASKED_MOVE(X, 16#FF00);
+        Bits := MASKED_MOVE(X, 16#FF00, Bits);
     END_IF;
     IF A THEN
         Y := SWAP_BYTES(X, REVERSE);

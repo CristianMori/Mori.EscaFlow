@@ -4868,6 +4868,17 @@
                               "int": 65280,
                               "radix": 16,
                               "type": "DINT"
+                            },
+                            {
+                              "op": "ref",
+                              "root": {
+                                "kind": "var",
+                                "id": "global/Ladder/Bits"
+                              },
+                              "path": [],
+                              "io": false,
+                              "opaque": false,
+                              "type": "DINT"
                             }
                           ],
                           "type": "DINT"

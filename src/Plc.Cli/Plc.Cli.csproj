@@ -11,5 +11,6 @@
     <ProjectReference Include="..\L5x\L5x.csproj" />
     <ProjectReference Include="..\Plc.Ir.Logix.Build\Plc.Ir.Logix.Build.csproj" />
     <ProjectReference Include="..\Plc.Ir.Validation\Plc.Ir.Validation.csproj" />
+    <ProjectReference Include="..\Plc.Generator.CSharp\Plc.Generator.CSharp.csproj" />
   </ItemGroup>
 </Project>

@@ -43,6 +43,15 @@ public static class Program
         ir validate options:
           --no-typing             Skip the typing pass
           --warnings              Print warnings as well as errors
+
+          Plc.Cli generate csharp <file.ir.json|file.L5X> <outDir> [options]   generate a C# solution
+          --name <Name>           Solution / namespace name (default: controller name)
+          --runtime <path>        Path to Plc.Runtime.CSharp.csproj relative to the generated Logic project
+          --host <path>           Path to Plc.Runtime.Host.csproj relative to the generated Host project
+          --eip-port <n|none>     EtherNet/IP port of the generated controller (default 44818)
+          --url <url>             Web console URL (default http://localhost:5080)
+          --strict-services       Fail when the logic uses a service the runtime does not implement
+          --no-source-comments    Do not emit rung text / lines as comments
         """;
 
     public static int Main(string[] args)
@@ -60,6 +69,7 @@ public static class Program
                 "ir" when args.Length >= 3 && args[1] == "build" && args.Length >= 4 => IrBuild(args),
                 "ir" when args.Length >= 3 && args[1] == "validate" => IrValidate(args),
                 "ir" when args.Length >= 3 && args[1] == "print" => IrPrint(args),
+                "generate" when args.Length >= 4 && args[1] == "csharp" => GenerateCSharp(args),
                 _ => UsageError(),
             };
         }
@@ -267,6 +277,72 @@ public static class Program
             return 2;
         }
         return 0;
+    }
+
+    // ------------------------------------------------------------------ generate csharp
+
+    private static int GenerateCSharp(string[] args)
+    {
+        var input = args[2];
+        var outDir = args[3];
+        string? name = null;
+        string? runtime = null;
+        string? host = null;
+        int? eipPort = 44818;
+        string? url = null;
+        var strict = false;
+        var sourceComments = true;
+        for (var i = 4; i < args.Length; i++)
+        {
+            switch (args[i])
+            {
+                case "--name": name = Next(args, ref i); break;
+                case "--runtime": runtime = Next(args, ref i); break;
+                case "--host": host = Next(args, ref i); break;
+                case "--eip-port": { var v = Next(args, ref i); eipPort = v.Equals("none", StringComparison.OrdinalIgnoreCase) ? null : int.Parse(v); break; }
+                case "--url": url = Next(args, ref i); break;
+                case "--strict-services": strict = true; break;
+                case "--no-source-comments": sourceComments = false; break;
+                default:
+                    Console.Error.WriteLine($"Unknown option '{args[i]}'");
+                    return UsageError();
+            }
+        }
+
+        var sw = Stopwatch.StartNew();
+        IrDocument ir;
+        if (input.EndsWith(".L5X", StringComparison.OrdinalIgnoreCase))
+        {
+            var project = L5xParser.ParseFile(input);
+            ir = new LogixIrBuilder(project).Build();
+            Console.WriteLine($"Parsed and built plc-ir from {Path.GetFileName(input)} in {sw.Elapsed.TotalSeconds:F1} s");
+        }
+        else
+        {
+            ir = IrJson.ReadFile(input);
+            Console.WriteLine($"Read {Path.GetFileName(input)} in {sw.Elapsed.TotalSeconds:F1} s");
+        }
+
+        var defaults = new Plc.Generator.CSharp.CSharpGeneratorOptions();
+        var options = new Plc.Generator.CSharp.CSharpGeneratorOptions
+        {
+            Name = name,
+            RuntimeProject = runtime ?? defaults.RuntimeProject,
+            HostProject = host ?? defaults.HostProject,
+            EipPort = eipPort,
+            WebUrl = url ?? defaults.WebUrl,
+            StrictServices = strict,
+            SourceComments = sourceComments,
+        };
+        sw.Restart();
+        var result = new Plc.Generator.CSharp.CSharpGenerator(options).Generate(ir);
+        result.WriteTo(outDir);
+        var report = result.Report;
+        Console.WriteLine($"Generated {result.Files.Count} files into {outDir} in {sw.Elapsed.TotalSeconds:F1} s");
+        Console.WriteLine($"  services used: {report.ServiceInventory.Count} distinct ({report.ServiceInventory.Values.Sum()} calls), unsupported: {report.UnsupportedServices.Count} ({string.Join(", ", report.UnsupportedServices.Select(u => u.Service).Take(15))})");
+        Console.WriteLine($"  standard blocks: {string.Join(", ", report.StandardBlockInventory.Select(kv => kv.Key + "x" + kv.Value))}");
+        foreach (var m in report.Messages.Where(m => m.Severity != "info").Take(20)) Console.WriteLine($"  {m.Severity} {m.Code}: {m.Message} [{m.Location}]");
+        return report.HasErrors ? 1 : 0;
     }
 
     private static string Next(string[] args, ref int i)

@@ -2056,7 +2056,19 @@
                   "type": "Motor"
                 },
                 "pou": "Motor",
-                "inputs": {},
+                "inputs": {
+                  "Data": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/MD1"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MotorData"
+                  }
+                },
                 "outputs": {},
                 "mode": "prescan",
                 "src": {
@@ -2077,7 +2089,19 @@
                   "type": "Motor"
                 },
                 "pou": "Motor",
-                "inputs": {},
+                "inputs": {
+                  "Data": {
+                    "op": "ref",
+                    "root": {
+                      "kind": "var",
+                      "id": "global/Aoi/MD2"
+                    },
+                    "path": [],
+                    "io": false,
+                    "opaque": false,
+                    "type": "MotorData"
+                  }
+                },
                 "outputs": {},
                 "mode": "prescan",
                 "src": {

@@ -10,3 +10,5 @@ TestResults/
 *.pdf
 out/
 *.json.gz
+.stfolder/
+.stignore

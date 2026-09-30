@@ -24,8 +24,15 @@ src/Plc.Ir/                plc-ir 2.0 model, JSON reader/writer, walker, ST prin
 src/Plc.Ir.Validation/     structural, referential and typing validator (IRVnnn codes)
 src/Plc.Ir.Logix/          Logix vendor extension: typed vendor.logix views, MESSAGE/socket model, logix-services.json catalog
 src/Plc.Ir.Logix.Build/    Logix front-end: parsed project -> plc-ir (types, variables, I/O, POUs, ladder and dataflow lowering, prescan)
-src/Plc.Cli/               console tool (parse, ir build, ir validate, ir print)
+src/Plc.Generator.Core/    shared generator layer: naming tally, Logix layout calculator, code writer, generation report
+src/Plc.Generator.CSharp/  C# generator: complete solution per project (types, add-ons, programs, controller, host)
+src/Plc.Runtime.CSharp/    runtime for generated controllers: wrappers over EthernetIPSharp tag memory, scan engine,
+                           Logix timers/counters, services, snapshots, EtherNet/IP tag server
+src/Plc.Runtime.Host/      web console (start/stop, snapshots, tag browser) and JSON API over IPlcController
+src/Plc.Cli/               console tool (parse, ir build, ir validate, ir print, generate csharp)
+external/EthernetIpSharp/  git submodule: the EtherNet/IP + Logix tag server library (branch feature/transpiler-gaps)
 docs/plc-ir-2.0.md         middle file format (docs/ir-1.0.md is the retired v1 format)
+docs/csharp-generator.md   generator / runtime / host design contract
 tests/L5x.Tests/           parser tests (unit + integration over the sample exports)
 tests/Plc.Ir.Tests/        model, JSON, catalog, walker, printer and schema tests
 tests/Plc.Ir.Validation.Tests/
@@ -190,6 +197,32 @@ foreach (var pou in ir.Pous)
     foreach (var action in pou.Actions)
         Emit(action.Body.Statements);   // typed statements, every ref carries a variable id and a type
 ```
+
+## C# generator (generated controller + tag server + web console)
+
+```
+dotnet run -c Release --project src/Plc.Cli -- generate csharp <file.L5X|file.ir.json> <outDir> [--name N] [--runtime path] [--host path] [--eip-port n|none] [--url http://localhost:5080] [--strict-services]
+cd <outDir> && dotnet run --project <Name>.Host
+```
+
+The generator (`src/Plc.Generator.CSharp`, design in [docs/csharp-generator.md](docs/csharp-generator.md))
+writes a complete solution: one class per structure type (`Types/`), per add-on instruction (`AddOns/`,
+with `Execute(enableIn)`, `Prescan`, `Postscan`, `EnableInFalse`), per program (`Programs/`, routines as
+methods, the synthesized prescan as `Prescan()`), and a controller class with every tag, module image and
+program instance, the tasks in scan order, and the structure layouts registered in the tag server. Every
+atomic leaf is a wrapper (`WrapBOOL`, `WrapDINT`, ...) bound to EthernetIPSharp tag memory, so the logic
+and the EtherNet/IP clients share one image; timers and counters run through the `logix` profile
+(`Logix.TON(...)`); vendor services go through `LogixServices` (GSV/SSV/MSG/EVENT/IOT/UID/UIE today;
+anything else compiles to `Services.Unsupported`, is listed in `generation-report.json`, and is logged
+once and skipped at run time unless `FaultOnUnsupportedService` is set). `generation-report.json` also
+carries the alias and naming tallies, layout notes and the instruction inventory.
+
+The generated `<Name>.Host` runs the controller with the web console from `src/Plc.Runtime.Host`: state
+and mode, start/stop, per-task scan statistics, save/load/download/upload snapshots, and a tag browser
+with live values and writes. The EtherNet/IP tag server listens on the configured port so external
+clients (Studio 5000, pycomm3, EthernetIPSharp's `TagClient`) read and write the same tags.
+
+Clone with the submodule: `git clone --recurse-submodules ...` (or `git submodule update --init`).
 
 ## Tests
 
