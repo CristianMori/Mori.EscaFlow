@@ -1,9 +1,9 @@
-# EthernetIPSharp: limitations to address for the PlcTranspiler C# target
+# EthernetIPSharp: limitations to address for the EscaFlow C# target
 
 Context for the agent working on https://github.com/CristianMori/EthernetIpSharp (state as of commit
 31ccf38, July 2026, net8.0).
 
-The PlcTranspiler project turns a Logix L5X export into generated C# where every tag value is a wrapper
+The EscaFlow project turns a Logix L5X export into generated C# where every tag value is a wrapper
 (`WrapDINT`, `WrapBOOL`, ...) backed by a `Tag` byte buffer in `EthernetIPSharp.Logix.TagDatabase`, so
 the generated controller is a Logix-compatible tag server: HMIs, OPC servers, pycomm3, Studio 5000 and
 other PLCs read and write the simulated controller over EtherNet/IP exactly as they would a real one.

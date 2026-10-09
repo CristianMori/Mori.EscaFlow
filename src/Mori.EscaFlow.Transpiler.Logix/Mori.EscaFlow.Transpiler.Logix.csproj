@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Mori.EscaFlow.Transpiler.Logix</RootNamespace>
+    <AssemblyName>Mori.EscaFlow.Transpiler.Logix</AssemblyName>
+    <Description>Rockwell Logix vendor extension for plc-ir 2.0: typed views of the vendor.logix slots, the MESSAGE / socket binding model, the Logix service catalog and pin profile helpers.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mori.EscaFlow.Transpiler\Mori.EscaFlow.Transpiler.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="catalog\logix-services.json" LogicalName="Mori.EscaFlow.Transpiler.Logix.catalog.logix-services.json" />
+  </ItemGroup>
+</Project>

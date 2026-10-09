@@ -1,4 +1,4 @@
-# PlcTranspiler — L5X parser and plc-ir middle file
+# EscaFlow — L5X parser and plc-ir middle file
 
 A C# (.NET 10) toolchain that reads PLC projects into a vendor-neutral middle file for transpilers.
 Today it reads Rockwell Logix 5000 `.L5X` exports into a complete in-memory object model (controller,
@@ -10,8 +10,8 @@ with vendor extension slots, a validator, a JSON Schema and a conformance suite.
 ## Layout
 
 ```
-PlcTranspiler.slnx
-src/L5x/                   L5X parser class library (namespace L5x)
+Mori.EscaFlow.slnx
+src/Mori.EscaFlow.Transpiler.L5X/                   L5X parser class library (namespace L5x)
   Model/                   the object model (Controller, DataTypes, Tags, Values, Programs, Logic/Rll, Logic/St, Logic/Sfc, Logic/Fbd)
   Parsing/Xml/             streaming XmlReader front end, one reader per element family
   Parsing/Rll/             ladder rung-text parser (branches, instructions, operand classification, text writer)
@@ -20,30 +20,30 @@ src/L5x/                   L5X parser class library (namespace L5x)
   Parsing/Linking/         reference resolution (types, aliases, JSR targets, tasks, SFC/FBD graphs)
   Diagnostics/             ParseDiagnostic, DiagnosticBag
   Json/                    System.Text.Json serialization of the model
-src/Plc.Ir/                plc-ir 2.0 model, JSON reader/writer, walker, ST printer, schema generator, catalogs (no dependencies)
-src/Plc.Ir.Validation/     structural, referential and typing validator (IRVnnn codes)
-src/Plc.Ir.Logix/          Logix vendor extension: typed vendor.logix views, MESSAGE/socket model, logix-services.json catalog
-src/Plc.Ir.Logix.Build/    Logix front-end: parsed project -> plc-ir (types, variables, I/O, POUs, ladder and dataflow lowering, prescan)
-src/Plc.Generator.Core/    shared generator layer: naming tally, Logix layout calculator, code writer, generation report
-src/Plc.Generator.CSharp/  C# generator: complete solution per project (types, add-ons, programs, controller, host)
-src/Plc.Runtime.CSharp/    runtime for generated controllers: wrappers over EthernetIPSharp tag memory, scan engine,
+src/Mori.EscaFlow.Transpiler/                plc-ir 2.0 model, JSON reader/writer, walker, ST printer, schema generator, catalogs (no dependencies)
+src/Mori.EscaFlow.Transpiler.Validation/     structural, referential and typing validator (IRVnnn codes)
+src/Mori.EscaFlow.Transpiler.Logix/          Logix vendor extension: typed vendor.logix views, MESSAGE/socket model, logix-services.json catalog
+src/Mori.EscaFlow.Transpiler.L5X.Import/    Logix front-end: parsed project -> plc-ir (types, variables, I/O, POUs, ladder and dataflow lowering, prescan)
+src/Mori.EscaFlow.Converter/    shared generator layer: naming tally, Logix layout calculator, code writer, generation report
+src/Mori.EscaFlow.Converter.CSharp/  C# generator: complete solution per project (types, add-ons, programs, controller, host)
+src/Mori.EscaFlow.Runtime.CSharp/    runtime for generated controllers: wrappers over EthernetIPSharp tag memory, scan engine,
                            Logix timers/counters, services, snapshots, EtherNet/IP tag server
-src/Plc.Runtime.Host/      web console (start/stop, snapshots, tag browser) and JSON API over IPlcController
-src/Plc.Cli/               console tool (parse, ir build, ir validate, ir print, generate csharp)
+src/Mori.EscaFlow.Runtime.Host/      web console (start/stop, snapshots, tag browser) and JSON API over IPlcController
+src/Mori.EscaFlow.Cli/               console tool (parse, ir build, ir validate, ir print, generate csharp)
 external/EthernetIpSharp/  git submodule: the EtherNet/IP + Logix tag server library (branch feature/transpiler-gaps)
 docs/plc-ir-2.0.md         middle file format (docs/ir-1.0.md is the retired v1 format)
 docs/csharp-generator.md   generator / runtime / host design contract
-tests/L5x.Tests/           parser tests (unit + integration over the sample exports)
-tests/Plc.Ir.Tests/        model, JSON, catalog, walker, printer and schema tests
-tests/Plc.Ir.Validation.Tests/
-tests/Plc.Ir.Logix.Tests/  front-end tests: fixture, sample exports, conformance goldens
+tests/Mori.EscaFlow.Transpiler.L5X.Tests/           parser tests (unit + integration over the sample exports)
+tests/Mori.EscaFlow.Transpiler.Tests/        model, JSON, catalog, walker, printer and schema tests
+tests/Mori.EscaFlow.Transpiler.Validation.Tests/
+tests/Mori.EscaFlow.Transpiler.L5X.Import.Tests/  front-end tests: fixture, sample exports, conformance goldens
 tests/Conformance/         crafted L5X fixtures per feature and their golden plc-ir / ST outputs
 ```
 
 ## Using the library
 
 ```csharp
-using L5x.Parsing;
+using Mori.EscaFlow.Transpiler.L5X.Parsing;
 
 var project = L5xParser.ParseFile("MyController.L5X");
 var controller = project.Controller;
@@ -52,12 +52,12 @@ foreach (var program in controller.Programs)
     foreach (var routine in program.Routines)
         switch (routine.Content)
         {
-            case L5x.Model.Logic.RllContent rll:
+            case Mori.EscaFlow.Transpiler.L5X.Model.Logic.RllContent rll:
                 foreach (var rung in rll.Rungs)
                     foreach (var instr in rung.Ast!.AllInstructions())
                         Console.WriteLine($"{instr.Mnemonic}({string.Join(",", instr.Arguments)})");
                 break;
-            case L5x.Model.Logic.StContent st:
+            case Mori.EscaFlow.Transpiler.L5X.Model.Logic.StContent st:
                 Console.WriteLine(st.Ast!.Statements.Count + " statements");
                 break;
         }
@@ -109,7 +109,7 @@ and leaf data type, following program/add-on scoping, aliases, array indices, st
 overlays, `.n` bits and module I/O tags such as `Local:3:I.Data.4`:
 
 ```csharp
-var resolver = new L5x.Parsing.Linking.ScopeResolver(project.Controller);
+var resolver = new Mori.EscaFlow.Transpiler.L5X.Parsing.Linking.ScopeResolver(project.Controller);
 var r = resolver.Resolve(tagRefOperand.Path, routine.Owner);
 // r.Tag, r.LeafType (e.g. DINT), r.IsBit / r.BitNumber, r.LeafDimensions, r.Module, r.Error
 ```
@@ -120,9 +120,9 @@ During linking, bare identifiers in built-in instructions that name no tag, modu
 
 ### Predefined (controller-supplied) data types
 
-`src/L5x/Model/DataTypes/BuiltInTypes.cs` defines the atomics and the structures whose L5K packing is
+`src/Mori.EscaFlow.Transpiler.L5X/Model/DataTypes/BuiltInTypes.cs` defines the atomics and the structures whose L5K packing is
 known exactly (STRING, TIMER, COUNTER, CONTROL). Every other predefined structure comes from the embedded
-resource `src/L5x/Model/DataTypes/PredefinedTypes.txt`, one line per type:
+resource `src/Mori.EscaFlow.Transpiler.L5X/Model/DataTypes/PredefinedTypes.txt`, one line per type:
 
 ```
 ?AXIS_CIP_DRIVE: CIPAxisState:DINT, ActualPosition:REAL, ..., MotionFault:BOOL, ...
@@ -148,7 +148,7 @@ stays opaque until a project that has the module is parsed.
 ## Command line
 
 ```
-dotnet run -c Release --project src/Plc.Cli -- parse <file.L5X> [options]
+dotnet run -c Release --project src/Mori.EscaFlow.Cli -- parse <file.L5X> [options]
 
   --summary               counts, timings, memory and diagnostics by code (default)
   --diagnostics           print every diagnostic
@@ -161,15 +161,15 @@ dotnet run -c Release --project src/Plc.Cli -- parse <file.L5X> [options]
   --threads <n>           parallelism of the logic phase
   --strict                exit code 1 when an Error diagnostic was raised
 
-dotnet run -c Release --project src/Plc.Cli -- ir build <file.L5X> <out.ir.json> [--no-values] [--no-source] [--no-prescan] [--indent] [--validate]
-dotnet run -c Release --project src/Plc.Cli -- ir validate <file.ir.json> [--no-typing] [--warnings]
-dotnet run -c Release --project src/Plc.Cli -- ir print <file.ir.json> [Pou[/Action]]
+dotnet run -c Release --project src/Mori.EscaFlow.Cli -- ir build <file.L5X> <out.ir.json> [--no-values] [--no-source] [--no-prescan] [--indent] [--validate]
+dotnet run -c Release --project src/Mori.EscaFlow.Cli -- ir validate <file.ir.json> [--no-typing] [--warnings]
+dotnet run -c Release --project src/Mori.EscaFlow.Cli -- ir print <file.ir.json> [Pou[/Action]]
 ```
 
 ## Middle file (plc-ir 2.0)
 
 `ir build` writes the vendor-neutral middle file that code generators consume. The format is documented
-in [docs/plc-ir-2.0.md](docs/plc-ir-2.0.md); its JSON Schema is `src/Plc.Ir/Schema/plc-ir-2.0.schema.json`.
+in [docs/plc-ir-2.0.md](docs/plc-ir-2.0.md); its JSON Schema is `src/Mori.EscaFlow.Transpiler/Schema/plc-ir-2.0.schema.json`.
 The core is IEC 61131-3: a configuration with resources, tasks and program instances; global variable
 lists; types (user, vendor, I/O, with neutral members); POUs of kind program / functionBlock / function
 with variable sections, a body, actions (with `init` / `enableFalse` / `postscan` hooks), and typed
@@ -181,18 +181,18 @@ ports and connections, BIT overlay hosts, scan-mode flags) lives in `vendor.logi
 
 Producers and consumers:
 
-- `src/Plc.Ir` — the model, `IrJson`, `IrWalker`, `StPrinter`, catalogs (`AtomicTypes`,
+- `src/Mori.EscaFlow.Transpiler` — the model, `IrJson`, `IrWalker`, `StPrinter`, catalogs (`AtomicTypes`,
   `StandardFunctionBlocks` with the `iec` / `logix` / `s7` profiles, `StandardFunctions`,
   `IServiceCatalog`) and `SchemaGenerator`. No dependency on the parser.
-- `src/Plc.Ir.Validation` — `IrValidator`: structural, referential and typing passes; `ValidationCodes`.
-- `src/Plc.Ir.Logix` — `LogixExtensions` (`variable.Logix()`, `type.Logix()`, ...), `LogixMessage`,
+- `src/Mori.EscaFlow.Transpiler.Validation` — `IrValidator`: structural, referential and typing passes; `ValidationCodes`.
+- `src/Mori.EscaFlow.Transpiler.Logix` — `LogixExtensions` (`variable.Logix()`, `type.Logix()`, ...), `LogixMessage`,
   `LogixServiceCatalog`.
-- `src/Plc.Ir.Logix.Build` — `LogixIrBuilder` (project → document), `LadderLowering`, `NetLowering`,
+- `src/Mori.EscaFlow.Transpiler.L5X.Import` — `LogixIrBuilder` (project → document), `LadderLowering`, `NetLowering`,
   `CallEmitter`, `SubroutineIndex`, `LogixInstructionMap`.
 
 ```csharp
-var ir = Plc.Ir.IrJson.ReadFile("project.ir.json");
-var result = new Plc.Ir.Validation.IrValidator().Validate(ir, new() { ServiceCatalogs = { Plc.Ir.Logix.LogixServiceCatalog.Instance } });
+var ir = Mori.EscaFlow.Transpiler.IrJson.ReadFile("project.ir.json");
+var result = new Mori.EscaFlow.Transpiler.Validation.IrValidator().Validate(ir, new() { ServiceCatalogs = { Mori.EscaFlow.Transpiler.Logix.LogixServiceCatalog.Instance } });
 foreach (var pou in ir.Pous)
     foreach (var action in pou.Actions)
         Emit(action.Body.Statements);   // typed statements, every ref carries a variable id and a type
@@ -201,11 +201,11 @@ foreach (var pou in ir.Pous)
 ## C# generator (generated controller + tag server + web console)
 
 ```
-dotnet run -c Release --project src/Plc.Cli -- generate csharp <file.L5X|file.ir.json> <outDir> [--name N] [--runtime path] [--host path] [--eip-port n|none] [--url http://localhost:5080] [--strict-services]
+dotnet run -c Release --project src/Mori.EscaFlow.Cli -- generate csharp <file.L5X|file.ir.json> <outDir> [--name N] [--runtime path] [--host path] [--eip-port n|none] [--url http://localhost:5080] [--strict-services]
 cd <outDir> && dotnet run --project <Name>.Host
 ```
 
-The generator (`src/Plc.Generator.CSharp`, design in [docs/csharp-generator.md](docs/csharp-generator.md))
+The generator (`src/Mori.EscaFlow.Converter.CSharp`, design in [docs/csharp-generator.md](docs/csharp-generator.md))
 writes a complete solution: one class per structure type (`Types/`), per add-on instruction (`AddOns/`,
 with `Execute(enableIn)`, `Prescan`, `Postscan`, `EnableInFalse`), per program (`Programs/`, routines as
 methods, the synthesized prescan as `Prescan()`), and a controller class with every tag, module image and
@@ -217,7 +217,7 @@ anything else compiles to `Services.Unsupported`, is listed in `generation-repor
 once and skipped at run time unless `FaultOnUnsupportedService` is set). `generation-report.json` also
 carries the alias and naming tallies, layout notes and the instruction inventory.
 
-The generated `<Name>.Host` runs the controller with the web console from `src/Plc.Runtime.Host`: state
+The generated `<Name>.Host` runs the controller with the web console from `src/Mori.EscaFlow.Runtime.Host`: state
 and mode, start/stop, per-task scan statistics, save/load/download/upload snapshots, and a tag browser
 with live values and writes. The EtherNet/IP tag server listens on the configured port so external
 clients (Studio 5000, pycomm3, EthernetIPSharp's `TagClient`) read and write the same tags.
@@ -240,8 +240,8 @@ outputs lowered, zero validator errors, and a byte-identical JSON round trip.
 
 Conformance: `tests/Conformance/fixtures/logix/*.L5X` are small crafted exports, one per feature area;
 `tests/Conformance/golden/logix/*.ir.json` and `*.st` are their expected middle file and structured text
-print. Regenerate them with `PLC_IR_UPDATE_GOLDEN=1 dotnet test tests/Plc.Ir.Logix.Tests` after an
-intentional format change, and the JSON Schema with `PLC_IR_UPDATE_SCHEMA=1 dotnet test tests/Plc.Ir.Tests`.
+print. Regenerate them with `PLC_IR_UPDATE_GOLDEN=1 dotnet test tests/Mori.EscaFlow.Transpiler.L5X.Import.Tests` after an
+intentional format change, and the JSON Schema with `PLC_IR_UPDATE_SCHEMA=1 dotnet test tests/Mori.EscaFlow.Transpiler.Tests`.
 
 ## Notes on the format
 

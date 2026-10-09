@@ -6,12 +6,12 @@ controller and exposes every tag over EtherNet/IP through EthernetIPSharp (submo
 generated code; this document is the contract between them and the generator.
 
 ```
-src/Plc.Generator.Core      shared generator layer: naming tally, Logix layout calculator, code writer, report
-src/Plc.Generator.CSharp    C# emitter: solution, projects, types, programs, add-ons, controller, host
-src/Plc.Runtime.CSharp      runtime library (namespace Plc.Runtime): wrappers over tag memory, structures,
+src/Mori.EscaFlow.Converter      shared generator layer: naming tally, Logix layout calculator, code writer, report
+src/Mori.EscaFlow.Converter.CSharp    C# emitter: solution, projects, types, programs, add-ons, controller, host
+src/Mori.EscaFlow.Runtime.CSharp      runtime library (namespace Mori.EscaFlow.Runtime): wrappers over tag memory, structures,
                             arrays, scan engine, system status, Logix timers/counters, services, snapshots,
                             EtherNet/IP server hosting, IPlcController
-src/Plc.Runtime.Host        ASP.NET Core host (namespace Plc.Runtime.Host): web page + JSON API over IPlcController
+src/Mori.EscaFlow.Runtime.Host        ASP.NET Core host (namespace Mori.EscaFlow.Runtime.Host): web page + JSON API over IPlcController
 ```
 
 ## Generated solution layout
@@ -20,12 +20,12 @@ src/Plc.Runtime.Host        ASP.NET Core host (namespace Plc.Runtime.Host): web 
 <Name>/
   <Name>.slnx
   Directory.Build.props                  net10.0, nullable, implicit usings, warnings as in this repo
-  <Name>.Logic/<Name>.Logic.csproj       ProjectReference to Plc.Runtime.CSharp (path from --runtime-path)
+  <Name>.Logic/<Name>.Logic.csproj       ProjectReference to Mori.EscaFlow.Runtime.CSharp (path from --runtime-path)
     Types/<TypeName>.cs                  one structure class per IR type (user, vendor, io); user string types
     AddOns/<Pou>.cs                      one class per functionBlock POU
     Programs/<Pou>.cs                    one class per program POU
     Controller.cs                        <Name>Controller : PlcController
-  <Name>.Host/<Name>.Host.csproj         ProjectReference to Plc.Runtime.Host; Program.cs runs PlcWebHost
+  <Name>.Host/<Name>.Host.csproj         ProjectReference to Mori.EscaFlow.Runtime.Host; Program.cs runs PlcWebHost
   generation-report.json                 aliases tally, naming tally, unsupported services, layout notes
   README.md
 ```
@@ -52,7 +52,7 @@ EtherNet/IP server and the logic share one memory:
 
 ## Layout
 
-The generator computes every structure layout with Logix rules (`Plc.Generator.Core.Layout.LogixLayout`)
+The generator computes every structure layout with Logix rules (`Mori.EscaFlow.Converter.Layout.LogixLayout`)
 and emits, per structure class, a static `Layout` (`PlcLayout { Name, Size, Members[] { Name, TypeCode, Offset,
 Bit, Dims, ElementSize, TemplateName } }`). The runtime turns a `PlcLayout` into an EthernetIPSharp
 `TemplateDefinition` (`TagStore.RegisterLayout`) so the server presents the same member list and offsets.
@@ -95,7 +95,7 @@ public sealed class TController : PlcController {
 }
 ```
 
-Calls: a standard block under the logix profile → `Logix.TON(M1.Timer, rc)` (`Plc.Runtime.Logix` static
+Calls: a standard block under the logix profile → `Logix.TON(M1.Timer, rc)` (`Mori.EscaFlow.Runtime.Logix` static
 class: TON, TOF, TONR, CTU, CTD and their `Prescan` forms on `ITimer` / `ICounter`); an add-on →
 `Blk.Rate.Value = 100; Blk.Execute(rc); Pulse.Value = Blk.Out.Value;` (inputs copied in, outputs copied
 out, InOut fields rebound); an action → method call; a `sysCall` → `Services.GSV(...)` on

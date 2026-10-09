@@ -8,17 +8,17 @@ and expression trees. Everything a vendor has that the core cannot express trave
 slot on the node it belongs to, so nothing is lost and no backend has to know a vendor it does not
 target.
 
-Produce it with the CLI (`dotnet run -c Release --project src/Plc.Cli -- ir build <file.L5X> <out.ir.json>`),
-read it in C# with `Plc.Ir.IrJson.ReadFile(path)` (assembly `Plc.Ir`, no other dependencies) or in any
-language from the JSON. The JSON Schema (draft 2020-12) is `src/Plc.Ir/Schema/plc-ir-2.0.schema.json`,
-generated from the C# model by `Plc.Ir.Schema.SchemaGenerator` and embedded in the assembly.
+Produce it with the CLI (`dotnet run -c Release --project src/Mori.EscaFlow.Cli -- ir build <file.L5X> <out.ir.json>`),
+read it in C# with `Mori.EscaFlow.Transpiler.IrJson.ReadFile(path)` (assembly `Mori.EscaFlow.Transpiler`, no other dependencies) or in any
+language from the JSON. The JSON Schema (draft 2020-12) is `src/Mori.EscaFlow.Transpiler/Schema/plc-ir-2.0.schema.json`,
+generated from the C# model by `Mori.EscaFlow.Transpiler.Schema.SchemaGenerator` and embedded in the assembly.
 
 ## Design rules
 
 - **IEC core, vendor slots.** Every node derives from `IrNode` with `vendor: { "<id>": {...} }`,
   `description` and `src` (provenance: line/col, rung/element, sheet). Backends that target the neutral
   core ignore `vendor`; a tag server or a same-vendor round trip reads it through the vendor package
-  (`Plc.Ir.Logix` gives typed views: `variable.Logix().Path`, `type.Logix().HiddenMembers`, ...).
+  (`Mori.EscaFlow.Transpiler.Logix` gives typed views: `variable.Logix().Path`, `type.Logix().HiddenMembers`, ...).
 - **Everything is resolved.** References carry the id of the declaring variable (aliases expanded, the
   alias noted), the leaf type, whether they touch an I/O channel image, and whether they enter an
   opaque type. Actions, POUs, channels, devices and tasks are referenced by id or name and checked by
@@ -55,7 +55,7 @@ generated from the C# model by `Plc.Ir.Schema.SchemaGenerator` and embedded in t
 
 Atomic (elementary) types are never listed; they are the IEC set `BOOL SINT INT DINT LINT USINT UINT
 UDINT ULINT REAL LREAL BYTE WORD DWORD LWORD CHAR WCHAR TIME LTIME DATE LDATE TOD LTOD DT LDT`
-(`Plc.Ir.Catalogs.AtomicTypes`).
+(`Mori.EscaFlow.Transpiler.Catalogs.AtomicTypes`).
 
 ```json
 { "name": "Motor", "kind": "struct", "class": "user", "opaque": false,
@@ -128,7 +128,7 @@ variables of the synthetic `IO` global list).
 | `lit` | `kind` int/real/bool/string/wstring/time/date/tod/dt/enum, `int`, `real`, `bool`, `string`, `radix`, `text`, `type` | constant |
 | `un` | `operator` neg/not, `operand` | unary |
 | `bin` | `operator` add sub mul div mod pow eq ne lt gt le ge and or xor, `left`, `right` | binary (and/or/xor are logical on BOOL, bitwise on integers) |
-| `fn` | `name` or `pou`, `args[]` | standard function (`Plc.Ir.Catalogs.StandardFunctions`: ABS SQRT … SHL SHR SEL MUX MIN MAX LIMIT LEN CONCAT MID FIND … `X_TO_Y`) or project function |
+| `fn` | `name` or `pou`, `args[]` | standard function (`Mori.EscaFlow.Transpiler.Catalogs.StandardFunctions`: ABS SQRT … SHL SHR SEL MUX MIN MAX LIMIT LEN CONCAT MID FIND … `X_TO_Y`) or project function |
 | `conv` | `to`, `mode` wrap/saturate/roundEven/roundHalfUp/trunc/checked, `operand` | explicit conversion where the source language converted implicitly (Logix REAL→integer stores round half to even; integer narrowing wraps) |
 | `bit` | `of`, `bit` | one bit of an integer or bit string; usable as an assignment target (Logix `Word.3`, `Word.[i]`) |
 | `edge` | `kind` rising/falling, `clk`, `storage` | edge of `clk` using the BOOL `storage` as previous-scan memory |
@@ -160,7 +160,7 @@ enable (Logix EnableIn; when false the block's `enableFalse` action runs instead
 
 ## Standard function blocks and profiles
 
-`Plc.Ir/Catalogs/std-fbs.json` lists TON, TOF, TP, TONR, CTU, CTD, CTUD, R_TRIG, F_TRIG, RS, SR with
+`Mori.EscaFlow.Transpiler/Catalogs/std-fbs.json` lists TON, TOF, TP, TONR, CTU, CTD, CTUD, R_TRIG, F_TRIG, RS, SR with
 IEC pin names and types, and the pin **profiles**:
 
 - `iec`: the instance type is the block itself, TIME pins.
@@ -174,7 +174,7 @@ the backend's Logix timer runtime; a backend that only knows the `iec` profile r
 
 ## Vendor service catalogs
 
-`sysCall` / `sysFn` name a catalog (`logix`, later `s7`, `twincat`) and a service. `Plc.Ir.Logix`
+`sysCall` / `sysFn` name a catalog (`logix`, later `s7`, `twincat`) and a service. `Mori.EscaFlow.Transpiler.Logix`
 embeds `catalog/logix-services.json`: every Logix instruction with its positional parameters (names
 from 1756-RM003 where known), group (bit, timer, compare, math, move, file, program, system, messaging,
 control, ascii, phase, motion, safety, fbd), `enable` (input: runs every scan and reads the rung
@@ -257,7 +257,7 @@ when entering Run, before the first scan.
 
 ## Validation
 
-`Plc.Ir.Validation.IrValidator` runs three passes: structural (format, enum values, ids), referential
+`Mori.EscaFlow.Transpiler.Validation.IrValidator` runs three passes: structural (format, enum values, ids), referential
 (every id and name resolves; standard block pins and instance types under the profile; POU pins and
 directions; catalog services and argument counts; labels; alias cycles; task/program consistency) and
 typing (BOOL conditions, operand categories, `bit` on integers, `edge` storage, `conv` pairs,

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Mori.EscaFlow.Transpiler.L5X</RootNamespace>
+    <AssemblyName>Mori.EscaFlow.Transpiler.L5X</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Parsing\Rll\InstructionSignatures.txt" LogicalName="Mori.EscaFlow.Transpiler.L5X.InstructionSignatures.txt" />
+    <EmbeddedResource Include="Model\DataTypes\PredefinedTypes.txt" LogicalName="Mori.EscaFlow.Transpiler.L5X.PredefinedTypes.txt" />
+  </ItemGroup>
+</Project>

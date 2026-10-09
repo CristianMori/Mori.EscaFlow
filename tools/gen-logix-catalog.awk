@@ -33,7 +33,7 @@ BEGIN {
   always="TON TOF RTO CTU CTD OTE PID ALMA ALMD MAOC MDOC SFP SFR EOT PXRQ PIDE MSG";
   n=split(always, arr, " "); for (i=1;i<=n;i++) alw[arr[i]]=1;
   print "{";
-  print "  \"$comment\": \"Logix instruction / service catalog for plc-ir 2.0 sysCall nodes with catalog = logix. Generated from src/L5x/Parsing/Rll/InstructionSignatures.txt (1756-RM014 neutral text table) and hand-grouped; parameter names from 1756-RM003 where known, argN otherwise. lowered = true marks instructions the Logix front-end never emits as sysCall (they become contacts, coils, assignments, standard function blocks, copies or action calls). enable = input marks instructions that run every scan and read the rung condition; gate marks instructions that run only when the rung condition is true.\",";
+  print "  \"$comment\": \"Logix instruction / service catalog for plc-ir 2.0 sysCall nodes with catalog = logix. Generated from src/Mori.EscaFlow.Transpiler.L5X/Parsing/Rll/InstructionSignatures.txt (1756-RM014 neutral text table) and hand-grouped; parameter names from 1756-RM003 where known, argN otherwise. lowered = true marks instructions the Logix front-end never emits as sysCall (they become contacts, coils, assignments, standard function blocks, copies or action calls). enable = input marks instructions that run every scan and read the rung condition; gate marks instructions that run only when the rung condition is true.\",";
   print "  \"id\": \"logix\",";
   print "  \"services\": [";
   first=1; group="misc";

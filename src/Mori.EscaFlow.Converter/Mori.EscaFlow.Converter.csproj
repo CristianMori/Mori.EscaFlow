@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Mori.EscaFlow.Converter</RootNamespace>
+    <AssemblyName>Mori.EscaFlow.Converter</AssemblyName>
+    <Description>Shared generator layer for plc-ir consumers: generated-file model, naming tally, Logix structure layout calculator, code writer, generation report.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mori.EscaFlow.Transpiler\Mori.EscaFlow.Transpiler.csproj" />
+    <ProjectReference Include="..\Mori.EscaFlow.Transpiler.Logix\Mori.EscaFlow.Transpiler.Logix.csproj" />
+  </ItemGroup>
+</Project>

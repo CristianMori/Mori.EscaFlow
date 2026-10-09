@@ -1,13 +1,13 @@
 # Intermediate representation (middle file)
 
-`L5x.Ir.Build` turns a parsed and linked L5X project into one JSON document, the *middle file*, that any
+`Mori.EscaFlow.Transpiler.L5X.Ir.Build` turns a parsed and linked L5X project into one JSON document, the *middle file*, that any
 program can consume to generate code. It is produced with:
 
 ```
-dotnet run -c Release --project src/L5x.Cli -- parse <file.L5X> --ir out.ir.json [--ir-no-values] [--ir-indent]
+dotnet run -c Release --project src/Mori.EscaFlow.Transpiler.L5X.Cli -- parse <file.L5X> --ir out.ir.json [--ir-no-values] [--ir-indent]
 ```
 
-and read back in C# with `L5x.Ir.IrJson.ReadFile(path)`, an assembly with no dependency on the parser.
+and read back in C# with `Mori.EscaFlow.Transpiler.L5X.Ir.IrJson.ReadFile(path)`, an assembly with no dependency on the parser.
 Any other language reads the JSON directly.
 
 ## Design rules

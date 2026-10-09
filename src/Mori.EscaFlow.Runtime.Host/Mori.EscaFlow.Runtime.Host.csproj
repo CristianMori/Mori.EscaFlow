@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>Mori.EscaFlow.Runtime.Host</RootNamespace>
+    <AssemblyName>Mori.EscaFlow.Runtime.Host</AssemblyName>
+    <OutputType>Library</OutputType>
+    <Description>Web host for generated controllers: a single-page console (start/stop, snapshots, tag browser) and a JSON API over IPlcController.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mori.EscaFlow.Runtime.CSharp\Mori.EscaFlow.Runtime.CSharp.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\index.html" LogicalName="Mori.EscaFlow.Runtime.Host.index.html" />
+  </ItemGroup>
+</Project>

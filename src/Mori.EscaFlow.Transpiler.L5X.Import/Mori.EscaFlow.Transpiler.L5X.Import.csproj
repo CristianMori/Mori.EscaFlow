@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Mori.EscaFlow.Transpiler.L5X.Import</RootNamespace>
+    <AssemblyName>Mori.EscaFlow.Transpiler.L5X.Import</AssemblyName>
+    <Description>Logix front-end for plc-ir 2.0: builds the vendor-neutral middle file from a parsed L5X project (types, variables, I/O, POUs, ladder lowering, dataflow lowering, prescan synthesis).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mori.EscaFlow.Transpiler.L5X\Mori.EscaFlow.Transpiler.L5X.csproj" />
+    <ProjectReference Include="..\Mori.EscaFlow.Transpiler.Logix\Mori.EscaFlow.Transpiler.Logix.csproj" />
+  </ItemGroup>
+</Project>

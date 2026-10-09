@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Mori.EscaFlow.Converter.CSharp</RootNamespace>
+    <AssemblyName>Mori.EscaFlow.Converter.CSharp</AssemblyName>
+    <Description>C# generator: turns a plc-ir document into a complete solution (structure classes, add-on classes, program classes, controller with task engine, web host) on top of Mori.EscaFlow.Runtime.CSharp.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mori.EscaFlow.Converter\Mori.EscaFlow.Converter.csproj" />
+  </ItemGroup>
+</Project>

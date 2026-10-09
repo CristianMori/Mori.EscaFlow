@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Mori.EscaFlow.Transpiler</RootNamespace>
+    <AssemblyName>Mori.EscaFlow.Transpiler</AssemblyName>
+    <Description>plc-ir 2.0: vendor-neutral intermediate representation of a PLC project (IEC 61131-3 core with vendor extension slots), JSON reader/writer, catalogs, walker, printer and schema generator. No dependencies.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Catalogs\std-fbs.json" LogicalName="Mori.EscaFlow.Transpiler.Catalogs.std-fbs.json" />
+    <EmbeddedResource Include="Schema\plc-ir-2.0.schema.json" LogicalName="Mori.EscaFlow.Transpiler.Schema.plc-ir-2.0.schema.json" Condition="Exists('Schema\plc-ir-2.0.schema.json')" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Mori.EscaFlow.Cli</RootNamespace>
+    <AssemblyName>escaflow</AssemblyName>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mori.EscaFlow.Transpiler.L5X\Mori.EscaFlow.Transpiler.L5X.csproj" />
+    <ProjectReference Include="..\Mori.EscaFlow.Transpiler.L5X.Import\Mori.EscaFlow.Transpiler.L5X.Import.csproj" />
+    <ProjectReference Include="..\Mori.EscaFlow.Transpiler.Validation\Mori.EscaFlow.Transpiler.Validation.csproj" />
+    <ProjectReference Include="..\Mori.EscaFlow.Converter.CSharp\Mori.EscaFlow.Converter.CSharp.csproj" />
+  </ItemGroup>
+</Project>
