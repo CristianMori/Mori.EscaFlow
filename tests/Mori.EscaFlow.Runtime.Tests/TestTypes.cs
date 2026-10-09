@@ -115,6 +115,47 @@ public sealed class Motor : PlcStruct
     };
 }
 
+/// <summary>
+/// A minimal MESSAGE structure, as a real one lays out the status bits the MSG service reads and writes:
+/// EW/ER/DN/ST/EN packed in one byte, plus ERR. Member order and offsets are arbitrary for the test; only the
+/// names matter, since <see cref="LogixServices.MSG"/> looks members up by name through <see cref="GetMember"/>.
+/// </summary>
+public sealed class MESSAGE : PlcStruct
+{
+    public static readonly PlcLayout Layout = new("MESSAGE", 4, 4, new[]
+    {
+        new PlcLayoutMember("ERR", LogixDataTypes.INT, null, 0, 0, Array.Empty<int>(), 2),
+        new PlcLayoutMember("ZZZZZZZZZZMESSAGE0", LogixDataTypes.SINT, null, 2, 0, Array.Empty<int>(), 1, hidden: true),
+        new PlcLayoutMember("EW", LogixDataTypes.BOOL, null, 2, 0, Array.Empty<int>(), 1),
+        new PlcLayoutMember("ER", LogixDataTypes.BOOL, null, 2, 1, Array.Empty<int>(), 1),
+        new PlcLayoutMember("DN", LogixDataTypes.BOOL, null, 2, 2, Array.Empty<int>(), 1),
+        new PlcLayoutMember("ST", LogixDataTypes.BOOL, null, 2, 3, Array.Empty<int>(), 1),
+        new PlcLayoutMember("EN", LogixDataTypes.BOOL, null, 2, 4, Array.Empty<int>(), 1),
+    });
+
+    public readonly WrapINT ERR;
+    public readonly WrapBOOL EW;
+    public readonly WrapBOOL ER;
+    public readonly WrapBOOL DN;
+    public readonly WrapBOOL ST;
+    public readonly WrapBOOL EN;
+
+    public MESSAGE(Tag tag, int offset) : base(tag, offset)
+    {
+        ERR = new WrapINT(tag, offset);
+        EW = new WrapBOOL(tag, offset + 2, 0);
+        ER = new WrapBOOL(tag, offset + 2, 1);
+        DN = new WrapBOOL(tag, offset + 2, 2);
+        ST = new WrapBOOL(tag, offset + 2, 3);
+        EN = new WrapBOOL(tag, offset + 2, 4);
+    }
+
+    public override object? GetMember(string name) => name.ToUpperInvariant() switch
+    {
+        "ERR" => ERR, "EW" => EW, "ER" => ER, "DN" => DN, "ST" => ST, "EN" => EN, _ => null,
+    };
+}
+
 public sealed class STRING20 : WrapSTRING
 {
     public static new readonly PlcLayout Layout = LayoutFor("STRING20", 20);

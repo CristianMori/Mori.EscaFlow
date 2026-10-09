@@ -178,19 +178,56 @@ public class LogixServices
         }
     }
 
-    /// <summary>MSG(message): the message structure is marked in error (unsupported messaging) until a messaging runtime is plugged in.</summary>
+    /// <summary>
+    /// MSG(enable, message): a message instruction, called every scan with the rung condition and the MESSAGE
+    /// structure. No real messaging is implemented, so every attempt completes immediately in error.
+    /// </summary>
     /// <remarks>
-    /// Logic that sends messages usually waits on <c>.DN</c> or <c>.ER</c> and retries; marking the message in error
-    /// with a nonzero <c>.ERR</c> lets such logic complete its state machine instead of hanging on <c>.EN</c>. A
-    /// real implementation (CIP data table reads and writes, generic CIP, socket services) replaces this method.
+    /// <para>
+    /// The converter always passes the rung condition first (MSG is an always-scan instruction, exactly like a
+    /// timer: Logix re-evaluates it on every scan it is reached, not only on an edge), then the message tag. This
+    /// mirrors the real instruction's enable/trigger bits as Rockwell documents them (1756-RM003, MSG status bits):
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description><c>.EN</c> is set on the rising edge of the rung and stays set — through the whole
+    /// transmission and after it completes — until the rung goes false. A true rung with <c>.EN</c> already set is
+    /// therefore the message still "owned" by this trigger; Logix does not start a second one underneath it, which
+    /// is why a plain level-sensitive rung (no one-shot) still sends only once per activation.</description></item>
+    /// <item><description>When the rung drops, <c>.EN</c> clears and the instruction is idle again, ready for the
+    /// next rising edge. This is also how retry logic actually works in real projects: the rung normally includes
+    /// the request bit the application logic itself clears once it has seen <c>.DN</c> or <c>.ER</c>, so the next
+    /// attempt is a fresh rising edge, not a bit this method has to clear on its own.</description></item>
+    /// <item><description><c>.ST</c> (transmitting) and <c>.DN</c> stay false and <c>.ER</c> is set with a nonzero
+    /// <c>.ERR</c>, because this runtime cannot complete a message successfully. Logic that waits on <c>.DN</c> or
+    /// <c>.ER</c> therefore proceeds instead of hanging forever on <c>.EN</c>.</description></item>
+    /// </list>
+    /// <para>A real implementation (CIP data table reads and writes, generic CIP, socket services) replaces this
+    /// method; it would clear <c>.ER</c> and set <c>.DN</c> on success instead.</para>
     /// </remarks>
     public virtual void MSG(params object?[] args)
     {
-        if (args.Length == 0 || args[0] is not PlcStruct message) return;
+        if (args.Length < 2 || args[0] is not bool enable || args[1] is not PlcStruct message) return;
+
+        if (!enable)
+        {
+            // Rung false: the instruction is idle. EN drops; DN/ER/ERR are left as the last attempt set them, exactly
+            // as a real controller leaves the status bits visible until the next trigger re-evaluates them.
+            SetBool(message, "EN", false);
+            return;
+        }
+
+        if (GetBool(message, "EN"))
+        {
+            // Still owned by the trigger that set EN (true rung, already enabled): Logix does not restart the
+            // message underneath an enable that has not cleared, so there is nothing further to do this scan.
+            return;
+        }
+
+        // Rising edge: a new attempt starts and, since there is no real transport, fails immediately.
         SetBool(message, "EN", true);
+        SetBool(message, "ST", false);
         SetBool(message, "DN", false);
         SetBool(message, "EW", false);
-        SetBool(message, "ST", false);
         SetBool(message, "ER", true);
         if (message.TryGetMember("ERR", out var err) && err is PlcValue errValue) errValue.SetFrom(0x0001);
         LogOnce("MSG:" + message.Tag.Name + ":" + message.Offset, $"MSG on {message.Tag.Name} is not implemented in this runtime; .ER set");
@@ -296,4 +333,7 @@ public class LogixServices
     {
         if (s.TryGetMember(member, out var m) && m is WrapBOOL b) b.Value = value;
     }
+
+    /// <summary>Reads a BOOL member by name; false when the structure has no such member (never faults on an unexpected shape).</summary>
+    private static bool GetBool(PlcStruct s, string member) => s.TryGetMember(member, out var m) && m is WrapBOOL b && b.Value;
 }

@@ -65,4 +65,48 @@ public class ControllerTests
         Assert.Equal(DateTime.Now.Year, year[0].Value);
         c.Services.Call("MAJ", 1, 2); // unsupported services are logged once and skipped unless FaultOnUnsupportedService is set
     }
+
+    /// <summary>
+    /// The converter emits <c>Services.MSG(rc, message)</c> every scan, exactly like a timer (the rung condition
+    /// first, the message structure second); this proves that shape is actually read (a prior build silently took
+    /// the bool for the structure and did nothing at all) and that EN/DN/ER follow the real Logix enable/trigger
+    /// bits: EN tracks the rung while the message is "owned" by this activation, every attempt fails immediately
+    /// since there is no real transport, and a false rung clears EN so the next rising edge starts a fresh attempt.
+    /// </summary>
+    [Fact]
+    public async Task MsgFollowsRungConditionAndCompletesInError()
+    {
+        await using var c = new TestController();
+        var message = new MESSAGE(c.Store.Define("Msg", MESSAGE.Layout, Array.Empty<int>()), 0);
+
+        // Rung false: idle, nothing set.
+        c.Services.MSG(false, message);
+        Assert.False(message.EN.Value);
+        Assert.False(message.ER.Value);
+
+        // Rising edge: the attempt fails immediately (no real messaging), EN latches on while the rung stays true.
+        c.Services.MSG(true, message);
+        Assert.True(message.EN.Value);
+        Assert.True(message.ER.Value);
+        Assert.False(message.DN.Value);
+        Assert.Equal(1, message.ERR.Value);
+
+        // Rung still true: Logix does not restart the message while EN is set, so a second attempt is not an error
+        // again that an observer could mistake for a retry (EN/ER simply stay as the first attempt left them).
+        message.ERR.Value = 0;
+        c.Services.MSG(true, message);
+        Assert.True(message.EN.Value);
+        Assert.True(message.ER.Value);
+        Assert.Equal(0, message.ERR.Value); // unchanged: MSG did nothing on this call, it did not re-run the attempt
+
+        // Rung drops: EN clears, ready for a fresh rising edge next time (this is how retry logic actually works).
+        c.Services.MSG(false, message);
+        Assert.False(message.EN.Value);
+        Assert.True(message.ER.Value); // ER/ERR are left visible until the next trigger re-evaluates them
+
+        c.Services.MSG(true, message);
+        Assert.True(message.EN.Value);
+        Assert.True(message.ER.Value);
+        Assert.Equal(1, message.ERR.Value);
+    }
 }
