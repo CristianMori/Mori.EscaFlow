@@ -11,6 +11,13 @@ namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Values;
 /// <summary>
 /// Reads a <c>&lt;Data Format="Decorated"&gt;</c> tree (DataValue / Array / Structure and their *Member forms)
 /// from a streaming <see cref="XmlReader"/> into a typed <see cref="TagValue"/>. Never throws on content problems.
+/// <para>
+/// Decorated data is self-describing (every element carries its own <c>DataType</c> and, for scalars,
+/// <c>Radix</c>), unlike L5K, so this reader needs no data type registry at all: it shapes values purely from
+/// what each element says about itself. It runs directly off the streaming <see cref="XmlReader"/> used by the
+/// XML phase (see <c>L5xParser</c>) rather than materializing a <see cref="XElement"/> tree first, because a
+/// large array can otherwise be the single biggest allocation in parsing a project.
+/// </para>
 /// </summary>
 public static class DecoratedDataReader
 {
@@ -29,7 +36,7 @@ public static class DecoratedDataReader
         return impl.ReadRoot();
     }
 
-    /// <summary>Reads a value from an already materialized element (used for module config / IO data).</summary>
+    /// <summary>Reads a value from an already materialized element (used for module config / IO data, whose elements are read as part of a generic subtree rather than streamed directly).</summary>
     public static TagValue? ReadFromElement(XElement element, IDiagnosticSink diagnostics, ValueInterner? interner = null)
     {
         using var reader = element.CreateReader();
@@ -37,7 +44,11 @@ public static class DecoratedDataReader
         return Read(reader, diagnostics, interner);
     }
 
-    /// <summary>Parses a decorated scalar text according to the atomic kind and radix. Returns null when unparseable.</summary>
+    /// <summary>
+    /// Parses a decorated scalar text according to the atomic kind and radix. Returns null when unparseable.
+    /// Handles plain numbers, the ASCII display form (<c>'$00$0F'</c>, most significant byte first) and the
+    /// boolean text forms (<c>0</c>/<c>1</c>, <c>true</c>/<c>false</c>).
+    /// </summary>
     public static ScalarValue? TryParseScalar(AtomicKind kind, Radix radix, string text, ValueInterner? interner = null)
     {
         interner ??= ValueInterner.Shared;
@@ -97,6 +108,8 @@ public static class DecoratedDataReader
                 {
                     var v = i.Value;
                     var bits = kind.BitSize();
+                    // A radix-prefixed literal (2#/8#/16#) is the bit pattern, not a signed decimal value, so it
+                    // must be sign-extended according to the destination type's width rather than taken as-is.
                     if (i.RadixBase != 10 && bits > 0 && bits < 64) v = SignExtend(v, bits, kind);
                     var effectiveRadix = radix != Radix.Unknown ? radix : i.RadixBase switch
                     {
@@ -114,6 +127,7 @@ public static class DecoratedDataReader
         return null;
     }
 
+    /// <summary>Masks to <paramref name="bits"/> width and, for a signed kind, extends the sign bit so the value matches what the same bit pattern means as a signed integer.</summary>
     private static long SignExtend(long value, int bits, AtomicKind kind)
     {
         var mask = (1L << bits) - 1;
@@ -126,6 +140,7 @@ public static class DecoratedDataReader
         return value;
     }
 
+    /// <summary>Parses an array's "Dimensions" attribute ("5 10 2" or "5,10,2") into dimension sizes, outermost first.</summary>
     internal static int[] ParseDimensions(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return Array.Empty<int>();
@@ -161,6 +176,7 @@ public static class DecoratedDataReader
         return dim == dims.Length ? flat : -1;
     }
 
+    /// <summary>Per-read cursor state over the streaming reader; one instance per <see cref="Read"/> call.</summary>
     private sealed class Impl
     {
         private readonly XmlReader _reader;
@@ -181,6 +197,7 @@ public static class DecoratedDataReader
         private DiagnosticLocation Loc(string? path = null)
             => new(XmlLine: CurrentLine(), ElementPath: path);
 
+        /// <summary>Unwraps an optional Data/DefaultData wrapper, then reads the single value element inside (or directly, if the reader was already positioned on it).</summary>
         public TagValue? ReadRoot()
         {
             if (_reader.NodeType != XmlNodeType.Element)
@@ -209,6 +226,7 @@ public static class DecoratedDataReader
                         }
                         else
                         {
+                            // A Data element has exactly one value child by spec; a second one is tolerated and dropped.
                             _diag.Info(CodeUnknownElement, $"Extra element <{_reader.LocalName}> in decorated data ignored", Loc(_reader.LocalName));
                             _reader.Skip();
                         }
@@ -241,12 +259,17 @@ public static class DecoratedDataReader
                 case "StructureMember":
                     return ReadStructure();
                 default:
+                    // A future element kind this reader does not yet know; skip it rather than fail the whole tag.
                     _diag.Info(CodeUnknownElement, $"Unknown decorated data element <{_reader.LocalName}>", Loc(_reader.LocalName));
                     _reader.Skip();
                     return null;
             }
         }
 
+        /// <summary>
+        /// Reads a DataValue(Member): an atomic scalar, or (for the non-atomic forms Logix also spells this way,
+        /// such as a STRING's DATA member) a string collapsed from its quoted or ASCII text.
+        /// </summary>
         private TagValue? ReadScalar()
         {
             var dataType = _reader.GetAttribute("DataType") ?? "";
@@ -255,6 +278,8 @@ public static class DecoratedDataReader
             var forceValue = _reader.GetAttribute("ForceValue");
             var line = CurrentLine();
 
+            // The value may be the "Value" attribute or, for some exports, the element's text content; the
+            // attribute wins when both are present (never expected to disagree, but it is the more structured form).
             string? text = valueAttr;
             if (_reader.IsEmptyElement)
             {
@@ -272,6 +297,8 @@ public static class DecoratedDataReader
                 var scalar = TryParseScalar(kind, radix, text, _interner);
                 if (scalar is null)
                 {
+                    // DT# date/time literals are a known, expected case we do not attempt to parse here; anything
+                    // else failing to parse is unusual and worth a warning, with the raw text preserved regardless.
                     if (!text.StartsWith("DT#", StringComparison.OrdinalIgnoreCase))
                     {
                         _diag.Warning(CodeBadValue, $"Cannot parse {dataType} value '{text}'", new DiagnosticLocation(XmlLine: line));
@@ -280,6 +307,7 @@ public static class DecoratedDataReader
                 }
                 if (forceValue is not null)
                 {
+                    // A forced tag's real value is overridden for I/O purposes while the force is active; both are kept.
                     scalar = scalar with { ForceValue = forceValue };
                 }
                 return scalar;
@@ -301,7 +329,7 @@ public static class DecoratedDataReader
             return new ScalarValue(AtomicKind.Dint, 0, 0, radix) { RawText = text };
         }
 
-        /// <summary>Reads text/CDATA content of the current element and advances past its end tag.</summary>
+        /// <summary>Reads text/CDATA content of the current element and advances past its end tag. A single text run avoids a StringBuilder; multiple runs (rare) are concatenated.</summary>
         private string ReadTextContent()
         {
             StringBuilder? sb = null;
@@ -335,6 +363,14 @@ public static class DecoratedDataReader
             return (sb?.ToString() ?? single ?? "").Trim();
         }
 
+        /// <summary>
+        /// Reads an Array(Member). Elements may be sparse (Logix omits elements that equal the type's default,
+        /// typically zero, to shrink the export) and may arrive out of index order, so each is placed into a
+        /// slot array by its parsed index rather than assumed sequential; a true multi-dimensional array
+        /// (<see cref="ParseDimensions"/> non-empty) fills any unwritten slot with the type's default value,
+        /// while a dimensionless array (seen for some module/config data) keeps only what was actually written,
+        /// in the order it appeared, including a fallback sequential placement when an index cannot be parsed.
+        /// </summary>
         private TagValue ReadArray()
         {
             var elementType = _reader.GetAttribute("DataType") ?? "";
@@ -382,6 +418,8 @@ public static class DecoratedDataReader
                         _diag.Warning(CodeBadIndex, $"Array element index '{indexText}' is invalid for dimensions [{string.Join(",", dims)}]", new DiagnosticLocation(XmlLine: elementLine));
                     }
 
+                    // An atomic element's value may sit directly on the "Value" attribute (the common case,
+                    // self-closing <Element/>) rather than in a nested DataValue child.
                     TagValue? element = null;
                     if (valueAttr is not null)
                     {
@@ -416,6 +454,7 @@ public static class DecoratedDataReader
                     }
                     else
                     {
+                        // A structure or nested array element: its value is a child node rather than an attribute.
                         _reader.Read();
                         while (!_reader.EOF && _reader.NodeType != XmlNodeType.EndElement)
                         {
@@ -447,10 +486,12 @@ public static class DecoratedDataReader
                     }
                     else if (dims.Length == 0)
                     {
+                        // No declared dimensions: keep elements in file order instead of trying to place them by index.
                         overflow.Add(element);
                     }
                     else if (nextSequential < slots.Length && flat < 0)
                     {
+                        // The index could not be parsed; fall back to sequential placement rather than dropping the value.
                         slots[nextSequential++] = element;
                     }
                 }
@@ -473,6 +514,7 @@ public static class DecoratedDataReader
                 }
                 else
                 {
+                    // An element the export omitted because it held the type's default value.
                     filler ??= isAtomic
                         ? _interner.Integer(kind, 0, radix == Radix.Unknown ? Radix.Decimal : radix)
                         : new StructValue(elementType, Array.Empty<KeyValuePair<string, TagValue>>());
@@ -483,6 +525,7 @@ public static class DecoratedDataReader
             return new ArrayValue(elementType, dims, radix, elements);
         }
 
+        /// <summary>Reads a Structure(Member): its child *Member elements become the structure's members in file order, then collapses to a string value when the shape matches [LEN, DATA].</summary>
         private TagValue ReadStructure()
         {
             var dataType = _reader.GetAttribute("DataType") ?? "";
@@ -515,6 +558,11 @@ public static class DecoratedDataReader
             return new StructValue(dataType, members);
         }
 
+        /// <summary>
+        /// A Decorated STRING is exported as a structure with a LEN scalar and a DATA member (either already a
+        /// string, from an earlier collapse of its own, or a SINT array of character codes); this folds that
+        /// back into one <see cref="StringValue"/> so consumers never have to special-case the STRING shape.
+        /// </summary>
         private static bool TryCollapseString(string dataType, List<KeyValuePair<string, TagValue>> members, out StringValue result)
         {
             result = null!;

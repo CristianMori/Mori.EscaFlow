@@ -4,10 +4,13 @@ namespace Mori.EscaFlow.Transpiler.L5X.Parsing.St;
 
 /// <summary>
 /// Rebuilds a structured text AST with call statements transformed. Returns the same instance when nothing changed,
-/// so untouched routines keep their original nodes.
+/// so untouched routines keep their original nodes. The linker uses it for the same purpose as
+/// <see cref="Rll.RungRewriter"/>: reclassifying call arguments once every tag name is known. Only statement
+/// bodies are walked (IF, CASE, FOR, WHILE, REPEAT); expressions never contain call statements.
 /// </summary>
 public static class StRewriter
 {
+    /// <summary>Applies <paramref name="transform"/> to every call statement in the block, recursively; a null result keeps the original.</summary>
     public static StBlock RewriteCalls(StBlock block, Func<StCallStatement, StCallStatement?> transform)
     {
         var changed = false;

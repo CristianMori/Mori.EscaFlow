@@ -5,6 +5,7 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Programs;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Model.Logic;
 
+/// <summary>The four Logix routine languages: relay ladder logic, structured text, sequential function chart, function block diagram.</summary>
 public enum RoutineType
 {
     Unknown,
@@ -14,6 +15,11 @@ public enum RoutineType
     FBD,
 }
 
+/// <summary>
+/// A routine of a program or add-on instruction. Routines of a program share its scope (program tags plus
+/// controller tags) and run only when called: the main routine from the task, the fault routine on a program
+/// fault, the others through JSR; an add-on's Logic routine runs on every call of the instruction.
+/// </summary>
 public sealed class Routine : L5xElement
 {
     public required string Name { get; init; }
@@ -27,8 +33,11 @@ public sealed class Routine : L5xElement
     public List<RoutineContent> OnlineEditContents { get; init; } = new();
 
     public GenericElement? EncryptionInfo { get; set; }
+
+    /// <summary>Set for source-protected routines, whose body is only present as an encrypted payload.</summary>
     public GenericElement? EncryptedContent { get; set; }
 
+    /// <summary>The program or add-on definition that owns the routine (set by the readers).</summary>
     [JsonIgnore]
     public IRoutineContainer? Owner { get; set; }
 
@@ -54,6 +63,7 @@ public sealed class Routine : L5xElement
     public override string ToString() => $"{Name} ({Type})";
 }
 
+/// <summary>A routine body in one of the four languages.</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(RllContent), "rll")]
 [JsonDerivedType(typeof(StContent), "st")]
@@ -65,16 +75,21 @@ public abstract class RoutineContent : L5xElement
     public string? OnlineEditType { get; init; }
 }
 
+/// <summary>A ladder routine: its rungs in execution order.</summary>
 public sealed class RllContent : RoutineContent
 {
     public List<Rung> Rungs { get; init; } = new();
 }
 
+/// <summary>
+/// One rung. The controller evaluates rungs top to bottom; within a rung the condition flows left to right through
+/// the instructions of the neutral text, which is the only representation the export carries (no graphics).
+/// </summary>
 public sealed class Rung : L5xElement
 {
     public int Number { get; init; }
 
-    /// <summary>N (normal), I, D, R, IR, rR, rI, rN, e, er, d.</summary>
+    /// <summary>N (normal), I, D, R, IR, rR, rI, rN, e, er, d: the online-edit state (insert, delete, replace and their accepted forms).</summary>
     public string Type { get; init; } = "N";
 
     public string? Comment { get; set; }
@@ -91,6 +106,7 @@ public sealed class Rung : L5xElement
 /// <summary>One <c>&lt;Line&gt;</c> of structured text. Number is the 0-based line number from the file.</summary>
 public sealed record StLine(int Number, string Text);
 
+/// <summary>A structured text routine: its lines (statements may span lines) and the parsed block.</summary>
 public sealed class StContent : RoutineContent
 {
     public List<StLine> Lines { get; init; } = new();
@@ -98,6 +114,7 @@ public sealed class StContent : RoutineContent
     /// <summary>Parsed form; null until the logic phase runs.</summary>
     public StBlock? Ast { get; set; }
 
+    /// <summary>Comments found while parsing, kept for transpilers that preserve documentation.</summary>
     public List<StComment>? Comments { get; set; }
 
     /// <summary>All lines joined with newlines, in file order.</summary>

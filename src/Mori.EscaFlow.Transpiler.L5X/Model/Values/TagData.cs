@@ -1,6 +1,11 @@
 namespace Mori.EscaFlow.Transpiler.L5X.Model.Values;
 
-/// <summary>Everything found in the <c>&lt;Data&gt;</c> / <c>&lt;DefaultData&gt;</c> children of a tag, keyed by format.</summary>
+/// <summary>
+/// Everything found in the <c>&lt;Data&gt;</c> / <c>&lt;DefaultData&gt;</c> children of a tag, keyed by format.
+/// A tag can export its value in more than one format at once (typically L5K and Decorated together, the L5K
+/// form being the legacy fallback), so this holds all of them rather than picking one during parsing; consumers
+/// read <see cref="Value"/> for the best typed answer without caring which format produced it.
+/// </summary>
 public sealed class TagData
 {
     public static readonly TagData Empty = new();

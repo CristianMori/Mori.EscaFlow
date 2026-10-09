@@ -8,6 +8,14 @@ namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Values;
 /// <summary>
 /// Converts an untyped L5K initializer tree into a typed <see cref="TagValue"/> by walking the tag's data type.
 /// Used when Decorated data is absent, and to cross-check the two formats. Never throws.
+/// <para>
+/// L5K nests one bracketed list per array dimension and one flat list per structure's members, in declaration
+/// order, with no names or type tags anywhere in the text; every decision here (how many levels of nesting are
+/// dimensions versus a nested structure, which slot belongs to which member, which members are hidden bit hosts
+/// that consume a slot but produce nothing) depends entirely on walking the destination type alongside the L5K
+/// tree. A type whose layout is unknown (<see cref="StructuredType.IsOpaque"/>) cannot be walked that way, so it
+/// falls back to <see cref="BestEffort"/>, which just mirrors the L5K tree's own shape.
+/// </para>
 /// </summary>
 public static class L5kShaper
 {
@@ -24,6 +32,7 @@ public static class L5kShaper
         return ctx.Shape(value, dataTypeName, dimensions ?? Array.Empty<int>());
     }
 
+    /// <summary>Per-call state: the set of type names already reported as opaque (so a huge array of an unknown type warns once, not per element) and the value interner to use.</summary>
     private sealed class Context
     {
         private readonly DataTypeRegistry _registry;
@@ -48,6 +57,7 @@ public static class L5kShaper
             return ShapeScalarOrStruct(value, typeName);
         }
 
+        /// <summary>Shapes an array by first flattening the (possibly nested) L5K list to a row-major sequence of element values, then shaping each.</summary>
         private TagValue ShapeArray(L5kValue value, string elementType, int[] dims)
         {
             var total = 1;
@@ -64,6 +74,8 @@ public static class L5kShaper
             var elements = new TagValue[total];
             for (var i = 0; i < total; i++)
             {
+                // A missing leaf (data shorter than declared, already warned above) fills with the type's zero value
+                // rather than leaving a null element, so every consumer can index the full declared length safely.
                 TagValue? el = i < leaves.Count ? ShapeScalarOrStruct(leaves[i], elementType) : null;
                 el ??= isAtomic
                     ? _interner.Integer(kind, 0, radix)
@@ -73,7 +85,12 @@ public static class L5kShaper
             return new ArrayValue(elementType, dims, radix, elements);
         }
 
-        /// <summary>Flattens nested lists row-major. L5K nests one list level per dimension, but tolerate a flat list.</summary>
+        /// <summary>
+        /// Flattens nested lists row-major. L5K nests one list level per dimension, but tolerates a flat list
+        /// (some exports write a 1-D array without the extra wrapping level); the depth check below is what
+        /// decides, at each level, whether a list is "one more dimension" or "the next element's own value"
+        /// (an element that happens to itself be a structure or an inner, non-array list).
+        /// </summary>
         private static void Flatten(L5kValue value, int[] dims, int depth, List<L5kValue> leaves)
         {
             if (value is L5kList list)
@@ -99,6 +116,7 @@ public static class L5kShaper
             leaves.Add(value);
         }
 
+        /// <summary>Shapes one scalar or structure value against a resolved type name, falling back to best effort when the type is unknown or opaque.</summary>
         private TagValue? ShapeScalarOrStruct(L5kValue value, string typeName)
         {
             if (AtomicKindExtensions.TryParseAtomic(typeName, out var kind))
@@ -129,6 +147,7 @@ public static class L5kShaper
             return BestEffort(value, typeName);
         }
 
+        /// <summary>A structure shaped exactly like the built-in STRING family (LEN then DATA) even if it is a user type, e.g. a fixed-length string UDT.</summary>
         private static bool IsStringShape(StructuredType st)
         {
             if (st.Members.Count != 2) return false;
@@ -136,6 +155,7 @@ public static class L5kShaper
                 && st.Members[1].Name.Equals("DATA", StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>Shapes a [LEN, DATA] pair, or a bare string (some exports write the string directly), into a single collapsed <see cref="StringValue"/>.</summary>
         private TagValue ShapeString(L5kValue value, StructuredType st)
         {
             if (value is L5kList { Items.Count: 2 } list && list.Items[0] is L5kInteger len)
@@ -143,6 +163,7 @@ public static class L5kShaper
                 var text = list.Items[1] switch
                 {
                     L5kString s => s.Value,
+                    // DATA as a list of character codes rather than a quoted string.
                     L5kList chars => new string(chars.Items.Select(c => c is L5kInteger ci ? (char)(ci.Value & 0xFF) : '\0').ToArray()),
                     _ => "",
                 };
@@ -158,6 +179,11 @@ public static class L5kShaper
             return new StringValue(0, "", st.Name);
         }
 
+        /// <summary>
+        /// Walks a structure's members against the flat L5K list (or a single bare value for a one-member
+        /// structure). Hidden bit-host members consume an L5K slot but are never themselves emitted; their value
+        /// is captured so the bit-overlay members that follow can read the right bit out of it.
+        /// </summary>
         private TagValue ShapeStructure(L5kValue value, StructuredType st)
         {
             var items = value is L5kList list ? list.Items : new[] { value };
@@ -200,6 +226,8 @@ public static class L5kShaper
 
                 var dims = member.Dimension > 0 ? new[] { member.Dimension } : Array.Empty<int>();
                 var shaped = Shape(item, member.DataType.Name, dims) ?? Default(member);
+                // The member's declared display radix takes priority over whatever the L5K literal's own
+                // spelling implied (e.g. a member declared @Hex keeps Hex even if its L5K text had no "16#").
                 if (shaped is ScalarValue sv && member.Radix != Radix.Unknown && sv.Radix != member.Radix && sv.RawText is null)
                 {
                     shaped = sv with { Radix = member.Radix };
@@ -214,6 +242,7 @@ public static class L5kShaper
             return new StructValue(st.Name, members);
         }
 
+        /// <summary>The zero value for a member, used when the L5K data is shorter than the structure declares.</summary>
         private TagValue Default(DataTypeMember member)
         {
             if (AtomicKindExtensions.TryParseAtomic(member.DataType.Name, out var kind))
@@ -230,6 +259,7 @@ public static class L5kShaper
             return new StructValue(member.DataType.Name, Array.Empty<KeyValuePair<string, TagValue>>());
         }
 
+        /// <summary>Converts one L5K leaf value to a scalar of the given atomic kind.</summary>
         private TagValue ShapeAtomic(L5kValue value, AtomicKind kind, Radix radix)
         {
             switch (value)
@@ -242,6 +272,8 @@ public static class L5kShaper
                     return _interner.Integer(kind, (long)r.Value, radix);
                 case L5kString s:
                 {
+                    // A string literal where an integer was expected: pack its bytes big-endian into the integer
+                    // (this is how Logix lets an L5K author write a small ASCII value, e.g. a DINT holding 'AB').
                     long v = 0;
                     foreach (var ch in s.Value) v = (v << 8) | ((long)ch & 0xFF);
                     if (kind.IsFloatingPoint()) return _interner.Real(kind, v, Radix.Float);
@@ -251,12 +283,18 @@ public static class L5kShaper
                     _diag.Warning(CodeShapeMismatch, $"Expected a {kind.ToLogixName()} value but found a list of {list.Items.Count}");
                     return list.Items.Count > 0 ? ShapeAtomic(list.Items[0], kind, radix) : _interner.Integer(kind, 0, radix);
                 case L5kRaw raw:
+                    // A token that failed to parse as a number: keep its text so the value is not silently lost as zero.
                     return new ScalarValue(kind, 0, 0, radix) { RawText = raw.Text };
                 default:
                     return _interner.Integer(kind, 0, radix);
             }
         }
 
+        /// <summary>
+        /// Shapes a value against an unknown or opaque type by mirroring the L5K tree's own shape: a list becomes
+        /// a pseudo-structure with positional member names ("[0]", "[1]", ...) rather than real ones, since the
+        /// real member names are simply not known for this type.
+        /// </summary>
         private TagValue BestEffort(L5kValue value, string typeName)
         {
             switch (value)

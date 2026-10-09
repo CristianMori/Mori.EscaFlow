@@ -10,6 +10,12 @@ using Xunit.Abstractions;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Integration;
 
+/// <summary>
+/// End-to-end checks against the real sample exports: parsed counts match a manual survey of each file,
+/// parsing the logic phase raises no diagnostics, every rung round-trips through parse-then-write, every
+/// operand in the project resolves through the linker and scope resolver, spot checks on specific known tags/
+/// rungs of one sample, and that parsing stays within a reasonable time budget.
+/// </summary>
 [Collection("Samples")]
 [Trait("Category", "Integration")]
 public class SampleFileTests

@@ -11,15 +11,24 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Values;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Json;
 
+/// <summary>
+/// Which parts of the parsed model a JSON dump should carry. The three sections can be large (parsed ASTs and
+/// shaped values especially) and a consumer inspecting project structure often wants none of them, hence the
+/// ability to drop each independently rather than always serializing everything.
+/// </summary>
 [Flags]
 public enum JsonInclude
 {
+    /// <summary>The structural model itself (types, tags, modules, programs, routines): always kept, regardless of what else is requested.</summary>
     Model = 1,
+    /// <summary>Parsed rung/ST/SFC/FBD ASTs.</summary>
     Logic = 2,
+    /// <summary>Shaped/decorated tag values.</summary>
     Values = 4,
     All = Model | Logic | Values,
 }
 
+/// <summary>Parses the CLI's comma-separated <c>--json-include</c> option text into a <see cref="JsonInclude"/> flag set.</summary>
 public static class JsonIncludeParser
 {
     public static JsonInclude Parse(string text)
@@ -36,6 +45,7 @@ public static class JsonIncludeParser
                 _ => throw new ArgumentException($"Unknown --json-include value '{part}'"),
             };
         }
+        // Model is never optional; an input that named none of the recognized sections defaults to everything.
         return result == 0 ? JsonInclude.All : result | JsonInclude.Model;
     }
 }
@@ -43,6 +53,7 @@ public static class JsonIncludeParser
 /// <summary>JSON serialization of the model with System.Text.Json.</summary>
 public static class L5xJson
 {
+    /// <summary>Builds serializer options that trim the requested sections and know how to write the model's few hand-rolled value types.</summary>
     public static JsonSerializerOptions CreateOptions(JsonInclude include = JsonInclude.All, bool indented = false)
     {
         var options = new JsonSerializerOptions
@@ -59,6 +70,13 @@ public static class L5xJson
         return options;
     }
 
+    /// <summary>
+    /// Removes the properties <paramref name="include"/> excludes. This runs as a type-info modifier (applied
+    /// once per type, not per instance) rather than per-property <c>[JsonIgnore]</c> attributes, because whether
+    /// a property is included depends on a runtime option, not a fixed decision the type itself can make; a few
+    /// properties (<see cref="TagData.Value"/>, <see cref="TagData.IsEmpty"/>) are always dropped regardless of
+    /// <paramref name="include"/> since they only duplicate or summarize other properties already present.
+    /// </summary>
     private static void Trim(JsonTypeInfo ti, JsonInclude include)
     {
         if (ti.Kind != JsonTypeInfoKind.Object) return;
@@ -89,6 +107,7 @@ public static class L5xJson
         }
     }
 
+    /// <summary>Serializes a project directly to a file with a large buffered stream, avoiding building the whole JSON text in memory first for large projects.</summary>
     public static void WriteFile(L5xProject project, string path, JsonInclude include = JsonInclude.All, bool indented = false)
     {
         using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 20);
@@ -98,6 +117,7 @@ public static class L5xJson
     public static string Serialize(object value, JsonInclude include = JsonInclude.All, bool indented = true)
         => JsonSerializer.Serialize(value, value.GetType(), CreateOptions(include, indented));
 
+    /// <summary>Writes a <see cref="DataTypeRef"/> as just its name string rather than an object, since <see cref="DataTypeRef.Definition"/> is a resolution cache, not independent data.</summary>
     private sealed class DataTypeRefConverter : JsonConverter<DataTypeRef>
     {
         public override DataTypeRef? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -107,6 +127,7 @@ public static class L5xJson
             => writer.WriteStringValue(value.Name);
     }
 
+    /// <summary>Writes a <see cref="TextSpan"/> as a compact "start:length:line:column" string instead of a nested object, since every AST node carries one.</summary>
     private sealed class TextSpanConverter : JsonConverter<TextSpan>
     {
         public override TextSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

@@ -5,6 +5,11 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Xml;
 
+/// <summary>
+/// Proves that <c>MessageConfiguration.FromAttributes</c> reads CIP Generic, data-table and unconfigured MESSAGE
+/// tags correctly, and that <c>IsSocketService</c>/<c>SocketService</c> recognize messages addressed to the
+/// Socket Object by class and service code.
+/// </summary>
 public class MessageConfigurationTests
 {
     private const string Xml = """
@@ -107,6 +112,7 @@ public class MessageConfigurationTests
     }
 }
 
+/// <summary>Integration check that every MESSAGE tag in a real sample export ends up typed and, where applicable, linked to its local/destination tags.</summary>
 [Collection("Samples")]
 [Trait("Category", "Integration")]
 public class MessageSampleTests

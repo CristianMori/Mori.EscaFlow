@@ -4,7 +4,12 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Logic.Sfc;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads a materialized <c>&lt;SFCContent&gt;</c> element.</summary>
+/// <summary>
+/// Reads a materialized <c>&lt;SFCContent&gt;</c> element. A chart is a flat list of nodes (steps with their
+/// actions, transitions, branches with legs, stops, subroutine markers, text boxes), each with a numeric ID and
+/// drawing coordinates, plus directed links between the IDs. The structured text inside steps, actions and
+/// transitions is collected as lines here and parsed in the logic phase.
+/// </summary>
 public sealed class SfcReader
 {
     private readonly ReaderContext _ctx;
@@ -22,6 +27,7 @@ public sealed class SfcReader
             OnlineEditType = attrs.Take("OnlineEditType"),
             SheetSize = attrs.Take("SheetSize"),
             SheetOrientation = attrs.Take("SheetOrientation"),
+            // Naming prefixes the designer uses for new elements (Step_000, Tran_000, ...); kept for round trips.
             StepName = attrs.Take("StepName"),
             TransitionName = attrs.Take("TransitionName"),
             ActionName = attrs.Take("ActionName"),
@@ -42,6 +48,7 @@ public sealed class SfcReader
                 case "TextBox": content.Nodes.Add(ReadTextBox(child)); break;
                 case "DirectedLink":
                 {
+                    // The flow of the chart: step -> transition -> step, or through branch legs.
                     var a = new AttributeBag(child);
                     content.Links.Add(new SfcDirectedLink
                     {
@@ -55,6 +62,7 @@ public sealed class SfcReader
                 }
                 case "Attachment":
                 {
+                    // A text box attached to a node (documentation only).
                     var a = new AttributeBag(child);
                     content.Attachments.Add(new SfcAttachment
                     {
@@ -74,6 +82,7 @@ public sealed class SfcReader
         return content;
     }
 
+    /// <summary>A step: backed by an SFC_STEP tag (its Operand), with timer preset and alarm limits (literals or expressions) and its actions.</summary>
     private SfcStep ReadStep(XElement e)
     {
         var a = new AttributeBag(e);
@@ -110,6 +119,7 @@ public sealed class SfcReader
         return step;
     }
 
+    /// <summary>An action of a step: backed by an SFC_ACTION tag, with its IEC qualifier (N, S, R, L, D, P, P1, P0, SL, SD, DS) and either a boolean flag or an ST body.</summary>
     private SfcAction ReadAction(XElement e)
     {
         var a = new AttributeBag(e);
@@ -139,6 +149,7 @@ public sealed class SfcReader
         return action;
     }
 
+    /// <summary>A transition: backed by a BOOL tag, with an ST condition and an optional force value used when testing the chart.</summary>
     private SfcTransition ReadTransition(XElement e)
     {
         var a = new AttributeBag(e);
@@ -168,6 +179,7 @@ public sealed class SfcReader
         return t;
     }
 
+    /// <summary>A branch: selection (one leg taken, by priority) or simultaneous (all legs active), diverging or converging; each leg is itself a link endpoint.</summary>
     private static SfcBranch ReadBranch(XElement e)
     {
         var a = new AttributeBag(e);
@@ -206,6 +218,7 @@ public sealed class SfcReader
         return b;
     }
 
+    /// <summary>A stop element (backed by an SFC_STOP tag): the chart halts here until reset.</summary>
     private static SfcStop ReadStop(XElement e)
     {
         var a = new AttributeBag(e);
@@ -226,6 +239,7 @@ public sealed class SfcReader
         return s;
     }
 
+    /// <summary>Subroutine entry / return marker of a chart called through JSR (older exports spell the return list <c>Out</c>).</summary>
     private static SfcSbrRet ReadSbrRet(XElement e)
     {
         var a = new AttributeBag(e);

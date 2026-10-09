@@ -5,5 +5,7 @@ public readonly record struct TextSpan(int Start, int Length, int Line, int Colu
 {
     public int End => Start + Length;
     public static readonly TextSpan Empty = new(0, 0, 0, 0);
+
+    /// <summary>A span covering from the start of <paramref name="first"/> to the end of <paramref name="last"/>, taking its line/column from <paramref name="first"/>.</summary>
     public static TextSpan Between(TextSpan first, TextSpan last) => new(first.Start, Math.Max(0, last.End - first.Start), first.Line, first.Column);
 }

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Model;
 
-/// <summary>A constant appearing in logic text or in an operand.</summary>
+/// <summary>A constant appearing in logic text or in an operand: an integer, a real or a string.</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(IntegerLiteral), "int")]
 [JsonDerivedType(typeof(RealLiteral), "real")]
@@ -15,7 +15,7 @@ public abstract record LiteralValue
     public override string ToString() => ToLogixText();
 }
 
-/// <summary>An integer constant. RadixBase is 10, 2, 8 or 16 depending on how it was written.</summary>
+/// <summary>An integer constant. RadixBase is 10, 2, 8 or 16 depending on how it was written (<c>2#</c>, <c>8#</c>, <c>16#</c> prefixes), so round-tripping keeps the author's chosen radix.</summary>
 public sealed record IntegerLiteral(long Value, int RadixBase = 10) : LiteralValue
 {
     public override string ToLogixText() => RadixBase switch
@@ -27,6 +27,7 @@ public sealed record IntegerLiteral(long Value, int RadixBase = 10) : LiteralVal
     };
 }
 
+/// <summary>A floating-point constant, including the IEEE special values Logix spells as <c>1.#QNAN</c> / <c>1.#INF</c> / <c>-1.#INF</c>.</summary>
 public sealed record RealLiteral(double Value) : LiteralValue
 {
     public override string ToLogixText()
@@ -35,17 +36,18 @@ public sealed record RealLiteral(double Value) : LiteralValue
         if (double.IsPositiveInfinity(Value)) return "1.#INF";
         if (double.IsNegativeInfinity(Value)) return "-1.#INF";
         var s = Value.ToString("R", CultureInfo.InvariantCulture);
+        // A real must always show a decimal point or exponent so it is never mistaken for an integer on re-export.
         return s.Contains('.') || s.Contains('E') || s.Contains('e') ? s : s + ".0";
     }
 }
 
-/// <summary>A string constant with Logix '$' escapes already decoded.</summary>
+/// <summary>A string constant with Logix '$' escapes already decoded to the real characters.</summary>
 public sealed record StringLiteral(string Value) : LiteralValue
 {
     public override string ToLogixText() => "'" + LogixStringEncoder.Encode(Value) + "'";
 }
 
-/// <summary>Encodes text using Logix '$' escapes (the inverse of <c>LogixStringDecoder</c>).</summary>
+/// <summary>Encodes text using Logix '$' escapes (the inverse of <c>LogixStringDecoder</c>), for writing a decoded string back as neutral text.</summary>
 public static class LogixStringEncoder
 {
     public static string Encode(string value)
@@ -63,6 +65,7 @@ public static class LogixStringEncoder
                 case '\t': sb.Append("$T"); break;
                 case '\f': sb.Append("$P"); break;
                 default:
+                    // Non-printable and non-ASCII bytes go through the $hh hex-escape form.
                     if (c < 0x20 || c > 0x7E) sb.Append('$').Append(((int)c & 0xFF).ToString("X2"));
                     else sb.Append(c);
                     break;

@@ -1,5 +1,9 @@
 namespace Mori.EscaFlow.Transpiler.L5X.Model;
 
+/// <summary>
+/// The display radix Logix stores per tag (and per L5K/decorated value). It changes how the designer shows a
+/// value and, for strings written in L5K, which literal grammar applies; it never changes the stored bits.
+/// </summary>
 public enum Radix
 {
     Unknown = 0,
@@ -14,11 +18,13 @@ public enum Radix
     Ascii,
     DateTime,
     DateTimeNs,
+    /// <summary>For an array or structure member: use whatever radix its own data type declares, rather than one fixed here.</summary>
     UseTypeStyle,
 }
 
 public static class RadixExtensions
 {
+    /// <summary>Parses the L5X spelling of a radix, including the two-word forms ("Date/Time", "Date/Time (ns)").</summary>
     public static Radix ParseRadix(string? text)
     {
         if (string.IsNullOrEmpty(text)) return Radix.Unknown;

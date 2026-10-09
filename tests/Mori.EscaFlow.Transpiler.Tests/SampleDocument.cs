@@ -8,7 +8,14 @@ public sealed class LogixTestExt
     public bool Packed { get; set; }
 }
 
-/// <summary>A hand-built document that exercises every node kind of the model.</summary>
+/// <summary>
+/// A hand-built document that exercises every node kind of the model: every statement and expression kind, every
+/// section of a POU, ladder/FBD/SFC diagrams, aliases, I/O channels and a full configuration/resource/task layout.
+/// It is the single fixture shared by the JSON round-trip, schema-coverage, walker and printer tests, so a model
+/// change that drops or renames a node kind is caught by whichever of those tests happens to exercise it, without
+/// each test needing its own bespoke document.
+/// </summary>
+/// <remarks>The <c>const string</c> fields below are the plc-ir ids of selected variables, exposed so a test can assert against a specific node (e.g. "the alias target is M1") without re-deriving the id string by hand.</remarks>
 public static class SampleDocument
 {
     public const string GvlT = "T";

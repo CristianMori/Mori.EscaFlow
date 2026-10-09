@@ -1,21 +1,46 @@
 namespace Mori.EscaFlow.Transpiler.Catalogs;
 
+/// <summary>Family of an elementary type, which decides the operations the validator allows on it and how converters store it.</summary>
 public enum AtomicCategory
 {
+    /// <summary>BOOL.</summary>
     Bool,
+
+    /// <summary>SINT, INT, DINT, LINT.</summary>
     SignedInt,
+
+    /// <summary>USINT, UINT, UDINT, ULINT.</summary>
     UnsignedInt,
+
+    /// <summary>REAL, LREAL.</summary>
     Real,
+
+    /// <summary>BYTE, WORD, DWORD, LWORD: integers meant for bit manipulation, not arithmetic.</summary>
     BitString,
+
+    /// <summary>TIME, LTIME: durations.</summary>
     Time,
+
+    /// <summary>DATE, LDATE, TOD, LTOD, DT, LDT: calendar values.</summary>
     Date,
+
+    /// <summary>CHAR, WCHAR.</summary>
     Char,
 }
 
+/// <summary>One IEC 61131-3 elementary type.</summary>
+/// <param name="Name">Canonical IEC name.</param>
+/// <param name="Category">Family.</param>
+/// <param name="Bits">Width in bits (1 for BOOL, which vendors pack differently).</param>
 public sealed record AtomicType(string Name, AtomicCategory Category, int Bits)
 {
+    /// <summary>True for the signed and unsigned integer families.</summary>
     public bool IsInteger => Category is AtomicCategory.SignedInt or AtomicCategory.UnsignedInt;
+
+    /// <summary>True for integers and reals (arithmetic operands).</summary>
     public bool IsNumeric => IsInteger || Category == AtomicCategory.Real;
+
+    /// <summary>True for BOOL and the bit-string family (logical operands).</summary>
     public bool IsBitString => Category is AtomicCategory.BitString or AtomicCategory.Bool;
 
     /// <summary>True when bit access (<c>bit</c> expressions) is meaningful: integers and bit strings.</summary>
@@ -23,8 +48,14 @@ public sealed record AtomicType(string Name, AtomicCategory Category, int Bits)
 }
 
 /// <summary>The IEC 61131-3 elementary types. Names are case-insensitive.</summary>
+/// <remarks>
+/// The catalog is the full IEC set, not the Logix subset, so a Siemens or Codesys front-end can use TIME, DATE,
+/// BYTE and WORD natively. Logix only has BOOL, the signed and unsigned integers, REAL and LREAL; a converter
+/// for a Logix-style runtime maps the others onto the integer of the same width.
+/// </remarks>
 public static class AtomicTypes
 {
+    /// <summary>Every elementary type, in IEC order.</summary>
     public static readonly IReadOnlyList<AtomicType> All = new[]
     {
         new AtomicType("BOOL", AtomicCategory.Bool, 1),
@@ -65,19 +96,24 @@ public static class AtomicTypes
         ["LDATE_AND_TIME"] = "LDT",
     };
 
+    /// <summary>The elementary type named <paramref name="name"/> (canonical name or long-form alias), or null.</summary>
     public static AtomicType? Get(string name)
     {
         if (ByName.TryGetValue(name, out var t)) return t;
         return Aliases.TryGetValue(name, out var canonical) ? ByName[canonical] : null;
     }
 
+    /// <summary>True when <paramref name="name"/> is an elementary type.</summary>
     public static bool IsAtomic(string name) => Get(name) is not null;
 
+    /// <summary>True when the reference names an elementary type (arrays of atomics are not atomic).</summary>
     public static bool IsAtomic(IrTypeRef? type) => type is { IsNamed: true, Name: { } n } && IsAtomic(n);
 
     /// <summary>Numeric promotion order used for expression typing: the wider of two numeric types.</summary>
+    /// <remarks>Follows the Logix rule that mixed arithmetic is computed in the wider operand type (any REAL operand makes the result REAL); BOOL sits at the bottom so BOOL arithmetic promotes to the other operand.</remarks>
     private static readonly string[] Rank = { "BOOL", "SINT", "USINT", "INT", "UINT", "DINT", "UDINT", "LINT", "ULINT", "REAL", "LREAL" };
 
+    /// <summary>The wider of two numeric type names (null-tolerant: an unknown side yields the other).</summary>
     public static string? Wider(string? a, string? b)
     {
         if (a is null) return b;
@@ -90,5 +126,6 @@ public static class AtomicTypes
     }
 
     /// <summary>The smallest signed integer type that holds <paramref name="value"/> (DINT for anything within 32 bits, else LINT).</summary>
+    /// <remarks>Integer literals are typed this way because Logix evaluates untyped literals as DINT; anything wider needs LINT arithmetic.</remarks>
     public static string IntegerTypeFor(long value) => value is >= int.MinValue and <= int.MaxValue ? "DINT" : "LINT";
 }

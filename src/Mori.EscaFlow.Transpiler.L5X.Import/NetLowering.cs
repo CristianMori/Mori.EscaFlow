@@ -14,15 +14,38 @@ namespace Mori.EscaFlow.Transpiler.L5X.Import;
 /// invoked; tagless functions produce body temporaries; output references are assigned last in their own
 /// position. Feedback wires are ignored for ordering, so their destination reads the previous scan's value.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Logix executes a function block sheet by data flow: a block runs once all the blocks feeding its inputs have run,
+/// and a wire marked as feedback (the "assume data available" indicator) deliberately carries the value produced in
+/// the previous scan. Every Logix FBD instruction keeps its pins as members of a backing structure tag (TONR's
+/// <c>TimerEnable</c>, <c>PRE</c>, <c>DN</c> ...), so copying wired values into those members and then invoking the
+/// instruction on the structure reproduces the controller's behaviour exactly, including values that are set on the
+/// block rather than wired.
+/// </para>
+/// <para>
+/// Only the 5x80 family has tagless functions (ADD, GRT, ...); their results live in body temporaries so later blocks
+/// can read them. Input and output connectors (ICON / OCON) are named jumps that may cross sheets; the output
+/// connector's feeding wire is the source of every input connector of the same name.
+/// </para>
+/// </remarks>
 public sealed class NetLowering
 {
     private readonly LogixExpressionBuilder _x;
     private readonly CallEmitter _calls;
+
+    /// <summary>Body temporaries, shared with the ladder lowering of the same body.</summary>
     private readonly List<IrTemporary> _temps;
     private readonly List<IrDiagnostic> _diagnostics;
     private readonly string _location;
+
+    /// <summary>Scratch sink for the operand parser (block operands are plain text in the export).</summary>
     private readonly DiagnosticBag _scratch = new();
+
+    /// <summary>Output connector name to the wire that feeds it, across every sheet of the routine.</summary>
     private readonly Dictionary<string, (FbdSheet Sheet, FbdWire Wire)> _connectors = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>The temporary holding each tagless function's result, once the function has been emitted.</summary>
     private readonly Dictionary<FbdElement, IrRef> _functionResults = new(ReferenceEqualityComparer.Instance);
 
     public NetLowering(LogixExpressionBuilder expressions, CallEmitter calls, List<IrTemporary> temporaries, List<IrDiagnostic> diagnostics, string location)
@@ -34,6 +57,7 @@ public sealed class NetLowering
         _location = location;
     }
 
+    /// <summary>Builds the diagram of every sheet and appends the lowered statements of the whole routine to <paramref name="body"/>.</summary>
     public IrNetDiagram Lower(FbdContent fbd, List<IrStatement> body)
     {
         var diagram = new IrNetDiagram();
@@ -53,6 +77,7 @@ public sealed class NetLowering
 
     // ------------------------------------------------------------------ diagram
 
+    /// <summary>The sheet as drawn: elements with their neutral kinds, operands resolved, and the wires.</summary>
     private IrNetSheet BuildSheet(FbdSheet sheet)
     {
         var s = new IrNetSheet { Number = sheet.Number, Description = sheet.Description };
@@ -70,6 +95,7 @@ public sealed class NetLowering
                     el.Type = b.Type;
                     el.Operand = b.Operand is null ? null : RefOf(b.Operand);
                     el.Pins = b.VisiblePins.Count > 0 ? b.VisiblePins : null;
+                    // Array operands (DEDT storage, FGEN tables, ...) are declared on the block rather than wired.
                     if (b.Arrays is { Count: > 0 }) el.Parameters = b.Arrays.ToDictionary(p => p.Key, p => RefOf(p.Value));
                     break;
                 case FbdFunction f: el.Kind = "function"; el.Type = f.Type; break;
@@ -79,6 +105,7 @@ public sealed class NetLowering
                     el.IsPou = true;
                     el.Operand = a.Operand is null ? null : RefOf(a.Operand);
                     el.Pins = a.VisiblePins.Count > 0 ? a.VisiblePins : null;
+                    // InOut parameters of an add-on are written on the block as operand text, never wired.
                     if (a.InOutParameters.Count > 0) el.Parameters = a.InOutParameters.ToDictionary(p => p.Key, p => RefOf(p.Value));
                     break;
                 case FbdJsr j: el.Kind = "call"; el.Name = j.Routine; el.Pins = j.In.Concat(j.Ret).ToList(); break;
@@ -92,6 +119,7 @@ public sealed class NetLowering
         return s;
     }
 
+    /// <summary>Resolves an operand written as text on a block (backing tag, array operand, InOut argument).</summary>
     private IrExpression RefOf(string operandText)
     {
         var path = StParser.TryParseOperandPath(operandText, LogicParseContext.Empty, _scratch);
@@ -99,11 +127,13 @@ public sealed class NetLowering
         return _x.Ref(path);
     }
 
+    /// <summary>A pin of a block's backing structure as a reference (<c>Backing.Pin</c>).</summary>
     private IrExpression MemberRef(string operandText, string member)
         => RefOf(operandText.Contains('.') || operandText.Contains('[') ? operandText + "." + member : operandText + "." + member);
 
     // ------------------------------------------------------------------ lowering
 
+    /// <summary>Lowers one sheet: executable elements in dataflow order, each stamped with its sheet and element id.</summary>
     private void LowerSheet(FbdSheet sheet, List<IrStatement> body)
     {
         var nodes = sheet.Elements.Where(IsExecutable).ToList();
@@ -116,8 +146,14 @@ public sealed class NetLowering
         }
     }
 
+    /// <summary>Elements that produce statements; input references, connectors and text boxes only feed values.</summary>
     private static bool IsExecutable(FbdElement e) => e is FbdBlock or FbdFunction or FbdAddOnInstruction or FbdJsr or FbdORef;
 
+    /// <summary>
+    /// Kahn's algorithm over the non-feedback wires between executable elements; ties are broken by drawing position
+    /// (top to bottom, left to right), which is how Studio 5000 orders blocks that have no data dependency. A cycle
+    /// that was not marked as feedback in the source is broken at its earliest-positioned element.
+    /// </summary>
     private static List<FbdElement> TopologicalOrder(FbdSheet sheet, List<FbdElement> nodes)
     {
         var nodeSet = new HashSet<FbdElement>(nodes, ReferenceEqualityComparer.Instance);
@@ -155,6 +191,7 @@ public sealed class NetLowering
         return result;
     }
 
+    /// <summary>Drawing order: top to bottom, then left to right, then by id for a stable result.</summary>
     private static int ByPosition(FbdElement a, FbdElement b)
     {
         var c = Nullable.Compare(a.Y, b.Y);
@@ -163,6 +200,7 @@ public sealed class NetLowering
         return c != 0 ? c : a.Id.CompareTo(b.Id);
     }
 
+    /// <summary>Emits the statements of one executable element: wired inputs first, then the element's own action.</summary>
     private void LowerNode(FbdSheet sheet, FbdElement node, List<IrStatement> body)
     {
         var inputs = sheet.Wires.Where(w => w.ToId == node.Id).ToList();
@@ -170,6 +208,7 @@ public sealed class NetLowering
         {
             case FbdORef oref:
             {
+                // Output reference: the wired value is stored into the tag, with the implicit Logix conversion.
                 var target = oref.ParsedOperand is null ? null : _x.Operand(oref.ParsedOperand);
                 var wire = inputs.FirstOrDefault();
                 if (target is IrRef or IrBitAccess && wire is not null)
@@ -178,6 +217,8 @@ public sealed class NetLowering
             }
             case FbdBlock block:
             {
+                // Vendor instruction with a backing structure: copy each wired pin into its member, then invoke the
+                // service on the structure (array operands follow as extra arguments).
                 if (block.Operand is null) { Warn($"FBD block {block.Type} #{block.Id} has no backing tag"); break; }
                 foreach (var w in inputs)
                 {
@@ -192,6 +233,8 @@ public sealed class NetLowering
             }
             case FbdAddOnInstruction aoi:
             {
+                // Add-on block: wired pins are members of the instance (its parameters), InOut parameters are bound
+                // from the operand text, then the block executes with EnableIn as set on the instance.
                 if (aoi.Operand is null) { Warn($"FBD add-on {aoi.Name} #{aoi.Id} has no backing tag"); break; }
                 foreach (var w in inputs)
                 {
@@ -206,6 +249,7 @@ public sealed class NetLowering
             }
             case FbdFunction fn:
             {
+                // Tagless function: its pins are named In1, In2, ... so ordering them by name gives the operand order.
                 var pins = inputs.Where(w => w.ToParam is not null).OrderBy(w => w.ToParam, StringComparer.OrdinalIgnoreCase).ToList();
                 var args = pins.Select(w => Source(sheet, w, 0)).ToList();
                 var iec = LogixInstructionMap.FunctionFor(fn.Type) ?? LogixInstructionMap.StFunctionFor(fn.Type) ?? fn.Type.ToUpperInvariant();
@@ -213,6 +257,7 @@ public sealed class NetLowering
                 IrTypeRef? type;
                 if (LogixInstructionMap.BinaryOperatorFor(fn.Type) is { } op && args.Count >= 2)
                 {
+                    // ADD/MUL/AND/... accept more than two inputs: fold them left to right.
                     value = args.Skip(1).Aggregate(args[0], (acc, a) => LogixExpressionBuilder.Binary(op, acc, a));
                     type = value.Type;
                 }
@@ -229,6 +274,7 @@ public sealed class NetLowering
                         ? new IrFunction { Name = iec, Args = args.Cast<IrExpression?>().ToList(), Type = type }
                         : new IrSysFn { Catalog = LogixVendor.Id, Service = fn.Type.ToUpperInvariant(), Args = args.Cast<IrExpression?>().ToList(), Type = type };
                 }
+                // The result goes to a body temporary (_f1, _f2, ...) that later blocks read through Source.
                 var temp = new IrTemporary { Name = $"_f{_temps.Count(t => t.Name.StartsWith("_f", StringComparison.Ordinal)) + 1}", Type = type ?? IrTypeRef.Named("REAL") };
                 _temps.Add(temp);
                 var result = IrRef.Temp(temp.Name, temp.Type);
@@ -238,6 +284,7 @@ public sealed class NetLowering
             }
             case FbdJsr jsr:
             {
+                // A JSR box: wired In pins are the input values; the emitter binds them to the callee's SBR tags.
                 var routine = jsr.Routine ?? "?";
                 var args = new List<IrExpression?> { new IrKeyword { Text = routine, Kind = "action" } };
                 var ins = inputs.Where(w => w.ToParam is not null).OrderBy(w => PinIndex(jsr.In, w.ToParam!)).Select(w => Source(sheet, w, 0)).ToList();
@@ -249,6 +296,7 @@ public sealed class NetLowering
         }
     }
 
+    /// <summary>Position of a pin in a JSR's In / Ret list (pins not listed sort last).</summary>
     private static int PinIndex(List<string> pins, string pin)
     {
         var i = pins.FindIndex(p => p.Equals(pin, StringComparison.OrdinalIgnoreCase));
@@ -256,6 +304,7 @@ public sealed class NetLowering
     }
 
     /// <summary>The value carried by a wire: the source element's operand, pin member, function result or connector feed.</summary>
+    /// <param name="depth">Connector-chasing depth, bounded so a connector loop in the source cannot recurse forever.</param>
     private IrExpression Source(FbdSheet sheet, FbdWire wire, int depth)
     {
         if (depth > 32) return new IrErrorExpression { Text = "connector loop" };
@@ -265,10 +314,12 @@ public sealed class NetLowering
             case FbdIRef r:
                 return r.ParsedOperand is null ? new IrErrorExpression { Text = r.Operand ?? "" } : _x.Operand(r.ParsedOperand);
             case FbdBlock b:
+                // A block's output pin is a member of its backing structure, written when the block ran (or last scan for feedback).
                 return b.Operand is null || wire.FromParam is null ? new IrErrorExpression { Text = $"{b.Type}#{b.Id}.{wire.FromParam}" } : MemberRef(b.Operand, wire.FromParam);
             case FbdAddOnInstruction a:
                 return a.Operand is null || wire.FromParam is null ? new IrErrorExpression { Text = $"{a.Name}#{a.Id}.{wire.FromParam}" } : MemberRef(a.Operand, wire.FromParam);
             case FbdFunction f:
+                // A tagless function has no storage of its own, so a feedback wire from it cannot be honoured.
                 return _functionResults.TryGetValue(f, out var temp) ? temp : new IrErrorExpression { Text = $"{f.Type}#{f.Id} evaluated later (feedback)" };
             case FbdICon c:
             {
@@ -288,5 +339,6 @@ public sealed class NetLowering
         }
     }
 
+    /// <summary>Records a lowering problem on the document (code IRB010) without stopping the import.</summary>
     private void Warn(string message) => _diagnostics.Add(new IrDiagnostic { Severity = "warning", Code = "IRB010", Message = message, Location = _location });
 }

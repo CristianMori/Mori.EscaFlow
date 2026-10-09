@@ -5,7 +5,23 @@ using Mori.EscaFlow.Transpiler.L5X.Parsing.Values;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.St;
 
-/// <summary>Recursive-descent parser over a token list. One instance per text; not reusable.</summary>
+/// <summary>
+/// Recursive-descent parser over a token list. One instance per text; not reusable.
+/// <para>
+/// Grammar (standard IEC structured text, as Logix restricts it): statements are IF/CASE/FOR/WHILE/REPEAT,
+/// EXIT, RETURN, an assignment (<c>:=</c> or the non-retentive <c>[:=]</c>) or a call; expressions follow the
+/// usual OR &gt; XOR &gt; AND(&amp;) &gt; comparison &gt; additive &gt; multiplicative &gt; unary &gt; power &gt; primary
+/// precedence chain, left associative except <c>**</c>. A variable is a dotted/indexed path, optionally prefixed
+/// with <c>\ProgramName.</c> for a program-scoped reference from a controller routine.
+/// </para>
+/// <para>
+/// Recovery: every parse method keeps going on error. <see cref="Synchronize"/> skips to the next statement
+/// boundary so one bad statement does not lose the rest of the routine, and <see cref="ParsePrimary"/> refuses
+/// to consume a token that closes an enclosing construct (<c>)</c>, <c>]</c>, <c>,</c>, a block terminator) so a
+/// missing operand does not cascade into unmatched brackets. <see cref="MaxDepth"/> guards against stack
+/// overflow on deeply nested or malformed expressions.
+/// </para>
+/// </summary>
 internal sealed class StParserCore
 {
     private readonly string _text;
@@ -69,6 +85,7 @@ internal sealed class StParserCore
     private void Report(string code, string message, in StToken at, DiagnosticSeverity severity = DiagnosticSeverity.Error)
         => _diagnostics.Add(new ParseDiagnostic(severity, code, message, new DiagnosticLocation(StLine: at.Line, Column: at.Column)));
 
+    /// <summary>Builds a span from <paramref name="first"/> to the token just consumed.</summary>
     private TextSpan SpanFrom(in StToken first) => SpanFrom(first, _pos > 0 ? _tokens[_pos - 1] : first);
 
     private static TextSpan SpanFrom(in StToken first, in StToken last)
@@ -85,6 +102,7 @@ internal sealed class StParserCore
         {
             if (Current.IsBlockTerminator)
             {
+                // A terminator with nothing open (e.g. a stray END_IF): record it as an error statement and move on.
                 var t = Advance();
                 Report("ST002", $"Unexpected '{TextOf(t)}' without a matching block", t);
                 statements.Add(new StErrorStatement(t.Span, TextOf(t)));
@@ -108,6 +126,7 @@ internal sealed class StParserCore
         return new StBlock(statements.Count > 0 ? SpanFrom(first) : new TextSpan(first.Start, 0, first.Line, first.Column), statements);
     }
 
+    /// <summary>A CASE arm body ends at the next label, which starts with a (possibly signed) integer.</summary>
     private bool IsCaseLabelStart()
     {
         if (Current.Kind == StTokenKind.Integer) return true;
@@ -120,6 +139,7 @@ internal sealed class StParserCore
         switch (start.Kind)
         {
             case StTokenKind.Semicolon:
+                // An empty statement (a lone ';'); legal and common after editing.
                 Advance();
                 return new StEmptyStatement(start.Span);
             case StTokenKind.KwIf:
@@ -141,6 +161,8 @@ internal sealed class StParserCore
                 ExpectStatementEnd();
                 return new StReturn(SpanFrom(start));
             case StTokenKind.Identifier when PeekToken().Kind == StTokenKind.LParen:
+                // An identifier directly followed by '(' is a call (built-in function or add-on instruction),
+                // never an assignment target, so this must be checked before falling into ParseAssignment.
                 return ParseCallStatement();
             case StTokenKind.Identifier:
             case StTokenKind.Backslash:
@@ -189,7 +211,7 @@ internal sealed class StParserCore
         var target = ParseVariable();
         bool nonRetentive;
         if (Accept(StTokenKind.Assign)) nonRetentive = false;
-        else if (Accept(StTokenKind.AssignNonRetentive)) nonRetentive = true;
+        else if (Accept(StTokenKind.AssignNonRetentive)) nonRetentive = true; // "[:=]": value is not retained through a power cycle.
         else
         {
             ReportUnexpected("':='");
@@ -219,6 +241,7 @@ internal sealed class StParserCore
         {
             if (Current.Kind is StTokenKind.Comma or StTokenKind.RParen)
             {
+                // An elided argument between commas, e.g. GSV(WallClockTime,,DateTime,Dest).
                 args.Add(null);
             }
             else
@@ -328,6 +351,7 @@ internal sealed class StParserCore
         return new StCase(SpanFrom(start), selector, arms, elseBlock);
     }
 
+    /// <summary>A CASE label: a single integer or an inclusive range <c>low..high</c>, each side optionally signed.</summary>
     private bool TryParseCaseLabel(out StCaseLabel label)
     {
         label = null!;
@@ -411,6 +435,10 @@ internal sealed class StParserCore
     }
 
     // ------------------------------------------------------------------ expressions
+    //
+    // Standard precedence climbing, one method per level from lowest (OR) to highest (power/primary); each
+    // level calls the next and loops while it sees an operator of its own level, which gives left associativity
+    // everywhere except ParsePower, which recurses on the right so "2**3**2" groups as "2**(3**2)".
 
     public StExpression ParseExpression()
     {
@@ -458,6 +486,7 @@ internal sealed class StParserCore
     private StExpression ParseAnd()
     {
         var left = ParseComparison();
+        // '&' is an accepted synonym for AND.
         while (Current.Kind is StTokenKind.KwAnd or StTokenKind.Ampersand)
         {
             Advance();
@@ -530,6 +559,7 @@ internal sealed class StParserCore
         }
         if (Accept(StTokenKind.Plus))
         {
+            // Unary '+' changes nothing; drop it rather than wrap it in a no-op node.
             return ParseUnary();
         }
         if (Accept(StTokenKind.KwNot))
@@ -581,6 +611,7 @@ internal sealed class StParserCore
             }
             case StTokenKind.Identifier when PeekToken().Kind == StTokenKind.LParen:
             {
+                // A built-in function (ABS, TRUNC, ...) or an add-on instruction used as a value-returning call.
                 Advance();
                 var args = ParseArgumentList();
                 return new StCall(SpanFrom(t), TextOf(t), args);
@@ -600,7 +631,15 @@ internal sealed class StParserCore
         }
     }
 
-    /// <summary>variable := ['\' IDENT '.'] IDENT { '.' IDENT | '.' INTEGER | '[' expr {',' expr} ']' }</summary>
+    /// <summary>
+    /// variable := ['\' IDENT '.'] IDENT { '.' IDENT | '.' INTEGER | '.' '[' expr ']' | '[' expr {',' expr} ']' }
+    /// <para>
+    /// <c>\Program.Tag</c> reaches a specific program's tag from a controller-scoped routine (an add-on's logic
+    /// routine, or a controller fault handler). <c>.N</c> addresses bit N of an integer member; <c>.[expr]</c> is
+    /// the indirect form (the bit number itself computed at run time). A keyword token right after '.' is still a
+    /// member name (e.g. <c>Tag.Return</c>, where <c>Return</c> happens to also be the RETURN keyword spelling).
+    /// </para>
+    /// </summary>
     public StVariable ParseVariable()
     {
         var start = Current;
@@ -682,6 +721,7 @@ internal sealed class StParserCore
             }
             if (Current.Kind == StTokenKind.LBracket)
             {
+                // An array subscript; multiple comma-separated indices address a multi-dimensional array.
                 Advance();
                 var indices = new List<StExpression>();
                 if (Current.Kind == StTokenKind.RBracket)

@@ -10,7 +10,11 @@ using Mori.EscaFlow.Transpiler.L5X.Parsing.Values;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads Tag, Parameter and LocalTag elements with a streaming cursor, and Data elements anywhere.</summary>
+/// <summary>
+/// Reads Tag, Parameter and LocalTag elements with a streaming cursor, and Data elements anywhere. Tags are the
+/// bulk of a large export (values included), so they are never materialized as trees. The same reader serves the
+/// three tag flavours because their attributes coincide; add-on parameters only add Required / Visible / Usage.
+/// </summary>
 public sealed class TagReader
 {
     private readonly ReaderContext _ctx;
@@ -21,6 +25,8 @@ public sealed class TagReader
     }
 
     /// <summary>Reads the element the reader is on (Tag / Parameter / LocalTag) and moves past it.</summary>
+    /// <param name="scope">Where the tag lives; decides the concrete model class and how references to it resolve.</param>
+    /// <param name="container">Owning program or add-on name, for diagnostics.</param>
     public Tag Read(XmlReader reader, TagScope scope, string? container)
     {
         var line = reader.LineNumber();
@@ -34,6 +40,7 @@ public sealed class TagReader
             "Consumed" => TagType.Consumed,
             _ => TagType.Base,
         };
+        // Alias tags have no DataType of their own: they take the type of whatever AliasFor points at (resolved by the linker).
         var dataTypeName = attrs.Take("DataType");
         var dimensions = attrs.TakeDimensions("Dimensions");
         var radix = attrs.TakeRadix();
@@ -48,6 +55,8 @@ public sealed class TagReader
         Tag tag;
         if (scope == TagScope.AoiParameter)
         {
+            // Required parameters are the positional operands of a call (Blink(Blk, Rate, Out)); Visible ones show on the
+            // instruction face; InOut parameters are passed by reference and are always required.
             var required = attrs.TakeBool("Required");
             var visible = attrs.TakeBool("Visible");
             tag = new AoiParameter
@@ -139,6 +148,8 @@ public sealed class TagReader
                     break;
                 case "Data":
                 case "DefaultData":
+                    // A tag carries several Data children keyed by Format (L5K, Decorated, String, Message, ...); they all
+                    // describe the same value and land in one TagData. Add-on parameters use DefaultData.
                     data ??= new TagData();
                     ReadData(r, data, name, container);
                     break;
@@ -160,7 +171,7 @@ public sealed class TagReader
         return tag;
     }
 
-    /// <summary>Reads <c>&lt;Comments&gt;&lt;Comment Operand="..."&gt;</c> children.</summary>
+    /// <summary>Reads <c>&lt;Comments&gt;&lt;Comment Operand="..."&gt;</c> children: per-member and per-element documentation keyed by operand specifier (".Member", "[3]").</summary>
     public void ReadComments(XmlReader reader, List<TagComment> into)
     {
         reader.ForEachChild((r, child) =>
@@ -178,6 +189,7 @@ public sealed class TagReader
         });
     }
 
+    /// <summary>Reads one of the operand-keyed maps (engineering units, min/max, state names) that document members of a tag.</summary>
     private static Dictionary<string, string> ReadOperandMap(XmlReader reader, string childName)
     {
         var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -197,6 +209,12 @@ public sealed class TagReader
     }
 
     /// <summary>Reads one Data / DefaultData element (reader on the element) into <paramref name="data"/>, dispatching on Format.</summary>
+    /// <remarks>
+    /// Formats: no Format attribute is raw hex bytes (older exports, module data); <c>L5K</c> is the initializer
+    /// syntax of the L5K text format (compact, untyped); <c>Decorated</c> is the typed member-by-member XML form;
+    /// <c>String</c> is a string value with its LEN; <c>Message</c>, <c>Alarm</c>, <c>Axis</c>, <c>MotionGroup</c>
+    /// and <c>CoordinateSystem</c> are the configuration blocks of the corresponding predefined types.
+    /// </remarks>
     public void ReadData(XmlReader reader, TagData data, string? tagName, string? container)
     {
         var format = reader.GetAttribute("Format");
@@ -240,6 +258,7 @@ public sealed class TagReader
             }
             case "String":
             {
+                // The text is the Logix string literal form ('abc$r$l' with $-escapes), quoted in newer exports and bare in older ones.
                 var lengthText = reader.GetAttribute("Length");
                 var text = reader.ReadNormalizedText();
                 data.StringLength = int.TryParse(lengthText, out var len) ? len : null;
@@ -248,6 +267,7 @@ public sealed class TagReader
             }
             case "Message":
             {
+                // The MSG configuration lives in the attributes of a MessageParameters child; the element is kept as well.
                 var element = _ctx.ReadGeneric(reader);
                 data.MessageElement = element;
                 var parameters = element.Child("MessageParameters");
@@ -278,6 +298,7 @@ public sealed class TagReader
         var data = new TagData();
         foreach (var d in owner.Elements("Data"))
         {
+            // The Decorated reader is cursor based, so the materialized subtree is re-exposed through a node reader.
             using var r = d.CreateReader();
             r.MoveToContent();
             ReadData(r, data, tagName, container);
@@ -294,6 +315,7 @@ public sealed class TagReader
         }
     }
 
+    /// <summary>Raw hex data is written as whitespace separated byte pairs.</summary>
     private static byte[]? ParseHex(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;
@@ -306,6 +328,7 @@ public sealed class TagReader
         return bytes;
     }
 
+    /// <summary>Number of nodes in a value tree, for the statistics.</summary>
     public static long CountNodes(TagValue value)
     {
         switch (value)

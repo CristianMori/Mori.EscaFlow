@@ -7,12 +7,22 @@ namespace Mori.EscaFlow.Runtime;
 /// passed as objects, keywords as strings and literals as values; <see cref="Call"/> dispatches by name. Override
 /// members to plug in real messaging, motion or process control.
 /// </summary>
+/// <remarks>
+/// Everything the middle format could not express as a neutral statement arrives here as a vendor service with
+/// positional arguments, in the order the Logix instruction lists its operands. Arguments that are tags come as
+/// their wrapper or structure view (so the service can write results back), enumeration operands as strings, and
+/// immediates as boxed numbers. The policy for a service the runtime lacks is deliberate: it is never silent. It is
+/// reported by the converter, logged once per call site here, and optionally turned into a major fault.
+/// </remarks>
 public class LogixServices
 {
+    /// <summary>Keys already logged, so a message about one call site appears once rather than every scan.</summary>
     private readonly ConcurrentDictionary<string, byte> _logged = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Binds the services to their controller.</summary>
     public LogixServices(PlcController controller) => Controller = controller;
 
+    /// <summary>The owning controller (tasks, options, log).</summary>
     public PlcController Controller { get; }
 
     /// <summary>Logs a message once per key (unsupported attribute, ignored write, ...).</summary>
@@ -22,6 +32,7 @@ public class LogixServices
     }
 
     /// <summary>Dispatches a service by catalog name.</summary>
+    /// <remarks>The generated code calls the typed methods directly; this entry point serves tests, hosts and any dynamic caller.</remarks>
     public virtual object? Call(string service, params object?[] args)
     {
         switch (service.ToUpperInvariant())
@@ -39,6 +50,14 @@ public class LogixServices
     }
 
     /// <summary>GSV(className, instanceName, attributeName, dest).</summary>
+    /// <remarks>
+    /// Get System Value reads a controller object attribute into a tag. The objects modelled are the ones projects
+    /// read in practice: WallClockTime (DateTime as a DINT[7] of year, month, day, hour, minute, second,
+    /// microsecond, or CurrentValue as microseconds since the epoch), Controller and ControllerDevice identity,
+    /// Task and Program scan times in microseconds (Logix reports them in microseconds, the statistics keep
+    /// milliseconds), Module status (always a healthy entry status, since there is no real I/O), CST and FaultLog.
+    /// Unknown attributes store 0 and are logged once, so logic that branches on them keeps running.
+    /// </remarks>
     public virtual void GSV(params object?[] args)
     {
         var className = Text(args, 0);
@@ -53,6 +72,7 @@ public class LogixServices
                 var now = attribute.Equals("DateTime", StringComparison.OrdinalIgnoreCase) ? DateTime.UtcNow : DateTime.Now;
                 if (attribute.Equals("CurrentValue", StringComparison.OrdinalIgnoreCase))
                 {
+                    // Microseconds since 1970 as a LINT, the form Logix returns.
                     Store(dest, (now.ToUniversalTime() - DateTime.UnixEpoch).Ticks / 10);
                     return;
                 }
@@ -81,6 +101,7 @@ public class LogixServices
                 }
             case "TASK":
             {
+                // "THIS" (or no instance) means the task that is executing the instruction; the first task stands in for it.
                 var task = instance is string s && s.Length > 0 && !s.Equals("THIS", StringComparison.OrdinalIgnoreCase) ? Controller.FindTask(s) : Controller.Tasks.FirstOrDefault();
                 var stats = task?.Statistics;
                 switch (attribute.ToUpperInvariant())
@@ -112,6 +133,7 @@ public class LogixServices
             case "MODULE":
                 switch (attribute.ToUpperInvariant())
                 {
+                    // 0x4000 = "running" entry status: logic that checks module health sees healthy modules.
                     case "ENTRYSTATUS": Store(dest, 0x4000); return;
                     case "FAULTCODE" or "FAULTINFO" or "MODE" or "FORCESTATUS" or "INSTANCE": Store(dest, 0); return;
                     case "LEDSTATUS": Store(dest, 1); return;
@@ -135,6 +157,7 @@ public class LogixServices
     }
 
     /// <summary>SSV(className, instanceName, attributeName, source): writes to the objects are accepted and logged once.</summary>
+    /// <remarks>Set System Value changes controller objects (task rates, program disable flags, the wall clock). None of those is modelled yet, so the write is acknowledged for the attributes a real controller accepts and ignored for the rest, in both cases with a single log line.</remarks>
     public virtual void SSV(params object?[] args)
     {
         var className = Text(args, 0);
@@ -156,6 +179,11 @@ public class LogixServices
     }
 
     /// <summary>MSG(message): the message structure is marked in error (unsupported messaging) until a messaging runtime is plugged in.</summary>
+    /// <remarks>
+    /// Logic that sends messages usually waits on <c>.DN</c> or <c>.ER</c> and retries; marking the message in error
+    /// with a nonzero <c>.ERR</c> lets such logic complete its state machine instead of hanging on <c>.EN</c>. A
+    /// real implementation (CIP data table reads and writes, generic CIP, socket services) replaces this method.
+    /// </remarks>
     public virtual void MSG(params object?[] args)
     {
         if (args.Length == 0 || args[0] is not PlcStruct message) return;
@@ -182,19 +210,23 @@ public class LogixServices
         task.Trigger();
     }
 
+    /// <summary>IOT(outputTag): immediate output update. There is no physical output path yet, so nothing to flush.</summary>
     public virtual void IOT(params object?[] args)
     {
     }
 
+    /// <summary>UID: user interrupt disable. Tasks are never interrupted mid-rung here, so it is a no-op.</summary>
     public virtual void UID(params object?[] args)
     {
     }
 
+    /// <summary>UIE: user interrupt enable (see <see cref="UID"/>).</summary>
     public virtual void UIE(params object?[] args)
     {
     }
 
     /// <summary>A service the runtime does not implement.</summary>
+    /// <remarks>Faults the controller when <see cref="PlcControllerOptions.FaultOnUnsupportedService"/> is set; otherwise logs once per call site (service plus the first argument's tag and offset) and skips the call, which keeps the rest of the project scanning.</remarks>
     public virtual void Unsupported(string service, params object?[] args)
     {
         if (Controller.Options.FaultOnUnsupportedService)
@@ -207,6 +239,7 @@ public class LogixServices
     /// Prescan of an always-scan service (called once when entering Run for every such instruction). The default
     /// clears the status bits of the instruction's structure (EN, DN, ER, TT, IP, EW, ST) when the first argument is one.
     /// </summary>
+    /// <remarks>Logix prescans every instruction with its own rules; for the structure-backed instructions (MSG, PID, alarms, FBD blocks) the common effect is that the status bits start cleared, which this default reproduces without knowing each instruction.</remarks>
     public virtual void Prescan(string service, params object?[] args)
     {
         if (args.Length == 0 || args[0] is not PlcStruct structure) return;
@@ -216,8 +249,10 @@ public class LogixServices
 
     // ------------------------------------------------------------------ helpers
 
+    /// <summary>The argument at <paramref name="index"/> as text, or empty when absent.</summary>
     private static string Text(object?[] args, int index) => args.Length > index ? PlcConvert.ToText(args[index]) : "";
 
+    /// <summary>Stores 0 for an attribute that is not modelled and logs it once.</summary>
     private void Unknown(string className, string attribute, object dest)
     {
         LogOnce($"GSV:{className}.{attribute}", $"GSV {className}.{attribute} is not modelled; 0 returned");
@@ -233,6 +268,7 @@ public class LogixServices
             case PlcValue v: v.SetFrom(value); break;
             case PlcArrayBase array:
             {
+                // A scalar stored into an array lands in its first element, as a GSV into Array[0] would.
                 var first = ((System.Collections.IEnumerable)array).Cast<object>().FirstOrDefault();
                 if (first is not null) Store(first, value);
                 break;
@@ -240,6 +276,7 @@ public class LogixServices
         }
     }
 
+    /// <summary>Stores a date and time the way WallClockTime does: a DINT[7] of year, month, day, hour, minute, second, microsecond (or just the year into a scalar).</summary>
     private static void StoreDateTime(object dest, DateTime t)
     {
         var parts = new[] { t.Year, t.Month, t.Day, t.Hour, t.Minute, t.Second, (int)(t.Ticks % TimeSpan.TicksPerSecond / 10) };
@@ -254,6 +291,7 @@ public class LogixServices
         }
     }
 
+    /// <summary>Sets a BOOL member by name when the structure has one.</summary>
     private static void SetBool(PlcStruct s, string member, bool value)
     {
         if (s.TryGetMember(member, out var m) && m is WrapBOOL b) b.Value = value;

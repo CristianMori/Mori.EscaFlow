@@ -6,6 +6,11 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Linking;
 
+/// <summary>
+/// Proves the linker's keyword reclassification pass turns bare identifiers that name no tag/module/routine
+/// into <c>KeywordOperand</c>/<c>StKeyword</c> nodes, in both ladder rung operands and structured text call
+/// arguments, once every real tag name in the project is known.
+/// </summary>
 public class KeywordReclassificationTests
 {
     private const string Xml = """

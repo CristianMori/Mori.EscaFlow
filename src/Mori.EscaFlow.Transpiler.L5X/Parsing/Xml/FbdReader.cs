@@ -3,7 +3,13 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Logic.Fbd;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads a materialized <c>&lt;FBDContent&gt;</c> element (spec pp. 223–255).</summary>
+/// <summary>
+/// Reads a materialized <c>&lt;FBDContent&gt;</c> element (spec pp. 223–255). A function block diagram is a set of
+/// sheets; each sheet holds elements (input and output references, wire connectors, instruction blocks with their
+/// backing tags, tagless functions, add-on instructions, JSR/SBR/RET markers, text boxes) addressed by numeric
+/// ID, and wires that connect an output pin of one element to an input pin of another. Feedback wires are marked
+/// separately because they carry the previous scan's value and define the execution order.
+/// </summary>
 public sealed class FbdReader
 {
     private readonly ReaderContext _ctx;
@@ -32,6 +38,7 @@ public sealed class FbdReader
         return content;
     }
 
+    /// <summary>One sheet: elements and wires. Unknown element kinds are kept generically so a newer instruction family does not break the parse.</summary>
     private FbdSheet ReadSheet(XElement e)
     {
         var a = new AttributeBag(e);
@@ -64,6 +71,8 @@ public sealed class FbdReader
                     break;
                 case "Block":
                 {
+                    // A function block instruction: its pins are members of the backing tag (Operand); VisiblePins lists
+                    // the ones drawn, and a few instructions bind array tags through Array child elements.
                     var block = new FbdBlock
                     {
                         Type = b.TakeRequired("Type", "?"),
@@ -89,6 +98,7 @@ public sealed class FbdReader
                     break;
                 case "AddOnInstruction":
                 {
+                    // Add-on calls carry their InOut arguments as text on the block rather than as wires.
                     var aoi = new FbdAddOnInstruction
                     {
                         Name = b.TakeRequired("Name", "?"),
@@ -166,6 +176,7 @@ public sealed class FbdReader
 
     private static int Id(AttributeBag b) => b.TakeInt("ID") ?? -1;
 
+    /// <summary>Pin lists are written space separated; commas are accepted for tolerance.</summary>
     private static IEnumerable<string> SplitList(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return Array.Empty<string>();

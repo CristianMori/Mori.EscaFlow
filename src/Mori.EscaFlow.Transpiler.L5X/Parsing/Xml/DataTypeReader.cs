@@ -3,7 +3,12 @@ using Mori.EscaFlow.Transpiler.L5X.Model.DataTypes;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads a materialized <c>&lt;DataType&gt;</c> element.</summary>
+/// <summary>
+/// Reads a materialized <c>&lt;DataType&gt;</c> element: a user-defined structure (UDT) or a user string type
+/// (<c>Family="StringFamily"</c>, LEN plus DATA members). The export lists members in layout order including the
+/// hidden BOOL hosts (<c>ZZZZZZZZZZ...</c>) that BIT members overlay; both are kept because the host order is the
+/// byte layout a tag server must reproduce.
+/// </summary>
 public sealed class DataTypeReader
 {
     private readonly ReaderContext _ctx;
@@ -23,6 +28,7 @@ public sealed class DataTypeReader
             Family = attrs.Take("Family") == "StringFamily" ? DataTypeFamily.StringFamily : DataTypeFamily.NoFamily,
             SourceLine = element.Line(),
         };
+        // The Class attribute is always "User" in this section; predefined and module types never appear here.
         _ = attrs.Take("Class");
         type.UnknownAttributes = attrs.Remaining();
 
@@ -50,6 +56,10 @@ public sealed class DataTypeReader
         return type;
     }
 
+    /// <summary>
+    /// One member. A BIT member carries <c>Target</c> (its hidden host member) and <c>BitNumber</c>; an array member
+    /// carries <c>Dimension</c> (UDT members are at most one-dimensional); <c>Hidden</c> marks the hosts.
+    /// </summary>
     private static DataTypeMember ReadMember(XElement m)
     {
         var attrs = new AttributeBag(m);

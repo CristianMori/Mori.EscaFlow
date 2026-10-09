@@ -3,7 +3,11 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Logic.Rll;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Rll;
 
-/// <summary>Renders a <see cref="RungAst"/> back to neutral text in the exporter's canonical layout.</summary>
+/// <summary>
+/// Renders a <see cref="RungAst"/> back to neutral text in the exporter's canonical layout. Used to round-trip
+/// rungs (the conformance tests compare a re-rendered rung with the original after <see cref="Normalize"/>) and
+/// to print rewritten rungs. Operands are written from their original text, so no information is lost.
+/// </summary>
 public static class RungTextWriter
 {
     /// <summary>
@@ -18,6 +22,7 @@ public static class RungTextWriter
         return sb.ToString();
     }
 
+    /// <summary>Renders a single element (no terminator).</summary>
     public static string Write(RungElement element)
     {
         var sb = new StringBuilder();
@@ -69,6 +74,7 @@ public static class RungTextWriter
             var c = rungText[i];
             if (inString)
             {
+                // Inside a string every character is significant, including spaces and escaped quotes ($').
                 sb.Append(c);
                 if (c == '$' && i + 1 < rungText.Length)
                 {

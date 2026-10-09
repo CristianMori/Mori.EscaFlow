@@ -98,6 +98,11 @@ public sealed class ScopeResolver
         _ => Resolve(path, null, null),
     };
 
+    /// <summary>
+    /// Resolves a path to the full chain of information a transpiler needs: the declaring tag (or module), the
+    /// real path after following any alias, and the type/dimensions/bit status at the end of the path, walked
+    /// one segment at a time from the root's own type by <see cref="Walk"/>.
+    /// </summary>
     public ResolvedReference Resolve(OperandPath path, Program? program, AddOnInstructionDefinition? aoi)
     {
         // System bits such as S:FS (first scan)
@@ -140,6 +145,7 @@ public sealed class ScopeResolver
         return Walk(expanded, expanded.Segments, type, tag.Dimensions, tag, tag.Scope, null, null);
     }
 
+    /// <summary>Resolves a module-addressed root (<c>Local:1:I</c>, <c>Rack2:3:O</c>, ...) found by <see cref="IndexModuleTags"/>, handling the rack-optimized (opaque parent-slot) case specially.</summary>
     private ResolvedReference ResolveModuleTag(OperandPath path)
     {
         if (!_moduleTags.TryGetValue(path.Root, out var entry))
@@ -175,6 +181,13 @@ public sealed class ScopeResolver
         return Walk(path, path.Segments, type, Array.Empty<int>(), null, TagScope.Module, entry.Module, entry.Data);
     }
 
+    /// <summary>
+    /// Walks a path's segments (after its root) against the type system, one member/index/bit at a time,
+    /// starting from the root's own declared type and dimensions. Stops with an error on a genuine mismatch
+    /// (indexing a scalar, naming a member that does not exist on a known type), but keeps walking "blind"
+    /// (<paramref name="opaque"/> below) once it reaches a type with no known member list, since the rest of
+    /// the path is then unverifiable rather than wrong.
+    /// </summary>
     private ResolvedReference Walk(OperandPath expanded, IReadOnlyList<PathSegment> segments, DataTypeDefinition? type, int[] dims, Tag? tag, TagScope? scope, Module? module, ModuleTagData? moduleData)
     {
         DataTypeMember? leafMember = null;
@@ -312,6 +325,7 @@ public sealed class ScopeResolver
         return Done(null);
     }
 
+    /// <summary>Builds the lookup from every spelling a module's I/O/config data can be addressed under to the module and the actual <see cref="ModuleTagData"/> it names.</summary>
     private void IndexModuleTags()
     {
         // Module tag roots: "<Module>:<I|O|C>", "<Module>:<I|O><n>" for numbered data-driven connections,
@@ -369,6 +383,7 @@ public sealed class ScopeResolver
         }
     }
 
+    /// <summary>The name prefixes a module's tags can be addressed under: its own name, and (for a chassis/point-bus module) its parent's name plus the upstream port's numeric slot address.</summary>
     private static IEnumerable<string> ModuleTagPrefixes(Module m)
     {
         yield return m.Name;
@@ -383,6 +398,7 @@ public sealed class ScopeResolver
         }
     }
 
+    /// <summary>True for the legacy PLC-5/SLC-style system tag prefix "S:" (e.g. <c>S:FS</c>, first-scan bit), still accepted as a bare root in some imported logic.</summary>
     private static bool IsSystemTag(string root)
         => root.Length > 2 && (root[0] == 'S' || root[0] == 's') && root[1] == ':';
 }

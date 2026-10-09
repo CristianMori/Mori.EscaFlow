@@ -11,6 +11,14 @@ namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Linking;
 /// </summary>
 public static class SocketAnalysis
 {
+    /// <summary>
+    /// Finds every CIP Generic message addressed to the Socket Object and, for each, the structural binding
+    /// (session tag, request/response paths, field locations) that <see cref="MessageConfiguration.Socket"/>
+    /// exposes to consumers. This is a structural pass, not a simulation: it looks at which data type the
+    /// request structure has and locates fields by their conventional names in that type, never at what value
+    /// logic happens to have put there, because the whole point of a socket service is that logic can repoint
+    /// it (to a different socket, a different destination) on every scan.
+    /// </summary>
     public static void Run(Controller controller)
     {
         var resolver = new ScopeResolver(controller);

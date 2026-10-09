@@ -4,7 +4,11 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Tags;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads a <c>&lt;Program&gt;</c> with a streaming cursor.</summary>
+/// <summary>
+/// Reads a <c>&lt;Program&gt;</c> with a streaming cursor: its program-scoped tags (which shadow controller tags of
+/// the same name inside its routines), its routines, and the main / fault routine names. Programs can also be
+/// folders (<c>UseAsFolder</c>) grouping child programs, and equipment phases are programs with a different Type.
+/// </summary>
 public sealed class ProgramReader
 {
     private readonly ReaderContext _ctx;

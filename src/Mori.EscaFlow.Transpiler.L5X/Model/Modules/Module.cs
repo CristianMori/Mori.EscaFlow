@@ -4,7 +4,11 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Values;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Model.Modules;
 
-/// <summary>An I/O or communication module from the Modules section.</summary>
+/// <summary>
+/// An I/O or communication module from the Modules section: a chassis slot card, a network adapter, or a device
+/// attached through one. Modules form a tree through <see cref="ParentModule"/> (a module's connection runs
+/// through its parent's port), rooted at the controller's own local module.
+/// </summary>
 public sealed class Module : L5xElement
 {
     public required string Name { get; init; }
@@ -22,6 +26,7 @@ public sealed class Module : L5xElement
     public string? SafetyNetwork { get; init; }
     public string? Description { get; set; }
 
+    /// <summary>Electronic keying settings (compatible/exact/disabled, by revision or by exact match); kept verbatim, not interpreted here.</summary>
     public GenericElement? EKey { get; set; }
     public List<ModulePort> Ports { get; init; } = new();
     public ModuleCommunications? Communications { get; set; }
@@ -37,6 +42,7 @@ public sealed class Module : L5xElement
     public override string ToString() => $"{Name} ({CatalogNumber})";
 }
 
+/// <summary>One physical port of a module (backplane, Ethernet, a motion/safety network tap). Upstream marks the port that connects toward the controller.</summary>
 public sealed class ModulePort : L5xElement
 {
     public int Id { get; init; }
@@ -47,6 +53,7 @@ public sealed class ModulePort : L5xElement
     public GenericElement? Bus { get; set; }
 }
 
+/// <summary>A module's communication setup: its connections to the controller and any configuration data sent once at connection time.</summary>
 public sealed class ModuleCommunications : L5xElement
 {
     public string? CommMethod { get; init; }
@@ -60,9 +67,12 @@ public sealed class ModuleCommunications : L5xElement
     public GenericElement? SafetyScript { get; set; }
 }
 
+/// <summary>One CIP connection the module opens (its primary I/O connection, or an additional one such as a listen-only or safety connection).</summary>
 public sealed class ModuleConnection : L5xElement
 {
     public required string Name { get; init; }
+
+    /// <summary>Requested packet interval in microseconds: how often the connection's data is exchanged.</summary>
     public int? Rpi { get; init; }
     public string? Type { get; init; }
     public int? EventId { get; init; }
@@ -72,7 +82,11 @@ public sealed class ModuleConnection : L5xElement
     public ModuleTagData? OutputTag { get; set; }
 }
 
-/// <summary>Config / input / output data of a module. Shares the value model with ordinary tags.</summary>
+/// <summary>
+/// Config / input / output data of a module. Shares the value model with ordinary tags because it is addressed
+/// the same way in logic (<c>Local:3:I</c>, <c>Local:3:O</c>, <c>Local:3:C</c>): the module's data behaves like
+/// a tag of a module-defined type, it just lives on the module rather than in a program or controller scope.
+/// </summary>
 public sealed class ModuleTagData : L5xElement
 {
     public string? ExternalAccess { get; init; }

@@ -24,6 +24,12 @@ public enum OperandRole
 /// <summary>
 /// The built-in ladder instruction table (mnemonic and per-position operand roles), loaded from the embedded
 /// <c>InstructionSignatures.txt</c> resource. Unknown mnemonics are treated as all-tag instructions.
+/// <para>
+/// Resource format: one <c>MNEMONIC | role, role, ...</c> line per instruction, <c>#</c> comments, blank lines
+/// ignored; a trailing <c>...</c> repeats the last role for every further operand (JSR input/return lists, CMP and
+/// FSC variants). The table lives in a text file rather than in code so the instruction set can be extended
+/// without touching the parser, and it is loaded lazily and once because the parser runs on many threads.
+/// </para>
 /// </summary>
 public static class InstructionSignatures
 {
@@ -48,6 +54,7 @@ public static class InstructionSignatures
         return OperandRole.Tag;
     }
 
+    /// <summary>Reads the embedded resource; a missing resource gives an empty table (every instruction then counts as unknown) rather than a failure.</summary>
     private static Dictionary<string, Signature> Load()
     {
         var table = new Dictionary<string, Signature>(StringComparer.OrdinalIgnoreCase);

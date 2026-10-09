@@ -5,7 +5,11 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Programs;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads a <c>&lt;Routine&gt;</c> with a streaming cursor; SFC and FBD bodies are materialized per routine.</summary>
+/// <summary>
+/// Reads a <c>&lt;Routine&gt;</c> with a streaming cursor; SFC and FBD bodies are materialized per routine. Ladder
+/// and ST bodies are only collected as text here (rung text, ST lines); the logic phase parses them later once the
+/// add-on names are known. A routine may carry several content blocks when online edits are pending.
+/// </summary>
 public sealed class RoutineReader
 {
     private readonly ReaderContext _ctx;
@@ -66,6 +70,7 @@ public sealed class RoutineReader
                     break;
                 case "EncryptedContent":
                 case "EncryptedSegments":
+                    // Source-protected routine: there is no body to parse, only the encrypted payload.
                     routine.EncryptedContent = _ctx.ReadGeneric(r);
                     break;
                 case "CustomProperties":
@@ -90,6 +95,11 @@ public sealed class RoutineReader
         return routine;
     }
 
+    /// <summary>
+    /// Picks the routine's effective body. An export taken with online edits pending contains the <c>Original</c>
+    /// content plus <c>PendingEdits</c> / <c>TestEdits</c> variants; the original (what the controller runs) is the
+    /// content and the edit variants are kept aside, whatever order they appear in.
+    /// </summary>
     private static void AddContent(Routine routine, RoutineContent content)
     {
         var isOriginal = content.OnlineEditType is null || content.OnlineEditType == "Original";
@@ -113,6 +123,7 @@ public sealed class RoutineReader
         }
     }
 
+    /// <summary>Rungs: number, type (N normal; I/D/R and the lower-case forms mark pending inserts, deletes and replacements), comment and neutral text.</summary>
     private RllContent ReadRll(XmlReader reader, Routine routine)
     {
         var attrs = new AttributeBag(reader);
@@ -167,7 +178,7 @@ public sealed class RoutineReader
         return content;
     }
 
-    /// <summary>Reads the <c>&lt;Line&gt;</c> children of an STContent element (reader on STContent).</summary>
+    /// <summary>Reads the <c>&lt;Line&gt;</c> children of an STContent element (reader on STContent). One element per source line; statements may span several.</summary>
     public void ReadStLines(XmlReader reader, List<StLine> into)
     {
         reader.ForEachChild((r, child) =>

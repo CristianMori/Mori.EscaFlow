@@ -2,7 +2,23 @@ using EthernetIPSharp.Logix;
 
 namespace Mori.EscaFlow.Runtime;
 
-/// <summary>Typed views over another object's tag memory, used to bind InOut parameters: the declared parameter type is overlaid on the argument's bytes.</summary>
+/// <summary>
+/// Typed views over another object's tag memory, used to bind InOut parameters: the declared parameter type is
+/// overlaid on the argument's bytes.
+/// </summary>
+/// <remarks>
+/// <para>
+/// A Logix InOut parameter is passed by reference: the add-on instruction works directly on the caller's tag, and
+/// the controller overlays the parameter's declared type on whatever bytes were passed (projects routinely pass
+/// device images of a different size, or arrays longer than the declared <c>[1]</c>). The generated add-on class
+/// therefore holds a field of the declared type and, before each call, the caller rebinds it to a view over the
+/// argument's tag and offset through these helpers.
+/// </para>
+/// <para>
+/// The view is cached on the field: when the same argument is passed again (the normal case, since call sites are
+/// static), the existing view is reused and no allocation happens during the scan.
+/// </para>
+/// </remarks>
 public static class PlcView
 {
     /// <summary>Returns <paramref name="current"/> when it already views <paramref name="source"/>'s memory, else a new view built by <paramref name="factory"/>.</summary>

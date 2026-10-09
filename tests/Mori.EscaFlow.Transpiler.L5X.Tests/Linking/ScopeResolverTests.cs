@@ -13,6 +13,12 @@ using Xunit.Abstractions;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Linking;
 
+/// <summary>
+/// Proves <c>ScopeResolver</c> walks a tag path to the right leaf type in every case: members, array indices
+/// and bits combined and nested, predefined-type members and the STRING collapse, program/controller scope
+/// shadowing and alias following, module and system tag addressing, and that hitting an opaque type partway
+/// through a path stops cleanly (no error, no further type information) rather than guessing.
+/// </summary>
 public class ScopeResolverTests
 {
     private const string Xml = """
@@ -254,6 +260,7 @@ public class ScopeResolverTests
     }
 }
 
+/// <summary>Integration check that every rung operand in a real sample project resolves through <c>ScopeResolver</c> without error.</summary>
 [Collection("Samples")]
 [Trait("Category", "Integration")]
 public class ScopeResolverSampleTests

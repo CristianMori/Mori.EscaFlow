@@ -8,6 +8,13 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Values;
 
+/// <summary>
+/// Proves <c>L5kShaper</c> turns an untyped L5K tree into the right typed <c>TagValue</c> for every shape it
+/// has to handle: atomic scalars, the TIMER/COUNTER hidden-bit-host pattern, user and non-family string types,
+/// multi-dimensional arrays, arrays of structures and strings, and that a shape mismatch or an opaque type is
+/// reported rather than silently guessed wrong; also cross-checks a shaped value against the Decorated value
+/// of the same tag.
+/// </summary>
 public class L5kShaperTests
 {
     private static DataTypeRegistry Registry()

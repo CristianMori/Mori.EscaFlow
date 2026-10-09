@@ -5,6 +5,11 @@ using Xunit.Abstractions;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Values;
 
+/// <summary>
+/// Proves the embedded PredefinedTypes.txt resource is internally consistent: every member's declared type
+/// resolves to something registered, specific known members have the expected type, and no type name is
+/// declared twice (which would silently let the second definition win).
+/// </summary>
 public class PredefinedTypesResourceTests
 {
     private readonly ITestOutputHelper _out;

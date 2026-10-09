@@ -2,6 +2,7 @@ using Xunit;
 
 namespace Mori.EscaFlow.Runtime.Tests;
 
+/// <summary>End-to-end controller behaviour with <see cref="TestController"/>: prescan-then-scan on Start, freeze on Stop, host tag access, and GSV/EVENT services.</summary>
 public class ControllerTests
 {
     [Fact]

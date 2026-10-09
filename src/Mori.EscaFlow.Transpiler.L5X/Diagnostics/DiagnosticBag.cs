@@ -8,6 +8,7 @@ public interface IDiagnosticSink
     void Add(ParseDiagnostic diagnostic);
 }
 
+/// <summary>Shorthands for raising diagnostics of each severity.</summary>
 public static class DiagnosticSinkExtensions
 {
     public static void Info(this IDiagnosticSink sink, string code, string message, DiagnosticLocation? location = null)
@@ -20,7 +21,7 @@ public static class DiagnosticSinkExtensions
         => sink.Add(new ParseDiagnostic(DiagnosticSeverity.Error, code, message, location ?? DiagnosticLocation.None));
 }
 
-/// <summary>A simple list-backed diagnostic collection.</summary>
+/// <summary>A simple list-backed diagnostic collection, also the sink the XML and link phases write into.</summary>
 public sealed class DiagnosticBag : IDiagnosticSink, IReadOnlyList<ParseDiagnostic>
 {
     private readonly List<ParseDiagnostic> _items = new();
@@ -35,6 +36,7 @@ public sealed class DiagnosticBag : IDiagnosticSink, IReadOnlyList<ParseDiagnost
 
     public int CountBySeverity(DiagnosticSeverity severity) => _items.Count(d => d.Severity == severity);
 
+    /// <summary>Counts diagnostics of one family (codes are prefixed XML, RLL, ST, L5K, DEC, SFC, FBD, LNK).</summary>
     public int CountByCodePrefix(string prefix) => _items.Count(d => d.Code.StartsWith(prefix, StringComparison.Ordinal));
 
     public bool HasErrors => _items.Any(d => d.Severity == DiagnosticSeverity.Error);
@@ -59,6 +61,7 @@ public sealed class ScopedDiagnosticSink : IDiagnosticSink
         _context = context;
     }
 
+    /// <summary>Fills in every location field the parser left empty from the fixed context; fields the parser set win.</summary>
     public void Add(ParseDiagnostic diagnostic)
     {
         var loc = diagnostic.Location;

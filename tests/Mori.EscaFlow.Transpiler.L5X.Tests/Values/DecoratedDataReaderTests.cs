@@ -8,6 +8,14 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Values;
 
+/// <summary>
+/// Proves <c>DecoratedDataReader</c> reads every scalar, array and structure shape Decorated data can take:
+/// every atomic kind and radix, forced values, sparse and multi-dimensional arrays with missing elements
+/// filled in, the TIMER structure, nested arrays and structures, the STRING LEN/DATA collapse (as a top-level
+/// value, a struct member and an array element), and that unparseable or unknown content is diagnosed and
+/// skipped rather than aborting the read; also checks the reader correctly advances the underlying
+/// <c>XmlReader</c> past what it consumed and that <c>ValueInterner</c> actually shares common scalars.
+/// </summary>
 public class DecoratedDataReaderTests
 {
     private static (TagValue? Value, DiagnosticBag Diagnostics) Read(string xml)

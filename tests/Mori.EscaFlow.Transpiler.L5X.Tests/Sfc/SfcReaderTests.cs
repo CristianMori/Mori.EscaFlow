@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Sfc;
 
+/// <summary>Proves that an SFC chart (steps, actions with their qualifiers, transitions, branches, stops) is read correctly and that the linker resolves its directed links to the right nodes by ID.</summary>
 public class SfcReaderTests
 {
     private const string Xml = """

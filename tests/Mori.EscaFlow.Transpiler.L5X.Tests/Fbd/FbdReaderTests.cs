@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Fbd;
 
+/// <summary>Proves every FBD element kind (IRef/ORef, connectors, blocks, add-on calls, JSR/SBR/RET) is read with its attributes intact, and that wires (including feedback wires) resolve to the right elements by ID.</summary>
 public class FbdReaderTests
 {
     private const string Xml = """

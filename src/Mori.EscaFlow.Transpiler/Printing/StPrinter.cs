@@ -10,15 +10,24 @@ namespace Mori.EscaFlow.Transpiler.Printing;
 /// <c>FILL(value, dst, n)</c> for block operations; vendor services print as <c>Service(args) (* catalog *)</c>.
 /// Variable ids resolve to names through the document when one is given, else to the id's last segment.
 /// </summary>
+/// <remarks>
+/// The printer exists for two audiences: a human reading a diff or a golden file, and the conformance suite that
+/// compares printed output against a committed <c>.st</c> fixture. It is intentionally not a code generator — it
+/// never claims to produce text any real ST compiler would accept for the neutral constructs above, it only needs
+/// to be a faithful, stable rendering of the IR. Because of that, printed text is never parsed back; the only
+/// contract is "the same tree always prints the same text" and "a human can tell what the node means".
+/// </remarks>
 public sealed class StPrinter
 {
     private readonly IrDocument? _doc;
     private const string IndentUnit = "    ";
 
+    /// <param name="document">Optional owning document, used to resolve <c>var</c> reference ids to their declared names; without it, a reference prints the last segment of its id.</param>
     public StPrinter(IrDocument? document = null) => _doc = document;
 
     // ------------------------------------------------------------------ public API
 
+    /// <summary>Prints a body: its <c>VAR_TEMP</c> section (if any) followed by its statements.</summary>
     public string Print(IrBody body)
     {
         var sb = new StringBuilder();
@@ -32,6 +41,7 @@ public sealed class StPrinter
         return sb.ToString();
     }
 
+    /// <summary>Prints a bare statement list with no declaration section, at indent level 0.</summary>
     public string Print(IEnumerable<IrStatement> statements)
     {
         var sb = new StringBuilder();
@@ -39,6 +49,7 @@ public sealed class StPrinter
         return sb.ToString();
     }
 
+    /// <summary>Prints one statement, including its trailing newline.</summary>
     public string Print(IrStatement statement)
     {
         var sb = new StringBuilder();
@@ -46,6 +57,7 @@ public sealed class StPrinter
         return sb.ToString();
     }
 
+    /// <summary>Prints one expression with no trailing punctuation.</summary>
     public string Print(IrExpression expression)
     {
         var sb = new StringBuilder();
@@ -53,7 +65,7 @@ public sealed class StPrinter
         return sb.ToString();
     }
 
-    /// <summary>Declaration header (VAR sections), body and actions of a POU.</summary>
+    /// <summary>Declaration header (VAR sections), body and actions of a POU, as a complete ST unit.</summary>
     public string PrintPou(IrPou pou)
     {
         var sb = new StringBuilder();
@@ -63,6 +75,8 @@ public sealed class StPrinter
         if (pou.Extends is not null) sb.Append(" EXTENDS ").Append(pou.Extends);
         if (pou.Implements is { Count: > 0 }) sb.Append(" IMPLEMENTS ").Append(string.Join(", ", pou.Implements));
         sb.Append('\n');
+        // Variables are grouped by (section, retain, constant) so each VAR...END_VAR block in the output carries
+        // one consistent set of qualifiers, matching how the source declares them rather than one block per var.
         foreach (var group in pou.Vars.GroupBy(v => (v.Section, v.Retain, v.Constant)))
         {
             sb.Append(SectionKeyword(group.Key.Section));
@@ -87,6 +101,8 @@ public sealed class StPrinter
             sb.Append('\n');
             sb.Append(Print(pou.Body));
         }
+        // Actions are printed after the main body; a hook action (postscan, enableFalse, ...) carries a comment
+        // naming the hook so a reader can tell it is not called from the main body's ordinary logic.
         foreach (var a in pou.Actions)
         {
             sb.Append("\nACTION ").Append(a.Name);
@@ -113,11 +129,14 @@ public sealed class StPrinter
         _ => "VAR",
     };
 
+    /// <summary>Renders an initial value as an ST literal/structured constructor; false when the value has nothing printable (e.g. an empty scalar).</summary>
     private static bool TryValue(IrValue value, out string text)
     {
         switch (value)
         {
             case IrScalarValue s:
+                // Raw wins when the front-end kept the source literal text verbatim; otherwise fall back to the
+                // typed fields, rendering BOOL integers as TRUE/FALSE rather than 1/0.
                 text = s.Raw ?? (s.Real is { } r ? r.ToString("R", CultureInfo.InvariantCulture) : s.Int is { } i ? (s.Type.Equals("BOOL", StringComparison.OrdinalIgnoreCase) ? (i != 0 ? "TRUE" : "FALSE") : i.ToString(CultureInfo.InvariantCulture)) : "");
                 return text.Length > 0;
             case IrStringValue str:
@@ -152,6 +171,7 @@ public sealed class StPrinter
         foreach (var s in statements) PrintStatement(sb, s, level);
     }
 
+    /// <summary>Dispatches one statement node to its ST rendering. Every <c>IrStatement</c> subtype has a case; an unrecognised one prints as a comment rather than throwing, so a printer run never aborts on a future node kind.</summary>
     private void PrintStatement(StringBuilder sb, IrStatement s, int level)
     {
         var indent = Indent(level);
@@ -160,6 +180,8 @@ public sealed class StPrinter
             case IrAssign a:
                 sb.Append(indent);
                 Expr(sb, a.Target, 0);
+                // [:=] is the non-retentive assignment used for some pulse/one-shot semantics; ordinary ST has
+                // no such operator, but the bracket form reads unambiguously next to :=.
                 sb.Append(a.NonRetentive ? " [:=] " : " := ");
                 Expr(sb, a.Value, 0);
                 sb.Append(";\n");
@@ -171,6 +193,8 @@ public sealed class StPrinter
                 else sb.Append(c.Fb ?? c.Pou ?? "?");
                 if (c.Method is not null) sb.Append('.').Append(c.Method);
                 sb.Append('(');
+                // EN first (the ladder rung condition under the en-as-bind convention), then inputs, then outputs,
+                // then ENO last — the order a reader expects an FB call's argument list to follow.
                 var first = true;
                 if (c.En is not null)
                 {
@@ -199,6 +223,8 @@ public sealed class StPrinter
                     Expr(sb, c.Eno, 0);
                 }
                 sb.Append(");");
+                // The instance's declared type/profile and a non-normal mode (prescan/postscan/enableFalse) are not
+                // part of standard ST call syntax, so they are appended as a trailing comment instead of invented syntax.
                 var notes = new List<string>();
                 if (c.Instance is not null && (c.Fb ?? c.Pou) is { } typeName) notes.Add(typeName + (c.Profile is not null ? "/" + c.Profile : ""));
                 if (c.Mode != "normal") notes.Add("mode: " + c.Mode);
@@ -208,6 +234,9 @@ public sealed class StPrinter
             }
             case IrFnCall f:
                 sb.Append(indent);
+                // A standard function with an explicit en that is not implied by argument evaluation (e.g. a
+                // gated vendor extension function) prints its gate as a leading comment, since ST functions have
+                // no enable concept.
                 if (f.En is not null)
                 {
                     sb.Append("(* EN := ");
@@ -224,6 +253,8 @@ public sealed class StPrinter
                 sb.Append(");\n");
                 break;
             case IrActionCall ac:
+                // An action call with en prints as a guarded IF because ST has no conditional-call syntax of its own;
+                // this mirrors how a ladder rung's condition gates a JSR/action call in the source.
                 sb.Append(indent);
                 if (ac.En is not null)
                 {
@@ -244,6 +275,8 @@ public sealed class StPrinter
                 sb.Append('\n');
                 break;
             case IrSysCall sc:
+                // Vendor services have no ST syntax at all; printed as a call with the owning catalog noted,
+                // so a reader always knows which vendor's manual to check for the service's behaviour.
                 sb.Append(indent);
                 if (sc.En is not null)
                 {
@@ -256,6 +289,8 @@ public sealed class StPrinter
                 sb.Append("); (* ").Append(sc.Catalog).Append(" *)\n");
                 break;
             case IrCopy cp:
+                // COPY / COPY_ATOMIC are the printer's pseudo-functions for block-memory copy (no IEC syntax exists);
+                // "bytes" mode is noted because it changes count's unit from elements to raw bytes.
                 sb.Append(indent);
                 if (cp.En is not null)
                 {
@@ -311,6 +346,7 @@ public sealed class StPrinter
                 foreach (var arm in c.Arms)
                 {
                     sb.Append(Indent(level + 1));
+                    // A labels.To forms an IEC "a..b" range label; single-value labels print bare.
                     sb.Append(string.Join(", ", arm.Labels.Select(l => l.To is null ? Print(l.Value) : Print(l.Value) + ".." + Print(l.To))));
                     sb.Append(":\n");
                     PrintStatements(sb, arm.Body, level + 2);
@@ -359,6 +395,8 @@ public sealed class StPrinter
                 sb.Append(indent).Append("CONTINUE;\n");
                 break;
             case IrReturn r:
+                // A conditional return (JSR-RET chains lowered from a ladder branch) prints as IF...THEN RETURN;
+                // since ST's RETURN itself takes no condition.
                 sb.Append(indent);
                 if (r.En is not null)
                 {
@@ -369,6 +407,8 @@ public sealed class StPrinter
                 else sb.Append("RETURN;\n");
                 break;
             case IrJump j:
+                // JMP is not standard ST (IEC has no goto in the textual language) but is kept because it is how
+                // ladder's rung-to-rung jumps lower without restructuring control flow; conditional like RETURN above.
                 sb.Append(indent);
                 if (j.En is not null)
                 {
@@ -382,6 +422,8 @@ public sealed class StPrinter
                 sb.Append(indent).Append(l.Name).Append(":\n");
                 break;
             case IrErrorStatement e:
+                // A statement the front-end could not lower is kept in the tree (rather than dropped) so the
+                // document still round-trips; the printer surfaces it as a comment instead of failing.
                 sb.Append(indent).Append("(* error: ").Append(e.Text.Replace("*)", "* )")).Append(" *)\n");
                 break;
             default:
@@ -395,6 +437,8 @@ public sealed class StPrinter
         for (var i = 0; i < args.Count; i++)
         {
             if (i > 0) sb.Append(", ");
+            // A null slot is an omitted optional argument (e.g. a skipped output parameter); printed as nothing
+            // between the commas, matching how IEC allows eliding trailing/positional arguments.
             if (args[i] is { } a) Expr(sb, a, 0);
         }
     }
@@ -408,7 +452,7 @@ public sealed class StPrinter
 
     // ------------------------------------------------------------------ expressions
 
-    // Precedence: higher binds tighter.
+    /// <summary>Binding strength of each binary operator, IEC order: OR weakest, exponentiation strongest.</summary>
     private static int Precedence(string op) => op switch
     {
         "or" => 1,
@@ -452,6 +496,7 @@ public sealed class StPrinter
     };
 
     /// <summary>Prints <paramref name="e"/>, parenthesizing it when its precedence is below <paramref name="minPrecedence"/>.</summary>
+    /// <remarks>This is the standard "minimum binding power" algorithm for precedence-correct printing without a full re-parse: each call tells its child the weakest precedence it may print unparenthesized at that position.</remarks>
     private void Expr(StringBuilder sb, IrExpression e, int minPrecedence)
     {
         var p = PrecedenceOf(e);
@@ -474,7 +519,8 @@ public sealed class StPrinter
                 var prec = Precedence(b.Operator);
                 Expr(sb, b.Left, prec);
                 sb.Append(' ').Append(OperatorText(b.Operator)).Append(' ');
-                // Right operand of a left-associative operator at the same level needs parentheses (a - (b - c)).
+                // Right operand of a left-associative operator at the same level needs parentheses (a - (b - c));
+                // pow is right-associative in IEC, so its right side may print at its own precedence unparenthesized.
                 Expr(sb, b.Right, b.Operator == "pow" ? prec : prec + 1);
                 break;
             }
@@ -484,11 +530,16 @@ public sealed class StPrinter
                 sb.Append(')');
                 break;
             case IrConv c:
+                // conv prints as TO_<type>#<mode>(x): the #<mode> suffix is not real ST syntax, but no single IEC
+                // conversion function distinguishes truncating, rounding and reinterpreting conversions the way
+                // this node's mode does, so the suffix keeps that distinction visible.
                 sb.Append("TO_").Append(c.To.ToString().ToUpperInvariant()).Append('#').Append(c.Mode).Append('(');
                 Expr(sb, c.Operand, 0);
                 sb.Append(')');
                 break;
             case IrBitAccess ba:
+                // A literal integer bit index prints as .N (the common "word.7" form); a computed index prints as
+                // .[expr], since IEC has no syntax for a variable bit index at all.
                 Expr(sb, ba.Of, Atom);
                 sb.Append('.');
                 if (ba.Bit is IrLiteral { Kind: "int" } bl) sb.Append(bl.Int?.ToString(CultureInfo.InvariantCulture) ?? "0");
@@ -512,6 +563,8 @@ public sealed class StPrinter
                 sb.Append(')');
                 break;
             case IrKeyword k:
+                // A keyword expression carries vendor enumeration text (e.g. a GSV class/attribute name) that the
+                // model does not otherwise type; printed verbatim since it already is valid-looking ST-ish text.
                 sb.Append(k.Text);
                 break;
             case IrPlaceholder:
@@ -527,6 +580,7 @@ public sealed class StPrinter
         if (parens) sb.Append(')');
     }
 
+    /// <summary>Prints a reference: its root followed by each path segment in order.</summary>
     private void Ref(StringBuilder sb, IrRef r)
     {
         sb.Append(RootName(r.Root));
@@ -547,6 +601,8 @@ public sealed class StPrinter
                     sb.Append(']');
                     break;
                 case IrLengthSegment:
+                    // STRING length has no IEC accessor syntax of its own; LEN mirrors the structure's LEN member
+                    // the way most vendor runtimes actually store a string's current length.
                     sb.Append(".LEN");
                     break;
                 case IrCharSegment c:
@@ -561,6 +617,7 @@ public sealed class StPrinter
         }
     }
 
+    /// <summary>Resolves a reference root to display text: a <c>var</c> root looks up the declared name through the document when one was given, else falls back to the id's last path segment; other roots print their own name (<c>this</c> prints <c>THIS^</c>).</summary>
     private string RootName(IrRefRoot root)
     {
         switch (root.Kind)
@@ -579,6 +636,7 @@ public sealed class StPrinter
         }
     }
 
+    /// <summary>Prints a literal in its IEC radix/quoting form.</summary>
     private static void Literal(StringBuilder sb, IrLiteral l)
     {
         switch (l.Kind)
@@ -602,11 +660,14 @@ public sealed class StPrinter
             {
                 var v = l.Real ?? 0;
                 var text = v.ToString("R", CultureInfo.InvariantCulture);
+                // A real that round-trips to an integer-looking string ("3") still needs a decimal point so the
+                // printed text is unambiguously a REAL literal, not a DINT one.
                 if (!text.Contains('.') && !text.Contains('E') && !text.Contains('e') && !text.Contains("NaN") && !text.Contains("Infinity")) text += ".0";
                 sb.Append(text);
                 break;
             }
             case "string":
+                // IEC single-quoted strings escape '$' and the quote character with a leading '$'.
                 sb.Append('\'').Append((l.String ?? "").Replace("$", "$$").Replace("'", "$'")).Append('\'');
                 break;
             case "wstring":

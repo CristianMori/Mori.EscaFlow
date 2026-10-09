@@ -6,8 +6,14 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.Tests;
 
+/// <summary>
+/// Guards the model/schema contract from <see cref="SchemaGenerator"/>: every model class and property reaches
+/// the generated schema, the committed <c>plc-ir-2.0.schema.json</c> and the assembly-embedded copy both stay
+/// byte-identical to what the generator produces from the current model, and generation is deterministic.
+/// </summary>
 public class SchemaTests
 {
+    /// <summary>Walks up from the test binary's output directory to find the repository root (marked by the solution file), so the committed schema can be located regardless of build configuration or working directory.</summary>
     private static string RepoFile(string relative)
     {
         var dir = AppContext.BaseDirectory;
@@ -29,6 +35,7 @@ public class SchemaTests
         .Where(t => t.IsClass && t.IsPublic && t.Namespace == "Mori.EscaFlow.Transpiler" && !(t.IsAbstract && t.IsSealed) && !t.IsAbstract)
         .Where(t => !NotSerialized.Contains(t) && !typeof(Attribute).IsAssignableFrom(t) && !typeof(JsonConverter).IsAssignableFrom(t) && !t.IsNested);
 
+    /// <summary>Every public model class gets a <c>$defs</c> entry with every one of its serialized properties, polymorphic bases are <c>oneOf</c> with a <c>const</c> discriminator, closed-set strings become <c>enum</c>, the vendor slot allows unknown members while every other object forbids them, and non-nullable strings are <c>required</c>.</summary>
     [Fact]
     public void EveryModelClassAndPropertyIsInTheSchema()
     {
@@ -69,6 +76,7 @@ public class SchemaTests
         Assert.Contains("id", defs.GetProperty("Variable").GetProperty("required").EnumerateArray().Select(e => e.GetString()));
     }
 
+    /// <summary>The committed schema file is the generator's output, kept in sync by hand via <c>PLC_IR_UPDATE_SCHEMA=1</c> rather than regenerated on every build, so a model change that is not yet reflected in the committed schema fails this test instead of silently shipping a stale schema.</summary>
     [Fact]
     public void CommittedSchemaMatchesGeneratedAndEmbedded()
     {
@@ -83,6 +91,7 @@ public class SchemaTests
         Assert.Equal(generated, embedded!.Replace("\r\n", "\n"));
     }
 
+    /// <summary>Generating the schema twice from the same model yields identical text, so a diff against it is meaningful rather than noisy from run to run.</summary>
     [Fact]
     public void GenerationIsDeterministic()
     {

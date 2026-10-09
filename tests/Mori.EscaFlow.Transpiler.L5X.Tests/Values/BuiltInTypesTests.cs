@@ -4,6 +4,12 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Values;
 
+/// <summary>
+/// Proves the built-in type table is internally sound: every atomic kind is registered, TIMER's member list
+/// and bit overlays match the real controller layout, STRING is recognized as the string family with an
+/// 82-character buffer, the object-backed AXIS_* types are opaque, registering built-ins never overrides a
+/// project's own same-named type, and every built-in name is unique.
+/// </summary>
 public class BuiltInTypesTests
 {
     [Fact]

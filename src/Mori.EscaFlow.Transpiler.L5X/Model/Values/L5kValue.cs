@@ -2,7 +2,13 @@ using System.Text.Json.Serialization;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Model.Values;
 
-/// <summary>The untyped tree produced from a <c>Data Format="L5K"</c> initializer.</summary>
+/// <summary>
+/// The untyped tree produced from a <c>Data Format="L5K"</c> initializer: Logix's older, type-agnostic value
+/// syntax (nested brace lists of numbers and strings), still used for some tag defaults and module config
+/// alongside the newer typed "Decorated" format. Because L5K carries no type information of its own, this tree
+/// is shaped against the tag's actual data type afterward by <c>L5kShaper</c> into a typed <see cref="TagValue"/>;
+/// kept separately rather than shaped during parsing since the data type may not be resolved yet.
+/// </summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(L5kInteger), "int")]
 [JsonDerivedType(typeof(L5kReal), "real")]

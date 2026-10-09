@@ -12,17 +12,37 @@ namespace Mori.EscaFlow.Runtime.Host;
 /// Hosts a generated controller behind a single web page and a JSON API: state, start/stop, scan statistics,
 /// snapshots and a tag browser with read/write. Every route is under <c>/api</c>; <c>/</c> serves the embedded page.
 /// </summary>
+/// <remarks>
+/// <para>
+/// The host depends only on <see cref="IPlcController"/>, never on the generated classes, so one host serves any
+/// generated controller and the tests drive it with a fake. All routes exchange JSON; errors are
+/// <c>{ "error": "..." }</c> with status 400 (404 for a missing tag or snapshot). The page polls
+/// <c>/api/state</c> every second and the values of the visible tag rows every second while the tab is visible;
+/// values are fetched lazily per row so a project with tens of thousands of tags costs one request per shown row,
+/// not one request per tag.
+/// </para>
+/// <para>
+/// Routes: <c>GET /</c> page; <c>GET /api/state</c>; <c>POST /api/start</c>; <c>POST /api/stop</c>;
+/// <c>GET /api/tags?filter=&amp;skip=&amp;take=</c>; <c>GET /api/tag?path=</c>; <c>PUT /api/tag</c> with
+/// <c>{ path, text }</c>; <c>GET /api/snapshot</c> downloads; <c>POST /api/snapshot</c> uploads and loads;
+/// <c>GET /api/snapshots</c> lists the server-side snapshot directory; <c>POST /api/snapshots/{file}/save</c> and
+/// <c>/load</c> work with named files in that directory.
+/// </para>
+/// </remarks>
 public static class PlcWebHost
 {
+    /// <summary>JSON conventions of the API: camelCase, enums as lower-case strings (<c>running</c>, <c>run</c>), nulls omitted.</summary>
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
+    /// <summary>Runs the host until the process is asked to stop (the generated <c>Program.cs</c> calls this).</summary>
     public static void Run(IPlcController controller, string[] args, PlcWebHostOptions? options = null)
         => RunAsync(controller, args, options).GetAwaiter().GetResult();
 
+    /// <summary>Builds and runs the host; starts the controller first when <see cref="PlcWebHostOptions.AutoStart"/> is set.</summary>
     public static async Task RunAsync(IPlcController controller, string[] args, PlcWebHostOptions? options = null)
     {
         options ??= new PlcWebHostOptions();
@@ -32,10 +52,12 @@ public static class PlcWebHost
     }
 
     /// <summary>Builds the application without running it (tests use this with a test server).</summary>
+    /// <param name="configure">Lets a test replace the server (for example <c>builder.WebHost.UseTestServer()</c>); when given, the URL from the options is not applied.</param>
     public static WebApplication CreateApp(IPlcController controller, PlcWebHostOptions? options = null, Action<WebApplicationBuilder>? configure = null, string[]? args = null)
     {
         options ??= new PlcWebHostOptions();
         var builder = WebApplication.CreateBuilder(args ?? Array.Empty<string>());
+        // Keep the console quiet: only this host's own lines at Information, framework noise at Warning and above.
         builder.Logging.ClearProviders();
         builder.Logging.AddSimpleConsole(o => o.SingleLine = true);
         builder.Logging.SetMinimumLevel(LogLevel.Warning);
@@ -53,6 +75,7 @@ public static class PlcWebHost
         var app = builder.Build();
         var log = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Mori.EscaFlow.Runtime.Host");
 
+        // Minimal request log: state-changing API calls only (GET polling every second would flood the console).
         app.Use(async (ctx, next) =>
         {
             await next();
@@ -93,6 +116,7 @@ public static class PlcWebHost
             }
         });
 
+        // Paged listing; the page size is capped so a client cannot ask for the whole tag list in one response.
         app.MapGet("/api/tags", (string? filter, int? skip, int? take) =>
         {
             var all = controller.Tags(string.IsNullOrWhiteSpace(filter) ? null : filter).ToList();
@@ -109,6 +133,7 @@ public static class PlcWebHost
                 : Results.Json(new { error = $"tag '{path}' not found" }, Json, statusCode: StatusCodes.Status404NotFound);
         });
 
+        // Write, then read back: the response shows the value as the controller stored it (rounded, clamped, parsed).
         app.MapPut("/api/tag", async (HttpRequest request) =>
         {
             WriteRequest? body;
@@ -134,6 +159,7 @@ public static class PlcWebHost
             return Results.File(ms, "application/octet-stream", name);
         });
 
+        // Accepts both a multipart upload (the page's file picker) and a raw body (scripts, tests).
         app.MapPost("/api/snapshot", async (HttpRequest request) =>
         {
             try
@@ -205,6 +231,7 @@ public static class PlcWebHost
             }
         });
 
+        // Graceful shutdown: a running controller is put in Program mode before the process exits.
         app.Lifetime.ApplicationStopping.Register(() =>
         {
             if (controller.State == ControllerState.Running)
@@ -224,8 +251,10 @@ public static class PlcWebHost
         return app;
     }
 
+    /// <summary>Body of <c>PUT /api/tag</c>.</summary>
     private sealed record WriteRequest(string? Path, string? Text);
 
+    /// <summary>The <c>/api/state</c> document: name, state, mode, statistics and the server's clock.</summary>
     private static object StateOf(IPlcController c) => new
     {
         name = c.Name,
@@ -235,8 +264,10 @@ public static class PlcWebHost
         now = DateTimeOffset.Now,
     };
 
+    /// <summary>A 400 response with <c>{ "error": message }</c>.</summary>
     private static IResult Error(string message) => Results.Json(new { error = message }, Json, statusCode: StatusCodes.Status400BadRequest);
 
+    /// <summary>The controller name made safe for a download file name.</summary>
     private static string Safe(string name)
     {
         var invalid = Path.GetInvalidFileNameChars();
@@ -244,6 +275,11 @@ public static class PlcWebHost
         return chars.Length == 0 ? "controller" : new string(chars);
     }
 
+    /// <summary>
+    /// Maps a user-supplied snapshot name onto a file inside the snapshot directory. Names with path separators,
+    /// <c>..</c> or invalid characters are rejected so a request can never reach outside that directory; the
+    /// <c>.snapshot</c> extension is appended when missing so the directory listing only ever shows snapshots.
+    /// </summary>
     private static bool TrySnapshotPath(PlcWebHostOptions options, string file, out string path)
     {
         path = "";
@@ -254,8 +290,10 @@ public static class PlcWebHost
         return true;
     }
 
+    /// <summary>The page, read once from the embedded resource.</summary>
     private static string? _page;
 
+    /// <summary>Loads the embedded single-page console (embedded so the generated host has no static files to deploy).</summary>
     private static string LoadPage()
     {
         if (_page is not null) return _page;

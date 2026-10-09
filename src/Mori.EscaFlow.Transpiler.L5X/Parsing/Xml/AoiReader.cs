@@ -4,7 +4,12 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Tags;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads an <c>&lt;AddOnInstructionDefinition&gt;</c> with a streaming cursor.</summary>
+/// <summary>
+/// Reads an <c>&lt;AddOnInstructionDefinition&gt;</c> with a streaming cursor. An add-on instruction is Logix's
+/// function block: parameters (input, output, InOut), local tags, a Logic routine, and optional Prescan,
+/// Postscan and EnableInFalse routines whose execution is gated by the <c>Execute*</c> flags. Its parameters and
+/// locals double as a structure type (the backing type of every instance tag).
+/// </summary>
 public sealed class AoiReader
 {
     private readonly ReaderContext _ctx;
@@ -65,6 +70,8 @@ public sealed class AoiReader
                     aoi.EncryptionInfo = _ctx.ReadGeneric(r);
                     break;
                 case "Parameters":
+                    // Declaration order matters twice: it is the positional order of required operands in a call and the
+                    // member order of the backing structure.
                     r.ForEachChild((rr, c) =>
                     {
                         if (c == "Parameter")
@@ -100,6 +107,7 @@ public sealed class AoiReader
                     r.ForEachChild((rr, c) =>
                     {
                         if (c == "Routine") aoi.Routines.Add(_routines.Read(rr, aoi));
+                        // Source-protected routines appear only as encoded payloads.
                         else if (c is "EncodedData" or "EncryptedContent") aoi.EncodedRoutines.Add(_ctx.ReadGeneric(rr));
                         else _ctx.Unexpected(rr, "Routines", aoi);
                     });

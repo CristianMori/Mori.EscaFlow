@@ -2,9 +2,15 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Logic.Rll;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Rll;
 
-/// <summary>Rebuilds a rung AST with instructions transformed; returns the same instance when nothing changed.</summary>
+/// <summary>
+/// Rebuilds a rung AST with instructions transformed; returns the same instance when nothing changed.
+/// The linker uses it to replace operands after reclassification (bare identifiers that turned out to be
+/// keywords). Copy-on-write keeps the common case (no change) allocation free and lets callers detect a
+/// change by reference comparison.
+/// </summary>
 public static class RungRewriter
 {
+    /// <summary>Applies <paramref name="transform"/> to every instruction, inside branches too; a null result keeps the original instruction.</summary>
     public static RungAst Rewrite(RungAst ast, Func<InstructionElement, InstructionElement?> transform)
     {
         var elements = RewriteList(ast.Elements, transform, out var changed);
@@ -25,6 +31,7 @@ public static class RungRewriter
                     break;
                 case BranchElement branch:
                 {
+                    // Recurse into each leg; copy the leg array only when some leg actually changed.
                     var legsChanged = false;
                     IReadOnlyList<RungElement>[]? legs = null;
                     for (var l = 0; l < branch.Legs.Count; l++)

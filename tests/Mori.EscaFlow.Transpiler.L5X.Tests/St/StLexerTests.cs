@@ -5,6 +5,13 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.St;
 
+/// <summary>
+/// Proves the structured text lexer resolves its hardest ambiguities correctly: <c>:=</c> versus a module tag's
+/// colon segments, the system-tag colon, the non-retentive <c>[:=]</c> operator, a bit number versus a real
+/// literal after a dot, radix-prefixed literals, comment collection (line, block and <c>#region</c>), keyword
+/// case-insensitivity, string escapes (including an unterminated one), every operator token, the program-scope
+/// backslash, and that token positions map back to the correct L5X line numbers.
+/// </summary>
 public class StLexerTests
 {
     private static List<StToken> Lex(string text, DiagnosticBag? bag = null, List<StComment>? comments = null)

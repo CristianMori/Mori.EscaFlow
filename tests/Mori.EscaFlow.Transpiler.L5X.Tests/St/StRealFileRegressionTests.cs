@@ -8,7 +8,12 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.St;
 
-/// <summary>Constructs found in the sample exports that the first grammar draft did not cover.</summary>
+/// <summary>
+/// Constructs found in the sample exports that the first grammar draft did not cover: <c>#region</c>/<c>#endregion</c>
+/// as trivia, a real literal with no leading digit, a bit number right after an identifier staying a bit (not
+/// a real), indirect bit addressing, a QNAN literal with its numeric suffix, multi-word keyword operands, and
+/// that a subtraction of two unknown bare names is not mistaken for a keyword.
+/// </summary>
 public class StRealFileRegressionTests
 {
     [Fact]

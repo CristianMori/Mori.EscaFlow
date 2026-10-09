@@ -3,6 +3,8 @@ using Xunit;
 
 namespace Mori.EscaFlow.Runtime.Tests;
 
+/// <summary>TON/TOF/TONR/CTU/CTD state machines against a manual clock: timing, retention, overflow and prescan.</summary>
+/// <remarks>Shares the "Clock" collection so these tests never run in parallel with another test that sets the static <see cref="Logix.Clock"/>.</remarks>
 [Collection("Clock")]
 public class LogixBlockTests
 {
@@ -118,6 +120,7 @@ public class LogixBlockTests
     }
 }
 
+/// <summary>Marker collection forcing every test that touches the shared static clock onto one test thread.</summary>
 [CollectionDefinition("Clock")]
 public sealed class ClockCollection : ICollectionFixture<object>
 {

@@ -1,8 +1,15 @@
 namespace Mori.EscaFlow.Transpiler.Catalogs;
 
+/// <summary>One standard function: its name, group, arity and the rule that gives its result type.</summary>
+/// <param name="Name">IEC name.</param>
+/// <param name="Group">numeric | arithmetic | bits | selection | comparison | string | conversion | misc.</param>
+/// <param name="ResultRule">BOOL, DINT, REAL, STRING: a fixed type; arg0 / arg1: the type of that argument; widest: the widest argument type; suffix: the target of an <c>X_TO_Y</c> conversion.</param>
+/// <param name="MinArgs">Minimum number of arguments.</param>
+/// <param name="MaxArgs">Maximum number of arguments (<see cref="int.MaxValue"/> for extensible functions).</param>
 public sealed record StdFunction(string Name, string Group, string ResultRule, int MinArgs, int MaxArgs)
 {
     /// <summary>The result type given the argument types, or null when it cannot be decided.</summary>
+    /// <remarks>REAL-valued functions follow the precision of their first argument (an LREAL input gives an LREAL result), as IEC overloads do.</remarks>
     public string? ResultType(IReadOnlyList<string?> argTypes)
     {
         switch (ResultRule)
@@ -27,6 +34,12 @@ public sealed record StdFunction(string Name, string Group, string ResultRule, i
 }
 
 /// <summary>The IEC 61131-3 standard functions usable in <c>fn</c> expressions. Type conversions follow the <c>X_TO_Y</c> pattern and are recognised generically.</summary>
+/// <remarks>
+/// The table is the IEC function set plus a few named extensions that several vendors share and that keep
+/// vendor instructions out of the service catalogs: MASKED_MOVE (Logix MVM), BIT_FIELD_DISTRIBUTE (Logix BTD),
+/// SWAP_BYTES (Logix SWPB), IN_RANGE (Siemens), TO_BCD / FROM_BCD and the string conversions. Front-ends
+/// normalise their spellings onto these names so converters implement each function once.
+/// </remarks>
 public static class StandardFunctions
 {
     private static readonly StdFunction[] Table =
@@ -105,12 +118,14 @@ public static class StandardFunctions
 
     private static readonly Dictionary<string, StdFunction> ByName = Table.ToDictionary(f => f.Name, StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Every tabulated function (conversions recognised by pattern are not listed).</summary>
     public static IReadOnlyList<StdFunction> All => Table;
 
+    /// <summary>The function named <paramref name="name"/>, or a synthesized <c>X_TO_Y</c> conversion between atomic or string types, or null.</summary>
     public static StdFunction? Get(string name)
     {
         if (ByName.TryGetValue(name, out var f)) return f;
-        // X_TO_Y conversions between atomic types
+        // X_TO_Y conversions between atomic types: too many to tabulate, and the pattern is unambiguous.
         var idx = name.IndexOf("_TO_", StringComparison.OrdinalIgnoreCase);
         if (idx > 0)
         {
@@ -122,5 +137,6 @@ public static class StandardFunctions
         return null;
     }
 
+    /// <summary>True when <paramref name="name"/> is a standard function or a recognised conversion.</summary>
     public static bool IsStandard(string name) => Get(name) is not null;
 }

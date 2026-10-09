@@ -1,6 +1,11 @@
 namespace Mori.EscaFlow.Transpiler.Logix;
 
-/// <summary>Configuration of a MESSAGE tag (the MSG instruction reads it at run time), kept in <c>vendor.logix.message</c> of the variable.</summary>
+/// <summary>
+/// Configuration of a MESSAGE tag (the MSG instruction reads it at run time), kept in <c>vendor.logix.message</c> of
+/// the variable. A MESSAGE tag's configuration is a whole CIP request built in the Logix editor's Message
+/// Configuration dialog, not program logic, so it is modelled here as vendor data rather than as plc-ir statements;
+/// the MSG instruction itself still lowers to an ordinary <c>sysCall</c> that names this tag.
+/// </summary>
 public sealed class LogixMessage
 {
     public string MessageType { get; set; } = "Unconfigured";
@@ -41,6 +46,12 @@ public sealed class LogixMessage
 /// The generated code implements the Socket Object services at run time; this tells it where to read the parameters.
 /// All members are references into variables, so their current values are whatever the logic last wrote.
 /// </summary>
+/// <remarks>
+/// This is why the project note "the data can change, it needs to be dynamic" matters here specifically: a socket
+/// MSG's instance number, destination port and address are not literals baked in at build time, they are tag
+/// values the running program updates before triggering the MSG, so the runtime must re-read these references on
+/// every execution rather than capturing their values once during code generation.
+/// </remarks>
 public sealed class LogixSocket
 {
     /// <summary>Variable id of the tag holding the request structures; every service of one socket shares it.</summary>

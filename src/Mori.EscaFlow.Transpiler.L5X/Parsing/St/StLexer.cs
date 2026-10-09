@@ -4,7 +4,16 @@ using Mori.EscaFlow.Transpiler.L5X.Parsing.Values;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.St;
 
-/// <summary>Tokenizes structured text. Comments are collected separately and never delivered as tokens.</summary>
+/// <summary>
+/// Tokenizes structured text. Comments are collected separately and never delivered as tokens, so the parser
+/// grammar never has to account for them.
+/// <para>
+/// Logix accepts three comment forms: <c>//</c> to end of line, <c>(* ... *)</c> and <c>/* ... */</c> (the
+/// latter two can span lines), plus the editor's own <c>#region</c> / <c>#endregion</c> folding markers, which
+/// are only directives when they start a line and are otherwise treated like ordinary text so a <c>#</c> inside
+/// an expression is never silently swallowed.
+/// </para>
+/// </summary>
 public sealed class StLexer
 {
     private readonly string _text;
@@ -21,6 +30,8 @@ public sealed class StLexer
         _comments = comments;
     }
 
+    // Tracks the previous token's kind so the '.' scanner can tell a real literal like ".30" from a member/bit
+    // access following an identifier, ']' or ')' (see the '.' case in Next()).
     private StTokenKind _lastKind = StTokenKind.EndOfFile;
 
     public List<StToken> Tokenize()
@@ -54,6 +65,7 @@ public sealed class StLexer
         {
             ScanIdentifier();
             var span = _text.AsSpan(start, _pos - start);
+            // A ':' inside the span (e.g. "Local:1:I") means this is a module/alias-style name, never a keyword.
             if (span.IndexOf(':') < 0 && StKeywords.TryGetKeyword(span, out var kw))
                 return Make(kw, start, _pos - start);
             return Make(StTokenKind.Identifier, start, _pos - start);
@@ -100,7 +112,8 @@ public sealed class StLexer
                 return Make(StTokenKind.Colon, start, 1);
             case '[':
             {
-                // [:=] possibly with inner spaces
+                // [:=] possibly with inner spaces: the non-retentive assignment operator, written as a bracketed
+                // ":=" so it reads distinctly from a plain assignment in the exported text.
                 var i = _pos + 1;
                 while (i < _text.Length && _text[i] == ' ') i++;
                 if (i + 1 < _text.Length && _text[i] == ':' && _text[i + 1] == '=')
@@ -181,7 +194,7 @@ public sealed class StLexer
                 }
                 _pos++;
                 return Make(StTokenKind.Greater, start, 1);
-            case '&': _pos++; return Make(StTokenKind.Ampersand, start, 1);
+            case '&': _pos++; return Make(StTokenKind.Ampersand, start, 1); // accepted synonym for AND
             default:
                 _pos++;
                 Report("ST000", $"Unexpected character '{c}'", start);
@@ -193,7 +206,8 @@ public sealed class StLexer
 
     /// <summary>
     /// Identifier: [A-Za-z_][A-Za-z0-9_]* followed by any number of ":segment" parts, where a ':' is only
-    /// absorbed when it is not the start of ":=" and is followed by an identifier character.
+    /// absorbed when it is not the start of ":=" and is followed by an identifier character. This lets names
+    /// like <c>Local:3:I</c> (module-defined tag addressing) and <c>Program:Fault</c> lex as one identifier.
     /// </summary>
     private void ScanIdentifier()
     {
@@ -248,6 +262,7 @@ public sealed class StLexer
         }
     }
 
+    /// <summary>True when only whitespace precedes <paramref name="pos"/> on its line (so a leading '#' is a directive, not an operator misuse).</summary>
     private bool IsAtLineStart(int pos)
     {
         for (var i = pos - 1; i >= 0; i--)

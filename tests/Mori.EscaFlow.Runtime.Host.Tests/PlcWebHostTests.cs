@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Mori.EscaFlow.Runtime.Host.Tests;
 
+/// <summary>Boots <see cref="PlcWebHost"/> once over a <see cref="FakeController"/> and a temporary snapshot directory, shared by every test in the class.</summary>
 public sealed class HostFixture : IAsyncLifetime
 {
     public FakeController Controller { get; } = new();
@@ -29,6 +30,7 @@ public sealed class HostFixture : IAsyncLifetime
     }
 }
 
+/// <summary>The JSON API end to end: state polling, start/stop, paged and filtered tag listing, tag read/write, and both snapshot transports (download/upload and named server-side files, including path traversal rejection).</summary>
 public class PlcWebHostTests : IClassFixture<HostFixture>
 {
     private readonly HostFixture _fx;

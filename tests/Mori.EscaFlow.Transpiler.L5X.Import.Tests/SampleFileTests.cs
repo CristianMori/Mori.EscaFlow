@@ -7,6 +7,12 @@ using Xunit.Abstractions;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Import.Tests;
 
+/// <summary>
+/// End-to-end conformance check against real exported projects (skipped when the sample files are not present):
+/// builds the plc-ir document, requires every reference to resolve or be explicitly opaque, requires every rung
+/// that has an output to produce at least one statement, validates the document, then round-trips it through JSON
+/// and checks the two documents agree on variable and type counts.
+/// </summary>
 [Collection("Samples")]
 [Trait("Category", "Integration")]
 public class SampleFileTests

@@ -136,12 +136,14 @@ public sealed class MessageConfiguration
     [JsonIgnore]
     public Tag? LocalElementTag { get; set; }
 
+    /// <summary>Parsed <see cref="LocalElement"/> (logic phase); resolved to <see cref="LocalElementTag"/> by the linker.</summary>
     public OperandPath? LocalElementPath { get; set; }
 
     /// <summary>Resolved <see cref="DestinationTag"/> (linker).</summary>
     [JsonIgnore]
     public Tag? DestinationTagRef { get; set; }
 
+    /// <summary>Parsed <see cref="DestinationTag"/> (logic phase); resolved to <see cref="DestinationTagRef"/> by the linker.</summary>
     public OperandPath? DestinationTagPath { get; set; }
 
     [JsonIgnore]

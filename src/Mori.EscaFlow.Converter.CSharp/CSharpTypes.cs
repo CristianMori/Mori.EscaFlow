@@ -5,6 +5,13 @@ using Mori.EscaFlow.Transpiler.Catalogs;
 namespace Mori.EscaFlow.Converter.CSharp;
 
 /// <summary>Type mapping for the C# target: wrapper classes per atomic, generated classes per structure, arrays.</summary>
+/// <remarks>
+/// Generated code never holds a plain <c>int</c> field for a tag. Every atomic leaf is a wrapper object bound to a
+/// range of tag memory (the byte image the EtherNet/IP server also reads), so a store through <c>.Value</c> is
+/// immediately visible to clients and the controller's own byte layout is preserved. Structures become classes whose
+/// fields are such wrappers at fixed offsets; arrays become <c>PlcArray&lt;T&gt;</c> views (or the DWORD-packed
+/// <c>PlcBoolArray</c> for BOOL arrays, as Logix stores them).
+/// </remarks>
 public sealed class CSharpTypes
 {
     private readonly IrDocument _doc;
@@ -18,12 +25,14 @@ public sealed class CSharpTypes
         _layouts = layouts;
     }
 
+    /// <summary>Naming scope of the generated class names (structures, add-ons, programs, the controller).</summary>
     public const string TypeScope = "types";
 
     /// <summary>Wrapper class for an atomic (BOOL → WrapBOOL, ...).</summary>
     public static string Wrapper(string atomic) => "Wrap" + AtomicTypes.Get(atomic)?.Name ?? "WrapDINT";
 
     /// <summary>C# value type of an atomic wrapper's Value.</summary>
+    /// <remarks>Unsigned, bit-string and time types share the storage of the unsigned integer of the same width.</remarks>
     public static string ValueType(string atomic) => (AtomicTypes.Get(atomic)?.Name ?? "DINT") switch
     {
         "BOOL" => "bool", "SINT" => "sbyte", "INT" => "short", "DINT" => "int", "LINT" => "long",
@@ -33,18 +42,27 @@ public sealed class CSharpTypes
     };
 
     /// <summary>Alias atomics (BYTE, WORD, TIME...) onto the Logix wrapper that stores them.</summary>
+    /// <remarks>Logix has no bit-string or time atomics; the runtime offers wrappers for the Logix set only, so the IEC extras map onto the unsigned integers of the same width.</remarks>
     public static string CanonicalAtomic(string atomic) => (AtomicTypes.Get(atomic)?.Name ?? "DINT") switch
     {
         "BYTE" or "CHAR" => "USINT", "WORD" or "WCHAR" => "UINT", "DWORD" or "TIME" or "DATE" or "TOD" or "DT" => "UDINT", "LWORD" or "LTIME" or "LDATE" or "LTOD" or "LDT" => "ULINT",
         var n => n,
     };
 
+    /// <summary>True for a named reference to an elementary type.</summary>
     public static bool IsAtomic(IrTypeRef? t) => t is { IsNamed: true, Name: { } n } && AtomicTypes.IsAtomic(n);
+
+    /// <summary>True for BOOL.</summary>
     public static bool IsBool(IrTypeRef? t) => t is { } x && x.Is("BOOL");
+
+    /// <summary>True for signed, unsigned and bit-string integers (the types that support bit access and bitwise operators).</summary>
     public static bool IsIntegerAtomic(IrTypeRef? t) => t is { IsNamed: true, Name: { } n } && AtomicTypes.Get(n) is { } a && (a.IsInteger || a.Category == AtomicCategory.BitString);
+
+    /// <summary>True for REAL and LREAL.</summary>
     public static bool IsRealAtomic(IrTypeRef? t) => t is { IsNamed: true, Name: { } n } && AtomicTypes.Get(n) is { Category: AtomicCategory.Real };
 
     /// <summary>Generated class name for a structure, string type or function block.</summary>
+    /// <remarks>STRING keeps its name verbatim because the runtime's string wrapper and the generated class agree on it.</remarks>
     public string ClassName(string typeName)
     {
         if (typeName.Equals("STRING", StringComparison.OrdinalIgnoreCase)) return "STRING";
@@ -65,10 +83,12 @@ public sealed class CSharpTypes
             case "array":
             {
                 var element = type.Element ?? IrTypeRef.Named("DINT");
+                // BOOL arrays are packed 32 per DINT in the controller's memory; the dedicated array type indexes bits.
                 if (element.Is("BOOL")) return "PlcBoolArray";
                 return $"PlcArray<{FieldType(element)}>";
             }
             case "string":
+                // An anonymous string type of a given capacity gets a class named after that capacity.
                 return ClassName($"STRING{type.Length}");
             default:
                 return "WrapDINT";
@@ -76,6 +96,11 @@ public sealed class CSharpTypes
     }
 
     /// <summary>Construction expression for a field of the given type at <paramref name="tag"/> + <paramref name="offset"/>.</summary>
+    /// <param name="controller">
+    /// Expression reaching the controller, needed by add-on instances (they call services). Null means the field is
+    /// built inside a structure class, which has no controller of its own: the instance then binds to
+    /// <c>PlcController.Current</c>, the controller constructed in this process.
+    /// </param>
     public string Construct(IrTypeRef type, string tag, string offset, string? controller = null)
     {
         switch (type.Kind)
@@ -95,6 +120,7 @@ public sealed class CSharpTypes
                 var element = type.Element ?? IrTypeRef.Named("DINT");
                 var dims = "new[] { " + string.Join(", ", (type.Dims ?? new()).Select(d => d.Count.ToString())) + " }";
                 if (element.Is("BOOL")) return $"new PlcBoolArray({tag}, {offset}, {dims})";
+                // The element factory lets the array create element views lazily at their computed offsets.
                 var (size, _) = _layouts.SizeOf(element);
                 return $"new PlcArray<{FieldType(element)}>({tag}, {offset}, {size}, {dims}, (t, o) => {Construct(element, "t", "o", controller)})";
             }
@@ -106,6 +132,11 @@ public sealed class CSharpTypes
     }
 
     /// <summary>Layout literal for a structure (a <c>PlcLayout</c> construction expression).</summary>
+    /// <remarks>
+    /// The literal is what the generated class registers with the tag store so the EtherNet/IP server presents the
+    /// same members, offsets and bit positions as the source controller. Structure members reference their template by
+    /// name and carry CIP type code 0; atomics carry their CIP code (0xC1 BOOL ... 0xCB LREAL).
+    /// </remarks>
     public string LayoutLiteral(StructLayout layout)
     {
         var members = layout.Members.Select(m =>
@@ -121,5 +152,6 @@ public sealed class CSharpTypes
     /// <summary>The Logix MODULE pseudo-type (add-on InOut parameters that receive a module name).</summary>
     public static bool IsModuleType(string name) => name.Equals("MODULE", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>A C# string literal with backslashes and quotes escaped.</summary>
     public static string Quote(string s) => "\"" + s.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
 }

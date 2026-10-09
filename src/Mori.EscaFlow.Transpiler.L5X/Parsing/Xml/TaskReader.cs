@@ -3,6 +3,12 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Programs;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
+/// <summary>
+/// Reads a materialized <c>&lt;Task&gt;</c> element. Logix tasks are continuous (one per controller, runs whenever
+/// nothing else does), periodic (rate in milliseconds, preempting by priority) or event (triggered by a module
+/// input change, a consumed tag, an EVENT instruction, an axis or a motion group). The scheduled programs run
+/// in the listed order on every scan of the task.
+/// </summary>
 public static class TaskReader
 {
     public static L5xTask Read(XElement element)
@@ -36,6 +42,7 @@ public static class TaskReader
                     task.Description = child.OwnText();
                     break;
                 case "EventInfo":
+                    // EventTrigger / EventTag / EnableTimeout: kept generic, the importer reads the attributes it needs.
                     task.EventInfo = GenericElementReader.Read(child);
                     break;
                 case "ScheduledPrograms":

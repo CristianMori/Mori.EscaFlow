@@ -4,8 +4,11 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Tags;
 
 namespace Mori.EscaFlow.Cli;
 
+/// <summary>Prints the one-page summary of a parsed export: element counts, tag statistics, phase timings, memory and diagnostics grouped by code.</summary>
+/// <remarks>The counts are the quickest way to check that an export was read completely; the integration tests assert the same numbers.</remarks>
 public static class SummaryPrinter
 {
+    /// <summary>Writes the summary of <paramref name="project"/> to <paramref name="w"/>.</summary>
     public static void Print(L5xProject project, TextWriter w)
     {
         var c = project.Controller;
@@ -28,6 +31,7 @@ public static class SummaryPrinter
         w.WriteLine($"{"CustomProperties skipped",-22}{s.SkippedCustomProperties,8}");
         w.WriteLine();
 
+        // Tag kinds and how many carry a value the parser could decode (Decorated or shaped L5K data).
         var alias = c.AllTags.Count(t => t.TagType == TagType.Alias);
         var produced = c.AllTags.Count(t => t.TagType == TagType.Produced);
         var consumed = c.AllTags.Count(t => t.TagType == TagType.Consumed);
@@ -37,6 +41,7 @@ public static class SummaryPrinter
         w.WriteLine($"Registry: {c.Types.All.Count} data types known, {unresolvedTypes} tag type references unresolved");
         w.WriteLine();
 
+        // Phase timings mirror the three parsing phases (XML, logic, link).
         w.WriteLine($"{"XML phase",-14}{s.XmlPhase.TotalSeconds,8:F2} s");
         w.WriteLine($"{"Logic phase",-14}{s.LogicPhase.TotalSeconds,8:F2} s");
         w.WriteLine($"{"Link phase",-14}{s.LinkPhase.TotalSeconds,8:F2} s");
@@ -45,6 +50,7 @@ public static class SummaryPrinter
         w.WriteLine($"{"Managed heap",-14}{GC.GetTotalMemory(false) / (1024.0 * 1024.0),8:F0} MB");
         w.WriteLine();
 
+        // One line per diagnostic code with an example, so a large export's problems can be triaged at a glance.
         var diags = project.Diagnostics;
         w.WriteLine($"Diagnostics: {diags.Count} ({diags.CountBySeverity(DiagnosticSeverity.Error)} errors, {diags.CountBySeverity(DiagnosticSeverity.Warning)} warnings, {diags.CountBySeverity(DiagnosticSeverity.Info)} info)");
         foreach (var g in diags.GroupBy(d => d.Code).OrderBy(g => g.Key))
@@ -54,5 +60,6 @@ public static class SummaryPrinter
         }
     }
 
+    /// <summary>Shortens a message so the table stays one line per code.</summary>
     private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max] + "...";
 }

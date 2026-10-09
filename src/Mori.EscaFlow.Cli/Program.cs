@@ -11,8 +11,17 @@ using Mori.EscaFlow.Transpiler.Validation;
 
 namespace Mori.EscaFlow.Cli;
 
+/// <summary>
+/// The <c>escaflow</c> command line tool: <c>parse</c> reports on an L5X export, <c>ir build</c> / <c>ir validate</c> /
+/// <c>ir print</c> work with the middle file, and <c>generate csharp</c> writes a complete C# solution.
+/// </summary>
+/// <remarks>
+/// Exit codes: 0 success, 1 when the requested check found errors (strict parse, validation, generation errors),
+/// 2 for usage errors and unreadable input. Options are parsed by hand to keep the tool dependency-free.
+/// </remarks>
 public static class Program
 {
+    /// <summary>The usage text printed for <c>--help</c>-less invocations and on option errors.</summary>
     private const string Usage = """
         Usage:
           escaflow parse <file.L5X> [options]          parse a Logix export and report on it
@@ -54,6 +63,7 @@ public static class Program
           --no-source-comments    Do not emit rung text / lines as comments
         """;
 
+    /// <summary>Dispatches on the first argument(s); parse and format errors are reported as a single line with exit code 2.</summary>
     public static int Main(string[] args)
     {
         if (args.Length == 0)
@@ -75,11 +85,13 @@ public static class Program
         }
         catch (L5xParseException ex)
         {
+            // Only I/O problems and malformed XML throw; content problems are diagnostics, not exceptions.
             Console.Error.WriteLine($"error: {ex.Message}");
             return 2;
         }
         catch (InvalidDataException ex)
         {
+            // A middle file of another format or an unsupported major version.
             Console.Error.WriteLine($"error: {ex.Message}");
             return 2;
         }
@@ -93,6 +105,7 @@ public static class Program
 
     // ------------------------------------------------------------------ parse
 
+    /// <summary><c>parse</c>: reads the export with the requested options and prints the summary, the diagnostics and/or the model as JSON.</summary>
     private static int Parse(string[] args)
     {
         var file = args[1];
@@ -126,6 +139,7 @@ public static class Program
                     return UsageError();
             }
         }
+        // The summary is the default output; it is suppressed only when a JSON dump was asked for explicitly.
         if (jsonPath is null) summary = true;
 
         var project = L5xParser.ParseFile(file, new ParseOptions
@@ -151,6 +165,7 @@ public static class Program
 
     // ------------------------------------------------------------------ ir build
 
+    /// <summary><c>ir build</c>: parses the export, imports it into the middle format, writes the JSON and optionally validates it.</summary>
     private static int IrBuild(string[] args)
     {
         var file = args[2];
@@ -192,6 +207,7 @@ public static class Program
         Console.WriteLine($"IR written to {outPath} ({new FileInfo(outPath).Length / (1024.0 * 1024.0):F1} MB): {ir.Types.Count} types, {variables} variables, {ir.Io.Devices.Count} devices, {ir.Pous.Count} pous, {actions} actions; build {buildTime.TotalSeconds:F1} s, write {sw.Elapsed.TotalSeconds:F1} s");
 
         if (!validate) return 0;
+        // The Logix service catalog is registered so sysCall names and argument counts are checked.
         var result = new IrValidator().Validate(ir, new ValidationOptions { ServiceCatalogs = { LogixServiceCatalog.Instance } });
         Report(result, warnings: false);
         return result.HasErrors ? 1 : 0;
@@ -199,6 +215,7 @@ public static class Program
 
     // ------------------------------------------------------------------ ir validate
 
+    /// <summary><c>ir validate</c>: strict read of a middle file followed by the referential and (optionally) typing passes.</summary>
     private static int IrValidate(string[] args)
     {
         var file = args[2];
@@ -222,6 +239,7 @@ public static class Program
         return result.HasErrors ? 1 : 0;
     }
 
+    /// <summary>Prints validation issues grouped by code with the code's description and up to ten examples each.</summary>
     private static void Report(ValidationResult result, bool warnings)
     {
         var errors = result.Errors.ToList();
@@ -244,6 +262,7 @@ public static class Program
 
     // ------------------------------------------------------------------ ir print
 
+    /// <summary><c>ir print</c>: renders every POU, one POU, or one action of a middle file as structured text.</summary>
     private static int IrPrint(string[] args)
     {
         var file = args[2];
@@ -281,6 +300,7 @@ public static class Program
 
     // ------------------------------------------------------------------ generate csharp
 
+    /// <summary><c>generate csharp</c>: takes an export or a middle file, runs the C# converter and writes the solution plus its report.</summary>
     private static int GenerateCSharp(string[] args)
     {
         var input = args[2];
@@ -309,6 +329,7 @@ public static class Program
             }
         }
 
+        // An L5X input is imported on the fly; anything else is read as a middle file.
         var sw = Stopwatch.StartNew();
         IrDocument ir;
         if (input.EndsWith(".L5X", StringComparison.OrdinalIgnoreCase))
@@ -345,6 +366,7 @@ public static class Program
         return report.HasErrors ? 1 : 0;
     }
 
+    /// <summary>The value following an option, advancing the index; throws when the option is the last argument.</summary>
     private static string Next(string[] args, ref int i)
     {
         if (i + 1 >= args.Length) throw new ArgumentException($"Option {args[i]} needs a value");

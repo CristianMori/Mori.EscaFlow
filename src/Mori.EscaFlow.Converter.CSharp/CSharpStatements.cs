@@ -5,6 +5,12 @@ using Mori.EscaFlow.Transpiler.Logix;
 namespace Mori.EscaFlow.Converter.CSharp;
 
 /// <summary>Emits C# statements for IR statements into a <see cref="CodeWriter"/>.</summary>
+/// <remarks>
+/// Working alongside <see cref="CSharpExpressions"/>, this class owns everything that is a statement rather than a
+/// value: assignments (with the destination-specific rules for atomics, strings and whole structures), function
+/// block and add-on calls (parameter binding and InOut rebinding), control flow, and the handful of Logix memory
+/// instructions (COP/CPS/FLL) that the IR keeps as their own statement kinds instead of generic calls.
+/// </remarks>
 public sealed class CSharpStatements
 {
     private readonly IrDocument _doc;
@@ -13,6 +19,8 @@ public sealed class CSharpStatements
     private readonly CSharpExpressions _x;
     private readonly GenerationReport _report;
     private readonly CSharpGeneratorOptions _options;
+
+    /// <summary>Unimplemented services seen so far, with every location that called them (for the generation report).</summary>
     private readonly Dictionary<string, List<string>> _unsupported = new(StringComparer.OrdinalIgnoreCase);
 
     public CSharpStatements(IrDocument doc, NameMapper names, CSharpTypes types, CSharpExpressions expressions, GenerationReport report, CSharpGeneratorOptions options, Func<IrTypeRef, int> elementSize)
@@ -26,9 +34,18 @@ public sealed class CSharpStatements
         _layoutSize = elementSize;
     }
 
+    /// <summary>Every service the generated solution calls that the target runtime does not implement, with example call sites.</summary>
     public IReadOnlyDictionary<string, List<string>> Unsupported => _unsupported;
+
+    /// <summary>Locations already reported for GEN020 (opaque-type statements), so the warning is not repeated per statement.</summary>
     private readonly HashSet<string> _opaqueReported = new(StringComparer.Ordinal);
 
+    /// <summary>
+    /// Finds whether a statement reads or writes through a reference into an opaque type — a member path that
+    /// enters a structure whose layout the source project does not define (typically an I/O module that is not
+    /// present in the project's hardware tree, so the export records its name but never its Decorated layout). Such
+    /// a statement cannot be generated: there is no member to bind a C# field to.
+    /// </summary>
     private sealed class OpaqueFinder : IrWalker
     {
         private bool _found;
@@ -61,6 +78,7 @@ public sealed class CSharpStatements
         }
     }
 
+    /// <summary>Emits a whole routine body: local temporaries, then statements, with the source rung's text as a comment whenever the rung changes.</summary>
     public void Body(CodeWriter w, IrBody body, EmitContext ctx, string location)
     {
         ctx.Temporaries.Clear();
@@ -103,6 +121,7 @@ public sealed class CSharpStatements
         }
     }
 
+    /// <summary>Gathers every label name reachable in a body (including inside IF branches), needed before emitting so a forward <c>goto</c> can be recognized.</summary>
     private static void CollectLabels(IEnumerable<IrStatement> statements, HashSet<string> labels)
     {
         foreach (var s in statements)
@@ -120,6 +139,7 @@ public sealed class CSharpStatements
         foreach (var s in statements) Statement(w, s, ctx, location);
     }
 
+    /// <summary>Emits one statement, dispatching by IR kind; an opaque-type reference anywhere in the statement replaces it with a skip comment instead of invalid code.</summary>
     public void Statement(CodeWriter w, IrStatement s, EmitContext ctx, string location)
     {
         if (OpaqueFinder.Contains(s))
@@ -151,9 +171,11 @@ public sealed class CSharpStatements
                 SysCall(w, sc, ctx, location);
                 break;
             case IrCopy cp:
+                // COP: a raw element-count copy that ignores structure boundaries, exactly as Logix performs it.
                 Gate(w, cp.En, ctx, () => w.Line($"PlcMem.Copy({_x.Arg(cp.Source, ctx)}, {_x.Arg(cp.Dest, ctx)}, {_x.Int(cp.Count, ctx)});"));
                 break;
             case IrFill fl:
+                // FLL: fills a destination array with repeated copies of one value.
                 Gate(w, fl.En, ctx, () => w.Line($"PlcMem.Fill({_x.Arg(fl.Value, ctx)}, {_x.Arg(fl.Dest, ctx)}, {_x.Int(fl.Count, ctx)});"));
                 break;
             case IrIf i:
@@ -164,6 +186,7 @@ public sealed class CSharpStatements
                     var cond = _x.Bool(b.Condition, ctx);
                     if (b.Condition is IrLiteral { IsTrue: true } && i.Branches.Count == 1 && i.Else is null)
                     {
+                        // A single always-true branch (the common ladder "when the rung condition is true" wrapper) needs no if at all.
                         Statements(w, b.Body, ctx, location);
                         return;
                     }
@@ -183,6 +206,7 @@ public sealed class CSharpStatements
                     {
                         foreach (var label in arm.Labels)
                         {
+                            // A range label becomes a C# relational pattern; a single value becomes a plain case.
                             if (label.To is not null) w.Line($"case >= {_x.Value(label.Value, ctx)} and <= {_x.Value(label.To, ctx)}:");
                             else w.Line($"case {_x.Value(label.Value, ctx)}:");
                         }
@@ -208,6 +232,9 @@ public sealed class CSharpStatements
             }
             case IrFor f:
             {
+                // IEC FOR evaluates TO and BY once and keeps looping in whichever direction BY points, which a plain
+                // C# for with a fixed comparison operator cannot express; the bound and step are cached in locals
+                // and the loop condition picks the direction from the sign of BY.
                 var v = _x.Value(f.Variable, ctx);
                 var vt = CSharpTypes.ValueType(f.Variable.Type?.LeafName ?? "DINT");
                 var to = _x.Value(f.To, ctx);
@@ -248,6 +275,7 @@ public sealed class CSharpStatements
                 break;
             }
             case IrExit:
+                // EXIT outside any loop is legal in Logix ST (it ends the routine); break has no such meaning in C#, so fall back to return.
                 w.Line(ctx.LoopDepth > 0 ? "break;" : "return; // EXIT outside a loop");
                 break;
             case IrContinue:
@@ -271,6 +299,7 @@ public sealed class CSharpStatements
 
     private string LabelName(string label) => "L_" + _names.Map("labels", label);
 
+    /// <summary>Wraps a statement in an <c>if</c> on its enable expression, unless the enable is absent or always true.</summary>
     private void Gate(CodeWriter w, IrExpression? en, EmitContext ctx, Action body)
     {
         if (en is null || en is IrLiteral { IsTrue: true })
@@ -283,6 +312,12 @@ public sealed class CSharpStatements
 
     // ------------------------------------------------------------------ assignments
 
+    /// <summary>
+    /// Emits an assignment. The target decides the shape: a temporary is a plain local write, a bit access flips one
+    /// bit, an atomic leaf writes <c>.Value</c> with the cast its declared type needs unless the source is already
+    /// exactly that type, a string-family member gets a string-specific store, and anything else (a whole structure
+    /// or array) is a byte-for-byte copy through <c>PlcMem.CopyAll</c>.
+    /// </summary>
     private void Assign(CodeWriter w, IrAssign a, EmitContext ctx)
     {
         var value = _x.Value(a.Value, ctx);
@@ -303,6 +338,9 @@ public sealed class CSharpStatements
                 else
                 {
                     var vt = CSharpTypes.ValueType(type);
+                    // Skip the cast when the source is already exactly the destination's C# value type and the
+                    // expression is a simple term (a cast on anything else is cheap and keeps the output honest
+                    // about any narrowing the front-end did not already make explicit via IrConv).
                     var sameType = a.Value.Type is { } st && st.LeafName is { } sn && CSharpTypes.IsAtomic(st) && CSharpTypes.ValueType(sn) == vt;
                     var needsCast = !(sameType && a.Value is (IrRef or IrLiteral or IrConv));
                     w.Line(needsCast ? $"{target}.Value = ({vt})({value});" : $"{target}.Value = {value};");
@@ -324,6 +362,13 @@ public sealed class CSharpStatements
 
     // ------------------------------------------------------------------ calls
 
+    /// <summary>
+    /// Emits a function block call. Standard blocks (TON/TOF/RTO/CTU/CTD/...) call straight into the runtime's
+    /// <c>Logix</c> helper with the enable pin as a parameter, since their whole behaviour is in the runtime, not
+    /// generated code. Add-on instances bind InOut parameters (aliasing the caller's memory through a <see cref="PlcView"/>
+    /// wrapper), copy inputs in, invoke <c>Execute</c> with EnableIn, then copy outputs out — reproducing the
+    /// parameter-passing semantics Logix itself uses for an AOI instance.
+    /// </summary>
     private void FbCall(CodeWriter w, IrFbCall c, EmitContext ctx, string location)
     {
         if (c.Fb is not null)
@@ -425,6 +470,7 @@ public sealed class CSharpStatements
 
     private readonly Func<IrTypeRef, int> _layoutSize;
 
+    /// <summary>Assigns a value to an input parameter target, choosing the atomic / string / structure form the same way <see cref="Assign"/> does for a reference target.</summary>
     private void AssignTo(string target, IrTypeRef type, IrExpression value, CodeWriter w, EmitContext ctx)
     {
         if (CSharpTypes.IsAtomic(type) && !type.IsArray)
@@ -449,6 +495,7 @@ public sealed class CSharpStatements
         _ => _x.Value(value, ctx),
     };
 
+    /// <summary>Emits a JSR-equivalent call to an action (routine) in the current POU or another program, by its already-mapped method name.</summary>
     private void ActionCall(CodeWriter w, IrActionCall ac, EmitContext ctx, string location)
     {
         var pou = ac.Pou is null ? ctx.Pou : _doc.FindPou(ac.Pou);
@@ -466,6 +513,13 @@ public sealed class CSharpStatements
         Gate(w, ac.En, ctx, () => w.Line($"{target}();"));
     }
 
+    /// <summary>
+    /// Emits a vendor service call. A service the runtime does not implement goes through <c>Services.Unsupported</c>
+    /// (logged once, never faulting unless the controller is configured to fault on it) instead of failing to
+    /// compile; a service that must run every scan to behave correctly (per <see cref="LogixServiceCatalog.RunsEveryScan"/>)
+    /// receives its enable as an explicit first argument rather than being wrapped in an <c>if</c>, so the runtime
+    /// method itself can observe the enable's rising and falling edges.
+    /// </summary>
     private void SysCall(CodeWriter w, IrSysCall sc, EmitContext ctx, string location)
     {
         _report.Count(_report.ServiceInventory, sc.Service);

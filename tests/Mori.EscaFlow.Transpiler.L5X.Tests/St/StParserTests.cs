@@ -7,6 +7,14 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.St;
 
+/// <summary>
+/// Proves the structured text statement and expression grammar: assignments (both forms), empty statements,
+/// every control construct (IF/ELSIF/ELSE, CASE with ranges and negatives, FOR with/without BY, WHILE, REPEAT),
+/// call statements including add-on and elided arguments, RETURN, operator precedence and NOT versus
+/// comparison, function calls, variable paths (module, program-scoped, bit, indirect bit), real file samples,
+/// error recovery (bad statements, missing/stray END_IF) with line-accurate diagnostics, the expression-only
+/// entry point's trailing-text check, index lists, and that parsed text round-trips.
+/// </summary>
 public class StParserTests
 {
     private static StBlock Parse(string text, out DiagnosticBag bag, LogicParseContext? ctx = null)

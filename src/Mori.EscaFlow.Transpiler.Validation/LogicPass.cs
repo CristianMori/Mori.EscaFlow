@@ -3,6 +3,14 @@ using Mori.EscaFlow.Transpiler.Catalogs;
 namespace Mori.EscaFlow.Transpiler.Validation;
 
 /// <summary>Walks every body: references, calls, labels (referential) and expression / statement typing.</summary>
+/// <remarks>
+/// Built on <see cref="IrWalker"/> rather than its own recursion because this pass needs the walker's context
+/// (current body for label/temporary lookup, enclosing POU for <c>this</c> and bare action calls) at every node,
+/// and the walker already threads that context through statements and expressions uniformly. Each check here
+/// reports at most one error per offending node and returns early rather than cascading: once a reference fails
+/// to resolve, nothing about its "type" is trustworthy, so later checks on the same node are skipped instead of
+/// producing a wall of follow-on noise.
+/// </remarks>
 internal sealed class LogicPass : IrWalker
 {
     private readonly IrDocument _doc;
@@ -10,7 +18,11 @@ internal sealed class LogicPass : IrWalker
     private readonly TypeResolver _types;
     private readonly ValidationOptions _options;
     private readonly Dictionary<string, IServiceCatalog> _catalogs;
+
+    /// <summary>Catalog ids already warned about, so an unregistered catalog produces one warning for the whole document rather than one per call site.</summary>
     private readonly HashSet<string> _unknownCatalogs = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Labels defined in each body, collected before the body's statements are visited so a forward jump (label defined after the jump) still resolves.</summary>
     private readonly Dictionary<IrBody, HashSet<string>> _labels = new(ReferenceEqualityComparer.Instance);
 
     public LogicPass(IrDocument doc, ValidationResult result, TypeResolver types, ValidationOptions options)
@@ -24,6 +36,7 @@ internal sealed class LogicPass : IrWalker
 
     public void Run() => Walk(_doc);
 
+    /// <summary>Error location: the walker's structural path, extended with the node's source trace (rung/line/element) when the front-end recorded one, so an error points back at the original ladder rung or ST line.</summary>
     private string Loc(IrWalkContext ctx, IrNode node)
     {
         var l = ctx.Location;
@@ -38,6 +51,7 @@ internal sealed class LogicPass : IrWalker
 
     // ------------------------------------------------------------------ bodies
 
+    /// <summary>Pre-scans a body for its labels before the walker descends into its statements.</summary>
     protected override void VisitBody(IrBody body, IrWalkContext ctx)
     {
         var labels = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -45,6 +59,7 @@ internal sealed class LogicPass : IrWalker
         _labels[body] = labels;
     }
 
+    /// <summary>Recurses into every structured-statement body (if/case/for/while/repeat) so a label nested inside one is still visible to a jump anywhere else in the same top-level body.</summary>
     private static void CollectLabels(IEnumerable<IrStatement> statements, HashSet<string> labels)
     {
         foreach (var s in statements)
@@ -69,6 +84,7 @@ internal sealed class LogicPass : IrWalker
 
     // ------------------------------------------------------------------ statements
 
+    /// <summary>Dispatches referential and condition-typing checks for one statement, then lets the base walker recurse into its nested bodies and expressions.</summary>
     public override void VisitStatement(IrStatement s, IrWalkContext ctx)
     {
         switch (s)
@@ -122,6 +138,12 @@ internal sealed class LogicPass : IrWalker
             _result.Error(ValidationCodes.AssignTypeMismatch, $"cannot assign {vt} to {tt}", Loc(ctx, a));
     }
 
+    /// <summary>
+    /// Checks a function-block call: exactly one of <c>fb</c> (standard block) / <c>pou</c> (project POU instance)
+    /// must be set; for a standard block, the instance's declared type must match its profile's instance type and
+    /// every pin name/type must exist under that profile; for a POU, every pin name must be a correctly directioned
+    /// input/output/inOut variable of the target POU.
+    /// </summary>
     private void CheckFbCall(IrFbCall c, IrWalkContext ctx)
     {
         var loc = Loc(ctx, c);
@@ -205,6 +227,7 @@ internal sealed class LogicPass : IrWalker
         }
     }
 
+    /// <summary>True for a project type marked as an I/O device image (<c>class: "io"</c>), the category that gets the relaxed device-image pin check above instead of an error.</summary>
     private bool IsIoType(IrTypeRef? type) => type?.LeafName is { } name && _doc.FindType(name) is { Class: "io" };
 
     private void CheckActionCall(IrActionCall ac, IrWalkContext ctx)
@@ -216,6 +239,12 @@ internal sealed class LogicPass : IrWalker
         if (ac.En is not null) RequireBool(ac.En, "actionCall enable", ctx, ac);
     }
 
+    /// <summary>
+    /// Checks a vendor service call/function against its registered catalog: an unregistered catalog id is a
+    /// warning (not an error — the document may simply be validated without that vendor's catalog loaded) reported
+    /// once per catalog; a registered catalog must actually define the named service, with an argument count
+    /// within its declared min/max (unbounded when <see cref="ServiceDefinition.Variadic"/>).
+    /// </summary>
     private void CheckService(string catalogId, string service, int argCount, bool isFunction, string loc)
     {
         if (!_catalogs.TryGetValue(catalogId, out var catalog))
@@ -236,6 +265,7 @@ internal sealed class LogicPass : IrWalker
             _result.Error(ValidationCodes.ServiceArgCount, $"{service} takes {(def.Variadic ? $"at least {min}" : min == max ? $"{min}" : $"{min} to {max}")} argument(s), got {argCount}", loc);
     }
 
+    /// <summary>A call/reference to a bare function name (no explicit <c>pou</c>) is only a warning when it matches neither the standard function table nor any POU name — it may be a vendor-specific function this validator simply does not know about.</summary>
     private void CheckFunctionName(string? name, string? pou, string loc)
     {
         if (pou is not null) return; // pou existence checked structurally
@@ -243,6 +273,7 @@ internal sealed class LogicPass : IrWalker
             _result.Warning(ValidationCodes.UnresolvedPou, $"'{name}' is not a standard function and names no pou", loc);
     }
 
+    /// <summary>Reports <see cref="ValidationCodes.ConditionNotBool"/> unless the expression's type is BOOL or unknown (an unknown type is never flagged — there is nothing to be wrong about).</summary>
     private void RequireBool(IrExpression e, string what, IrWalkContext ctx, IrNode owner)
     {
         if (!_options.CheckTyping) return;
@@ -252,6 +283,7 @@ internal sealed class LogicPass : IrWalker
 
     // ------------------------------------------------------------------ expressions
 
+    /// <summary>Dispatches referential and typing checks for one expression, then lets the base walker recurse into its operands.</summary>
     public override void VisitExpression(IrExpression e, IrWalkContext ctx)
     {
         switch (e)
@@ -264,6 +296,7 @@ internal sealed class LogicPass : IrWalker
         base.VisitExpression(e, ctx);
     }
 
+    /// <summary>Operand/result typing rules for the expression kinds that carry their own type constraints: comparisons and and/or/xor must agree and must themselves be BOOL; arithmetic operands must be numeric (or TIME, which supports addition/subtraction/scaling); bit access needs an integer/bit-string operand and an integer index; edge pins must be BOOL; conv's target must be atomic and its operand convertible.</summary>
     private void CheckTyping(IrExpression e, IrWalkContext ctx)
     {
         switch (e)
@@ -279,6 +312,8 @@ internal sealed class LogicPass : IrWalker
                 }
                 if (b.IsLogical && lc != TypeResolver.Cat.Unknown && rc != TypeResolver.Cat.Unknown)
                 {
+                    // and/or/xor work either on two BOOLs (logical) or two integer-like operands (bitwise); any
+                    // other combination (e.g. BOOL with DINT) is rejected.
                     var ok = lc == TypeResolver.Cat.Bool && rc == TypeResolver.Cat.Bool || TypeResolver.IsIntegerLike(lc) && TypeResolver.IsIntegerLike(rc);
                     if (!ok) _result.Error(ValidationCodes.LogicalOperandTypes, $"{b.Operator} between {b.Left.Type} and {b.Right.Type}", Loc(ctx, b));
                 }
@@ -329,6 +364,13 @@ internal sealed class LogicPass : IrWalker
         }
     }
 
+    /// <summary>
+    /// Resolves a reference's root to its declared type, then walks its path segment by segment, re-deriving the
+    /// type reached at each step (member lookup, array indexing, length/char on a string, pointer dereference) so
+    /// the final reached type can be compared against the ref's own declared <see cref="IrRef.Type"/>. A mismatch
+    /// is only a warning: the declared type is advisory metadata the front-end wrote down for convenience, and the
+    /// path walk is the source of truth, so disagreement is worth flagging but not fatal.
+    /// </summary>
     private void CheckRef(IrRef r, IrWalkContext ctx)
     {
         var loc = Loc(ctx, r);

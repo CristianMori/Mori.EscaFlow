@@ -5,6 +5,11 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Xml;
 
+/// <summary>
+/// Proves that <c>SocketAnalysis</c> binds a socket-service MESSAGE tag to its request structure purely by that
+/// structure's data type, and locates the conventional field paths (type, address, buffer, ...) by member name
+/// rather than by reading any run-time value.
+/// </summary>
 public class SocketAnalysisTests
 {
     /// <summary>The ENET-AT002 sample layout: one UDT holding every request structure of a socket. No initial values on purpose: bindings come from the types.</summary>
@@ -97,6 +102,7 @@ public class SocketAnalysisTests
     }
 }
 
+/// <summary>Integration check that real sample exports with SNTP socket messages bind correctly end to end.</summary>
 [Collection("Samples")]
 [Trait("Category", "Integration")]
 public class SocketSampleTests

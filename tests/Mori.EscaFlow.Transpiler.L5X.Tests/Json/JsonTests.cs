@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Json;
 
+/// <summary>Proves <c>L5xJson</c> writes polymorphic AST nodes with a type discriminator and that the <see cref="Json.JsonInclude"/> flags actually drop logic and value properties from the output.</summary>
 public class JsonTests
 {
     private const string Xml = """
@@ -81,6 +82,7 @@ public class JsonTests
     }
 }
 
+/// <summary>Integration check that dumping a real sample project to JSON produces well-formed output.</summary>
 [Collection("Samples")]
 [Trait("Category", "Integration")]
 public class JsonSampleTests

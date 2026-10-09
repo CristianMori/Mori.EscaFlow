@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Mori.EscaFlow.Runtime.Tests;
 
+/// <summary>Layout-to-template registration, path resolution and text read/write, and snapshot round-trips, against a real <see cref="TagDatabase"/>.</summary>
 public class TagStoreTests
 {
     private static TagStore NewStore() => new(new TagDatabase());

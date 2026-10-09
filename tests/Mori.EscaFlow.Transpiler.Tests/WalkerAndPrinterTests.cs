@@ -4,12 +4,14 @@ using Xunit.Abstractions;
 
 namespace Mori.EscaFlow.Transpiler.Tests;
 
+/// <summary>Covers <see cref="IrWalker"/> (every expression/statement kind is reached, with the right context attached) and <see cref="StPrinter"/> (every statement and expression kind renders as expected ST text) against the full sample document.</summary>
 public class WalkerAndPrinterTests
 {
     private readonly ITestOutputHelper _out;
 
     public WalkerAndPrinterTests(ITestOutputHelper output) => _out = output;
 
+    /// <summary>Every expression and statement subtype in the sample document is visited at least once, and the walk context correctly tracks the enclosing variable (for alias targets), action, method and pou as it descends into actions, methods, ladder elements and nested expressions.</summary>
     [Fact]
     public void WalkerEnumeratesEverything()
     {
@@ -40,6 +42,7 @@ public class WalkerAndPrinterTests
         Assert.Equal("P/Main", statements.First(s => s.Context.Action?.Name == "Main").Context.Location);
     }
 
+    /// <summary>Every statement and expression kind in the sample document's main body renders as the expected IEC structured-text fragment, including the pseudo-function forms for neutral constructs ST has no syntax for (edges, conv, copy/fill, vendor services) and the comment-annotated forms for fbCall instance type and mode.</summary>
     [Fact]
     public void PrinterRendersStructuredText()
     {
@@ -75,6 +78,7 @@ public class WalkerAndPrinterTests
         Assert.Contains("Color := Green;", text);
     }
 
+    /// <summary>Lowered-ladder temporaries print their VAR_TEMP header, a full POU prints its grouped VAR sections, body, and hook actions, an unresolved id prints its last segment without a document, and binary operators parenthesize only where precedence actually requires it.</summary>
     [Fact]
     public void PrinterRendersLoweredLadderWithTemporariesAndPou()
     {

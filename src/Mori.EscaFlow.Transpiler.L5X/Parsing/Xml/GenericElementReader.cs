@@ -4,7 +4,10 @@ using Mori.EscaFlow.Transpiler.L5X.Model;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Copies an XML subtree into <see cref="GenericElement"/> objects.</summary>
+/// <summary>
+/// Copies an XML subtree into <see cref="GenericElement"/> objects. Used for every part of the format that is not
+/// modelled in detail, and for unknown content, so that nothing in an export is lost.
+/// </summary>
 public static class GenericElementReader
 {
     /// <summary>Reads the current element (and its subtree) and moves the reader past its end tag.</summary>
@@ -21,6 +24,7 @@ public static class GenericElementReader
             reader.MoveToFirstAttribute();
             do
             {
+                // Namespace declarations are XML plumbing, not data.
                 if (reader.Prefix != "xmlns" && reader.Name != "xmlns") element.Attributes[reader.Name] = reader.Value;
             } while (reader.MoveToNextAttribute());
             reader.MoveToElement();
@@ -63,12 +67,14 @@ public static class GenericElementReader
         }
         if (text is not null)
         {
+            // Mixed content is rare; an element with children only gets its text when there is some beyond whitespace.
             var t = CdataText.Normalize(text.ToString());
             if (t.Length > 0 || element.Children.Count == 0) element.Text = t;
         }
         return element;
     }
 
+    /// <summary>Same copy from a materialized element.</summary>
     public static GenericElement Read(XElement element, bool skipCustomProperties = true)
     {
         var g = new GenericElement
@@ -95,6 +101,7 @@ public static class GenericElementReader
         }
         else
         {
+            // With children present, only the element's own text nodes count (not the descendants' text).
             var direct = string.Concat(element.Nodes().OfType<XText>().Select(n => n.Value));
             var t = CdataText.Normalize(direct);
             if (t.Trim().Length > 0) g.Text = t;

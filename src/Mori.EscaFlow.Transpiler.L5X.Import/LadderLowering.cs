@@ -9,14 +9,43 @@ namespace Mori.EscaFlow.Transpiler.L5X.Import;
 /// The rung condition flows left to right as a boolean expression; parallel branches OR their legs; compound
 /// conditions shared by several outputs are stored once in a body temporary. See docs/plc-ir-2.0.md for the contract.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Logix evaluates a rung as a boolean "rung-condition-in" that starts true at the left rail. Every input
+/// instruction ANDs its result into it; every output instruction acts on the current value and passes it on
+/// unchanged, so several outputs on one rung share the same condition. A branch evaluates each leg from the
+/// condition at the branch's start and ORs the leg results at its end.
+/// </para>
+/// <para>
+/// The lowering keeps two expressions per series: <c>incoming</c> (the condition at the series start, already
+/// absolute) and <c>rel</c> (what this series has ANDed so far). The absolute condition of an output is
+/// <c>incoming AND rel</c>. When that compound expression would be used by more than one output, it is stored once
+/// in a body temporary (<c>_rcN</c>) instead of being duplicated into every output's statement; without that rule the
+/// lowered form of a long rung grew to several times the size of the rung.
+/// </para>
+/// <para>
+/// One instance serves a whole body: master-control (MCR) zones and the temporaries must span rungs, because an MCR
+/// opened on one rung conditions every rung up to the closing MCR.
+/// </para>
+/// </remarks>
 public sealed class LadderLowering
 {
     private readonly LogixExpressionBuilder _x;
     private readonly CallEmitter _calls;
+
+    /// <summary>Body-level temporaries (<c>_rcN</c> conditions, <c>_mcrN</c> zone conditions); shared with the net lowering of the same body.</summary>
     private readonly List<IrTemporary> _temps;
+
+    /// <summary>The statement list of the body being lowered.</summary>
     private List<IrStatement> _out = new();
+
+    /// <summary>Current rung number, stamped on every emitted statement.</summary>
     private int _rung;
+
+    /// <summary>Depth-first index of the element being lowered inside the rung, stamped on its statements.</summary>
     private int _element;
+
+    /// <summary>The condition of the open MCR zone, or null outside a zone. Rungs inside the zone start from it instead of TRUE.</summary>
     private IrRef? _mcr;
     private int _mcrCount;
 
@@ -33,6 +62,8 @@ public sealed class LadderLowering
         _out = body;
         _rung = rungNumber;
         _element = 0;
+        // Inside an MCR zone the left rail is the zone condition: when it is false every output in the zone sees a
+        // false rung (OTE clears, timers reset), which is exactly what the controller does.
         var incoming = _mcr is null ? IrLiteral.True : (IrExpression)_mcr;
         var (_, drawn) = Series(ast.Elements, incoming);
         return drawn;
@@ -48,6 +79,10 @@ public sealed class LadderLowering
 
     // ------------------------------------------------------------------ normal scan
 
+    /// <summary>
+    /// Lowers one series of elements (a rung or a branch leg) under <paramref name="incoming"/> and returns the
+    /// condition the series contributes, relative to <paramref name="incoming"/>, together with the drawn elements.
+    /// </summary>
     private (IrExpression Rel, List<IrLdElement> Drawn) Series(IReadOnlyList<RungElement> elements, IrExpression incoming)
     {
         var drawn = new List<IrLdElement>(elements.Count);
@@ -55,6 +90,9 @@ public sealed class LadderLowering
         var relIsAbsolute = false; // set after an edge contact: rel already implies incoming
         IrExpression? absolute = null;
 
+        // The absolute condition at this point of the series. Materialized into a temporary when it is compound and
+        // another element after this one will need it again (so the expression is evaluated once per scan, as the
+        // controller evaluates the rung once).
         IrExpression Abs(bool willBeReused)
         {
             if (absolute is not null) return absolute;
@@ -82,7 +120,9 @@ public sealed class LadderLowering
                             drawn.Add(contact);
                             if (instr.Mnemonic.Equals("ONS", StringComparison.OrdinalIgnoreCase))
                             {
-                                // Edge of the condition so far: materialize it when compound so the edge tree stays small.
+                                // ONS passes the rung condition for one scan on its rising edge, remembering the previous
+                                // value in its storage bit. The edge of the condition so far replaces the condition; it is
+                                // materialized when compound so the edge tree stays small.
                                 var clk = Abs(false);
                                 if (IsCompound(clk)) clk = Materialize(clk, "_rc");
                                 contact.Edge = "rising";
@@ -102,6 +142,7 @@ public sealed class LadderLowering
                         }
                         case LadderRole.Coil:
                         {
+                            // OSR/OSF name the storage bit first and the output bit second.
                             var coil = new IrLdCoil { Name = instr.Mnemonic, Operand = Arg(args, instr.Mnemonic.ToUpperInvariant() is "OSR" or "OSF" ? 1 : 0) };
                             drawn.Add(coil);
                             EmitCoil(instr.Mnemonic, coil, args, Abs(moreFollow), index);
@@ -115,6 +156,7 @@ public sealed class LadderLowering
                             break;
                         }
                         case LadderRole.Passive:
+                            // NOP and SBR are drawn but execute nothing (SBR's parameters are bound at the JSR).
                             drawn.Add(new IrLdBlock { Name = instr.Mnemonic, Args = args, Enable = "none" });
                             break;
                         case LadderRole.Jump:
@@ -126,6 +168,7 @@ public sealed class LadderLowering
                         }
                         case LadderRole.Label:
                         {
+                            // A label is a position, never conditioned by its rung.
                             var label = Arg(args, 0) is IrKeyword k ? k.Text : "?";
                             drawn.Add(new IrLdLabel { Name = instr.Mnemonic, Label = label });
                             Emit(new IrLabel { Name = label }, index);
@@ -133,6 +176,7 @@ public sealed class LadderLowering
                         }
                         case LadderRole.McrBegin:
                         {
+                            // The first MCR opens the zone with the rung condition at that point; the next MCR closes it.
                             if (_mcr is null)
                             {
                                 drawn.Add(new IrLdMcr { Name = instr.Mnemonic, Begin = true });
@@ -148,6 +192,7 @@ public sealed class LadderLowering
                         }
                         case LadderRole.Return:
                         {
+                            // TND / RET leave the routine when the rung is true; RET's operands are the values the JSR copies out.
                             drawn.Add(new IrLdReturn { Name = instr.Mnemonic, Outputs = args.Count > 0 ? args : null });
                             Emit(When(Abs(moreFollow), new IrReturn()), index);
                             break;
@@ -157,6 +202,8 @@ public sealed class LadderLowering
                 }
                 case BranchElement branch:
                 {
+                    // Every leg starts from the condition at the branch; a leg that contains outputs reuses it, so it is
+                    // materialized once rather than copied into each leg.
                     var into = Abs(HasOutputs(branch));
                     var drawnBranch = new IrLdBranch();
                     drawn.Add(drawnBranch);
@@ -178,8 +225,10 @@ public sealed class LadderLowering
         return (rel, drawn);
     }
 
+    /// <summary>The i-th operand, or an empty placeholder when the instruction has fewer operands.</summary>
     private static IrExpression Arg(List<IrExpression> args, int i) => i < args.Count ? args[i] : new IrPlaceholder { Empty = true };
 
+    /// <summary>True when any leg (recursively) contains an element that acts on the rung condition; legs made only of contacts do not need the branch condition materialized.</summary>
     private static bool HasOutputs(BranchElement branch)
     {
         foreach (var leg in branch.Legs)
@@ -197,6 +246,11 @@ public sealed class LadderLowering
     }
 
     /// <summary>The boolean contribution of a contact instruction (null for no effect), filling the drawn contact.</summary>
+    /// <remarks>
+    /// Comparisons become typed BOOL expressions; LIM and MEQ become expression trees that spell out their Logix
+    /// semantics; DTR (data transitional, which also updates its reference operand) and any unknown boolean
+    /// instruction become a vendor function so no information is lost.
+    /// </remarks>
     private IrExpression? Condition(InstructionElement instr, List<IrExpression> args, IrLdContact contact)
     {
         var name = instr.Mnemonic.ToUpperInvariant();
@@ -210,9 +264,11 @@ public sealed class LadderLowering
                 contact.Negated = true;
                 return Not(contact.Operand);
             case "CMP":
+                // CMP carries an arbitrary boolean expression written in ST syntax.
                 contact.Operand = Bool(Arg(args, 0));
                 return contact.Operand;
             case "AFI":
+                // Always false: everything after it on the rung is disabled.
                 contact.Operand = IrLiteral.False;
                 return IrLiteral.False;
             case "LIM":
@@ -229,6 +285,7 @@ public sealed class LadderLowering
             }
             case "MEQ":
             {
+                // Masked equal: only the bits set in the mask take part in the comparison.
                 var source = Arg(args, 0);
                 var mask = Arg(args, 1);
                 var compare = Arg(args, 2);
@@ -254,6 +311,11 @@ public sealed class LadderLowering
         }
     }
 
+    /// <summary>
+    /// Emits the statement of a coil under <paramref name="condition"/>: OTE writes the condition every scan (so a false
+    /// rung clears the bit), OTL/OTU latch only when the rung is true, OSR/OSF write the edge of the condition using
+    /// their storage bit.
+    /// </summary>
     private void EmitCoil(string mnemonic, IrLdCoil coil, List<IrExpression> args, IrExpression condition, int index)
     {
         switch (mnemonic.ToUpperInvariant())
@@ -281,6 +343,13 @@ public sealed class LadderLowering
         }
     }
 
+    /// <summary>
+    /// Emits the statement(s) of an output block. Timers and counters become standard blocks with the rung condition
+    /// on their enable pin (they must run every scan to time and to reset); RES becomes member assignments; the
+    /// arithmetic, move, logic, string and bit instructions become assignments with the implicit Logix conversion;
+    /// everything else goes through <see cref="CallEmitter"/>, every scan with the condition as enable
+    /// (always-scan services, add-ons) or inside an IF (gated services).
+    /// </summary>
     private void EmitBlock(InstructionElement instr, List<IrExpression> args, LadderRole role, IrExpression condition, int index)
     {
         var name = instr.Mnemonic.ToUpperInvariant();
@@ -289,6 +358,8 @@ public sealed class LadderLowering
         {
             if (LogixProfiles.StandardBlockFor(name) is { } fb)
             {
+                // TON/TOF/RTO read the rung condition as IN, CTU as CU, CTD as CD; the preset and accumulator operands
+                // of the ladder form are display-only (the values live in the TIMER / COUNTER structure).
                 var pin = name is "CTU" ? "CU" : name is "CTD" ? "CD" : "IN";
                 var call = new IrFbCall { Instance = Arg(args, 0), Fb = fb, Profile = LogixVendor.Id };
                 call.Inputs[pin] = condition;
@@ -299,6 +370,7 @@ public sealed class LadderLowering
             {
                 case "RES":
                 {
+                    // Reset: the accumulator and the status bits of the structure are cleared; the preset is kept.
                     var target = Arg(args, 0);
                     var members = LogixInstructionMap.ResetMembersOf(target.Type?.LeafName ?? "") ?? new[] { "ACC", "DN" };
                     var body = new List<IrStatement>();
@@ -327,6 +399,8 @@ public sealed class LadderLowering
                     Emit(When(condition, Assign(Arg(args, 1), new IrUnary { Operator = "neg", Operand = Arg(args, 0), Type = Arg(args, 0).Type })), index);
                     return;
                 case "BTD":
+                    // Bit field distribute writes into its third operand; the function receives all five so the
+                    // destination's other bits are preserved.
                     Emit(When(condition, Assign(Arg(args, 2), Fn("BIT_FIELD_DISTRIBUTE", args, Arg(args, 2).Type))), index);
                     return;
                 case "MVM":
@@ -336,11 +410,13 @@ public sealed class LadderLowering
             }
             if (LogixInstructionMap.BinaryOperatorFor(name) is { } op)
             {
+                // ADD(a, b, dest) and friends: dest := a op b with the destination's implicit conversion.
                 Emit(When(condition, Assign(Arg(args, 2), LogixExpressionBuilder.Binary(op, Arg(args, 0), Arg(args, 1)))), index);
                 return;
             }
             if (LogixInstructionMap.FunctionFor(name) is { } fn)
             {
+                // Function-style instructions put their destination last: dest := FN(inputs...).
                 var dest = Arg(args, args.Count - 1);
                 var inputs = args.Take(args.Count - 1).ToList();
                 var resultType = Catalogs.StandardFunctions.Get(fn)?.ResultType(inputs.Select(a => a.Type?.LeafName).ToList());
@@ -359,11 +435,19 @@ public sealed class LadderLowering
 
     private static IrFunction Fn(string name, List<IrExpression> args, IrTypeRef? type) => new() { Name = name, Args = args.Cast<IrExpression?>().ToList(), Type = type };
 
+    /// <summary>An assignment with the destination's implicit conversion; a destination that is not a reference becomes an error reference rather than an exception.</summary>
     private static IrAssign Assign(IrExpression target, IrExpression value)
         => new() { Target = target is IrRef or IrBitAccess ? target : new IrRef { Root = IrRefRoot.Unresolved(target is IrKeyword k ? k.Text : "?"), Error = "operand is not a tag reference" }, Value = LogixExpressionBuilder.Convert(value, target.Type) };
 
     // ------------------------------------------------------------------ prescan
 
+    /// <summary>
+    /// Prescan form of a series. Logix prescans every routine once when the controller enters Run, treating every
+    /// rung as false: OTE clears its bit, OTL/OTU do nothing, ONS and the one-shot coils set their storage bit (so a
+    /// condition that is already true on the first real scan does not fire) and clear their output, timers and
+    /// counters are reset through their own prescan rules, add-on instances run their prescan logic, and always-scan
+    /// services get their prescan call; gated services, moves and arithmetic are skipped.
+    /// </summary>
     private void Prescan(IReadOnlyList<RungElement> elements, List<IrStatement> list, int rung)
     {
         foreach (var e in elements)
@@ -406,6 +490,8 @@ public sealed class LadderLowering
                         }
                         case LadderRole.BlockInput when LogixProfiles.StandardBlockFor(name) is { } fb:
                         {
+                            // Timers and counters are prescanned with a false enable; the runtime's prescan form clears
+                            // EN/TT/DN (and sets CU/CD so the first real scan cannot count).
                             var call = new IrFbCall { Instance = _x.Operand(instr.Arguments[0]), Fb = fb, Profile = LogixVendor.Id, Mode = "prescan" };
                             call.Inputs[name is "CTU" ? "CU" : name is "CTD" ? "CD" : "IN"] = IrLiteral.False;
                             s = call;
@@ -422,6 +508,7 @@ public sealed class LadderLowering
         }
     }
 
+    /// <summary>Stamps the rung number on a prescan statement.</summary>
     private static IrStatement Stamp(IrStatement s, int rung)
     {
         s.Src = new IrSrc { Rung = rung };
@@ -430,12 +517,14 @@ public sealed class LadderLowering
 
     // ------------------------------------------------------------------ helpers
 
+    /// <summary>Appends a statement to the body with its rung and element provenance.</summary>
     private void Emit(IrStatement s, int element)
     {
         s.Src = new IrSrc { Rung = _rung, Element = element };
         _out.Add(s);
     }
 
+    /// <summary>Stores a condition in a new body temporary (<c>_rcN</c> or <c>_mcrN</c>) and returns a reference to it.</summary>
     private IrRef Materialize(IrExpression condition, string prefix, bool force = false)
     {
         var name = prefix == "_mcr" ? $"_mcr{++_mcrCount}" : $"_rc{_temps.Count(t => t.Name.StartsWith("_rc", StringComparison.Ordinal)) + 1}";
@@ -446,16 +535,19 @@ public sealed class LadderLowering
         return IrRef.Temp(temp.Name);
     }
 
+    /// <summary>Literals, references and bit accesses are cheap to repeat; anything else is worth a temporary when reused.</summary>
     private static bool IsCompound(IrExpression e) => e is not (IrLiteral or IrRef or IrBitAccess);
 
     private static IrStatement When(IrExpression condition, IrStatement statement) => When(condition, new List<IrStatement> { statement });
 
+    /// <summary>Wraps statements in <c>IF condition</c>, except when the condition is the constant TRUE.</summary>
     private static IrStatement When(IrExpression condition, List<IrStatement> statements)
     {
         if (condition is IrLiteral { IsTrue: true } && statements.Count == 1) return statements[0];
         return new IrIf { Branches = { new IrIfBranch { Condition = condition, Body = statements } } };
     }
 
+    /// <summary>Boolean AND with constant folding, so TRUE rails and AFI do not clutter the lowered form.</summary>
     private static IrExpression And(IrExpression a, IrExpression b)
     {
         if (a is IrLiteral { IsTrue: true }) return b;
@@ -464,6 +556,7 @@ public sealed class LadderLowering
         return new IrBinary { Operator = "and", Left = a, Right = b, Type = IrTypeRef.Named("BOOL") };
     }
 
+    /// <summary>Boolean OR with constant folding.</summary>
     private static IrExpression Or(IrExpression a, IrExpression b)
     {
         if (a is IrLiteral { IsFalse: true }) return b;
@@ -472,6 +565,7 @@ public sealed class LadderLowering
         return new IrBinary { Operator = "or", Left = a, Right = b, Type = IrTypeRef.Named("BOOL") };
     }
 
+    /// <summary>Boolean NOT with constant folding and double-negation removal.</summary>
     private static IrExpression Not(IrExpression a) => a switch
     {
         IrLiteral { IsTrue: true } => IrLiteral.False,
@@ -480,6 +574,7 @@ public sealed class LadderLowering
         _ => new IrUnary { Operator = "not", Operand = a, Type = IrTypeRef.Named("BOOL") },
     };
 
+    /// <summary>Marks an untyped operand (an opaque reference) as BOOL, since it is used as a contact.</summary>
     private static IrExpression Bool(IrExpression e)
     {
         e.Type ??= IrTypeRef.Named("BOOL");

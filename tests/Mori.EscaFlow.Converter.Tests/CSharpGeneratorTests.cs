@@ -10,6 +10,12 @@ using Xunit.Abstractions;
 
 namespace Mori.EscaFlow.Converter.Tests;
 
+/// <summary>
+/// Checks the C# generator against the conformance fixtures: structure layouts follow the documented Logix packing
+/// rules, every fixture generates a solution report with no errors, specific ladder constructs lower to the
+/// expected C# shapes, and (for the fixtures worth the cost) the generated solution actually compiles against the
+/// real runtime project.
+/// </summary>
 public class CSharpGeneratorTests
 {
     private readonly ITestOutputHelper _out;

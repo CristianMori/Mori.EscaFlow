@@ -1,6 +1,11 @@
 namespace Mori.EscaFlow.Transpiler.L5X.Model;
 
-/// <summary>The Logix atomic data types. BIT is the synthetic type used for bit-overlay UDT members.</summary>
+/// <summary>
+/// The Logix atomic data types: the built-in scalars that a controller stores directly rather than as a
+/// structure. <see cref="Bit"/> is not a real Logix type; it is synthesized by this parser for a UDT member
+/// declared as an overlay of a single bit of a host integer member (see the BIT overlay handling in
+/// <c>DataTypeReader</c>), so the rest of the toolchain can treat it like any other atomic kind.
+/// </summary>
 public enum AtomicKind
 {
     Bool,
@@ -19,6 +24,7 @@ public enum AtomicKind
 
 public static class AtomicKindExtensions
 {
+    /// <summary>Parses the Logix spelling of an atomic type (case-insensitive). False for anything else, including structure and module-defined type names.</summary>
     public static bool TryParseAtomic(string? name, out AtomicKind kind)
     {
         kind = default;
@@ -58,6 +64,7 @@ public static class AtomicKindExtensions
         _ => kind.ToString(),
     };
 
+    /// <summary>Storage width. BOOL and the BIT overlay both report 1: the overlay occupies one bit of its host, never a byte of its own.</summary>
     public static int BitSize(this AtomicKind kind) => kind switch
     {
         AtomicKind.Bool or AtomicKind.Bit => 1,

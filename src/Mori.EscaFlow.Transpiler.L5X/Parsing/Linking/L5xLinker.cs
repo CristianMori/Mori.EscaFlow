@@ -19,6 +19,15 @@ namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Linking;
 /// <summary>
 /// Resolves references after parsing: data type registry and references, bit hosts, aliases, routine calls,
 /// program/task structure, module parents, SFC/FBD graph links and L5K value shaping.
+/// <para>
+/// This runs after both the XML phase and the logic phase, and strictly after, because most of what it does
+/// needs the whole project to exist first: a tag's data type may be declared anywhere in the file relative to
+/// the tag, a routine may call a routine defined later in the same program, a bare word in a rung cannot be
+/// told apart from a tag name until every tag name is known. <see cref="Link"/> lists the steps in the order
+/// they must run: types before anything that names a type, aliases and routine/module structure before the
+/// keyword reclassification that depends on "does this name resolve to something", and value shaping last
+/// because it needs the fully resolved type registry.
+/// </para>
 /// </summary>
 public static class L5xLinker
 {
@@ -43,6 +52,7 @@ public static class L5xLinker
 
     // ------------------------------------------------------------------ data types
 
+    /// <summary>Seeds the registry with the project's own user types, each add-on's synthesized backing structure, then the built-in atomic and predefined types (which never override a project type of the same, unexpected, name).</summary>
     private static DataTypeRegistry BuildRegistry(Controller c, IDiagnosticSink diagnostics)
     {
         var registry = new DataTypeRegistry();
@@ -96,6 +106,13 @@ public static class L5xLinker
         return t;
     }
 
+    /// <summary>
+    /// Resolves every <see cref="DataTypeRef"/> in the project (UDT members, add-on backing members, tag types)
+    /// against the registry, registering an unresolved placeholder (with one warning per distinct missing name)
+    /// for anything that still does not resolve, and a module-defined placeholder for any colon-qualified name.
+    /// Also walks tag values to discover module-defined structure layouts from their Decorated data
+    /// (see <see cref="LearnModuleTypes"/>), since those types are never declared up front.
+    /// </summary>
     private static void ResolveDataTypeRefs(Controller c, DataTypeRegistry registry, IDiagnosticSink diagnostics)
     {
         var unresolved = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -192,12 +209,14 @@ public static class L5xLinker
 
     // ------------------------------------------------------------------ modules, programs, tasks
 
+    /// <summary>Builds the module parent/child tree from each module's <see cref="Module.ParentModule"/> name.</summary>
     private static void ResolveModules(Controller c, IDiagnosticSink diagnostics)
     {
         var byName = new Dictionary<string, Module>(StringComparer.OrdinalIgnoreCase);
         foreach (var m in c.Modules) byName[m.Name] = m;
         foreach (var m in c.Modules)
         {
+            // The local chassis root module has no real parent and sometimes names itself; either case ends the walk.
             if (string.IsNullOrEmpty(m.ParentModule) || string.Equals(m.ParentModule, m.Name, StringComparison.OrdinalIgnoreCase)) continue;
             if (byName.TryGetValue(m.ParentModule, out var parent))
             {
@@ -211,6 +230,7 @@ public static class L5xLinker
         }
     }
 
+    /// <summary>Resolves each program's main/fault routine and child-program names, then each task's scheduled program list, in both directions (parent/child, task/program).</summary>
     private static void ResolvePrograms(Controller c, IDiagnosticSink diagnostics)
     {
         foreach (var p in c.Programs)
@@ -257,6 +277,7 @@ public static class L5xLinker
 
     // ------------------------------------------------------------------ aliases and comments
 
+    /// <summary>Parses every alias tag's target text and resolves it to the <see cref="Tag"/> it points to, using the alias's own scope (its program, or add-on parameters/locals) before falling back to controller scope.</summary>
     private static void ResolveAliases(Controller c, IDiagnosticSink diagnostics)
     {
         var empty = LogicParseContext.Empty;
@@ -277,7 +298,12 @@ public static class L5xLinker
         }
     }
 
-    /// <summary>Program scope (or AOI scope) first, then controller scope.</summary>
+    /// <summary>
+    /// Resolves a tag path's root name to a <see cref="Tag"/>, applying Logix's scope shadowing rule: an
+    /// explicit <c>\Program.Tag</c> goes straight to that program; otherwise an add-on's own parameters/locals
+    /// (when resolving inside an add-on), then the current program's tags, shadow a same-named controller tag,
+    /// which is only reached once nothing more local matches.
+    /// </summary>
     public static Tag? FindTag(Controller c, OperandPath path, Program? program, AddOnInstructionDefinition? aoi)
     {
         if (path.ProgramName is not null)
@@ -300,6 +326,7 @@ public static class L5xLinker
         return c.Tags[path.Root];
     }
 
+    /// <summary>Parses each tag comment's relative operand specifier (".Member", "[4]", "[7].Input.0") into a path, by prefixing a dummy root so the ordinary path grammar applies.</summary>
     private static void ParseCommentOperands(Controller c)
     {
         var empty = LogicParseContext.Empty;
@@ -455,6 +482,14 @@ public static class L5xLinker
 
     // ------------------------------------------------------------------ routine calls
 
+    /// <summary>
+    /// Finds every JSR/FOR target named in each container's routines (<see cref="CollectCalls"/>) and resolves
+    /// it to the actual <see cref="Routine"/>, filling <see cref="Routine.CalledRoutines"/> and
+    /// <see cref="Routine.Callers"/> so both directions of the call graph are available without a search.
+    /// A target that resolves to nothing is only a warning when the container's encoded (source-protected)
+    /// routines are empty; otherwise the call most likely reaches one of those routines, whose name this parser
+    /// cannot read, so it is reported as informational instead of as an error.
+    /// </summary>
     private static void ResolveRoutineCalls(Controller c, IDiagnosticSink diagnostics)
     {
         foreach (var container in c.Programs.Cast<IRoutineContainer>().Concat(c.AddOnInstructions))
@@ -484,6 +519,7 @@ public static class L5xLinker
         }
     }
 
+    /// <summary>Collects every JSR/FOR routine-name argument reachable from one routine body, across all four languages.</summary>
     private static void CollectCalls(RoutineContent? content, HashSet<string> targets)
     {
         switch (content)
@@ -499,6 +535,8 @@ public static class L5xLinker
                             if (instr.Arguments.Count > 0)
                             {
                                 var a = instr.Arguments[0];
+                                // The routine name may have classified as any of these, depending on how the
+                                // operand parser read it before this linker had a chance to see every routine name.
                                 var name = a switch
                                 {
                                     RoutineRefOperand r => r.RoutineName,
@@ -533,6 +571,7 @@ public static class L5xLinker
         foreach (var s in block.Statements) CollectStCalls(s, targets);
     }
 
+    /// <summary>Recurses into every control-flow body (IF/CASE/FOR/WHILE/REPEAT) looking for JSR/FOR call statements.</summary>
     private static void CollectStCalls(StStatement s, HashSet<string> targets)
     {
         switch (s)
@@ -563,6 +602,7 @@ public static class L5xLinker
 
     // ------------------------------------------------------------------ SFC / FBD graphs
 
+    /// <summary>Links every SFC chart's and FBD diagram's numeric-ID references (links, wires, attachments) to the actual nodes/elements they name.</summary>
     private static void ResolveGraphs(Controller c, IDiagnosticSink diagnostics)
     {
         foreach (var routine in c.AllRoutines)
@@ -579,12 +619,14 @@ public static class L5xLinker
         }
     }
 
+    /// <summary>The routine's current body plus any pending/test online-edit bodies, which also need their own graph links resolved.</summary>
     private static IEnumerable<RoutineContent> Contents(Routine r)
     {
         if (r.Content is not null) yield return r.Content;
         foreach (var e in r.OnlineEditContents) yield return e;
     }
 
+    /// <summary>Builds <see cref="SfcContent.ById"/> (steps, actions, transitions, branches, legs, stops, subroutine markers) and resolves every directed link and attachment against it.</summary>
     private static void LinkSfc(SfcContent sfc, DiagnosticLocation loc, IDiagnosticSink diagnostics)
     {
         sfc.ById.Clear();
@@ -619,6 +661,7 @@ public static class L5xLinker
             diagnostics.Info("SFC003", $"SFC has {initial} initial steps", loc);
     }
 
+    /// <summary>Builds each sheet's <see cref="FbdSheet.ById"/> and resolves every wire's endpoints against it; sheets are independent, so IDs only need to be unique within one sheet.</summary>
     private static void LinkFbd(FbdContent fbd, DiagnosticLocation loc, IDiagnosticSink diagnostics)
     {
         foreach (var sheet in fbd.Sheets)
@@ -641,6 +684,13 @@ public static class L5xLinker
 
     // ------------------------------------------------------------------ values
 
+    /// <summary>
+    /// For every tag with both a data type and an L5K initializer: shapes the L5K tree into a typed value when
+    /// Decorated data is absent (this is the only typed value such a tag will have), or, when both are present
+    /// and <see cref="ParseOptions.ValidateL5kAgainstDecorated"/> is set, shapes it anyway purely to cross-check
+    /// it against the Decorated value and report any structural disagreement — a sign the shaper's assumptions
+    /// about that type's layout do not match the real one.
+    /// </summary>
     private static void ShapeValues(Controller c, DataTypeRegistry registry, ParseOptions options, IDiagnosticSink diagnostics)
     {
         var reported = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -666,7 +716,12 @@ public static class L5xLinker
     }
 }
 
-/// <summary>Structural comparison of two value trees, tolerant of radix differences.</summary>
+/// <summary>
+/// Structural comparison of two value trees, tolerant of radix differences and of sign-extension spelling
+/// (a SINT of -1 and of 255 are the same bit pattern). Used only to validate that <see cref="L5kShaper"/>'s
+/// best-effort shaping of L5K data agrees with the authoritative Decorated value; <paramref name="b"/> is always
+/// the Decorated (trusted) side, which is why an opaque type is skipped there rather than on <paramref name="a"/>.
+/// </summary>
 public static class ValueComparer
 {
     /// <param name="isOpaque">Returns true for structure type names whose L5K packing is unknown; those subtrees are not compared.</param>

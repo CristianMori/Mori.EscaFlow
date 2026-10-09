@@ -8,6 +8,12 @@ namespace Mori.EscaFlow.Transpiler.L5X.Parsing.St;
 /// <summary>
 /// Structured text parser facade. All entry points are thread-safe (no shared mutable state) and never throw
 /// on bad input: they emit diagnostics and return error nodes instead.
+/// <para>
+/// Each entry point builds the pipeline for one piece of text: an <see cref="StLineMap"/> (joined text and
+/// line/column mapping back to the export's <c>&lt;Line&gt;</c> numbers), the <see cref="StLexer"/> and an
+/// <see cref="StParserCore"/>. Besides whole routine bodies the same grammar serves ladder expression operands,
+/// SFC transition conditions and presets, array subscripts and bare tag paths, hence the several entry points.
+/// </para>
 /// </summary>
 public static class StParser
 {
@@ -49,7 +55,10 @@ public static class StParser
         return expr;
     }
 
-    /// <summary>Parses a single expression from lines (SFC transition conditions and presets).</summary>
+    /// <summary>
+    /// Parses a single expression from lines (SFC transition conditions and presets). Unlike the string overload a
+    /// trailing <c>;</c> is tolerated, because the designer lets conditions be written like statements.
+    /// </summary>
     public static StExpression ParseExpression(IReadOnlyList<StLine> lines, LogicParseContext context, IDiagnosticSink diagnostics, List<StComment>? comments = null)
     {
         var map = StLineMap.Build(lines, out var text);
@@ -79,6 +88,7 @@ public static class StParser
         return expr;
     }
 
+    /// <summary>True when every token from <paramref name="from"/> to the end of input is a semicolon.</summary>
     private static bool IsOnlySemicolonsLeft(List<StToken> tokens, StToken from)
     {
         var started = false;
@@ -114,11 +124,13 @@ public static class StParser
     /// </summary>
     public static OperandPath? TryParseOperandPath(string text, LogicParseContext context, IDiagnosticSink diagnostics)
     {
+        // Everything goes to a local bag: a non-path must leave no trace in the caller's diagnostics.
         var local = new DiagnosticBag();
         var map = StLineMap.Single(0);
         var tokens = new StLexer(text, map, local, null).Tokenize();
         if (local.Count > 0) return null;
         if (tokens.Count < 2) return null;
+        // A path starts with an identifier or with the '\' of a program-scoped reference (\Program.Tag).
         var first = tokens[0].Kind;
         if (first != StTokenKind.Identifier && first != StTokenKind.Backslash) return null;
         var core = new StParserCore(text, tokens, context, local);

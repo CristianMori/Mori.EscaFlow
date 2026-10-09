@@ -18,6 +18,11 @@ namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Rll;
 /// single-quoted string state (honouring <c>$'</c> and <c>$$</c>); a <c>,</c> at depth 0 ends the argument
 /// and a <c>)</c> at depth 0 ends the instruction. Hence a <c>[</c> inside an argument is always a subscript.
 /// </para>
+/// <para>
+/// Argument text is classified afterwards by <see cref="OperandParser"/>; this class only finds the boundaries.
+/// Diagnostics are reported as warnings rather than errors because a damaged rung must not stop the import of
+/// the rest of the project: the parser resynchronizes at the next element and returns what it understood.
+/// </para>
 /// Thread-safe: the parser holds no per-parse state. Never throws on bad input.
 /// </summary>
 public sealed class RungParser
@@ -31,6 +36,7 @@ public sealed class RungParser
 
     public LogicParseContext Context => _context;
 
+    /// <summary>Parses one rung's text. Blank text yields <see cref="RungAst.Empty"/> (an empty rung is legal: a plain wire).</summary>
     public RungAst Parse(string text, IDiagnosticSink diagnostics)
     {
         if (string.IsNullOrWhiteSpace(text)) return RungAst.Empty;
@@ -39,11 +45,14 @@ public sealed class RungParser
         return new RungAst(elements);
     }
 
+    /// <summary>Per-parse cursor over the rung text; one instance per <see cref="Parse"/> call, which is what keeps the outer class thread-safe.</summary>
     private sealed class State
     {
         private readonly string _text;
         private readonly LogicParseContext _context;
         private readonly IDiagnosticSink _diag;
+
+        // Unknown mnemonics are reported once per rung, not once per occurrence.
         private readonly HashSet<string> _reportedUnknown = new(StringComparer.OrdinalIgnoreCase);
         private int _pos;
         private bool _terminated;
@@ -57,6 +66,10 @@ public sealed class RungParser
 
         private bool AtEnd => _pos >= _text.Length;
 
+        /// <summary>
+        /// Parses elements until the end of the text or, inside a branch, until the <c>,</c> or <c>]</c> that
+        /// ends the current leg (left for the caller to consume).
+        /// </summary>
         public List<RungElement> ParseElements(bool inBranch)
         {
             var elements = new List<RungElement>();
@@ -78,6 +91,7 @@ public sealed class RungParser
                     case ',':
                     case ']':
                         if (inBranch) return elements;
+                        // Stray separators at rung level: report and skip so the rest still parses.
                         Error("RLL003", $"Unexpected '{c}' outside a branch at offset {_pos}");
                         _pos++;
                         continue;
@@ -107,6 +121,7 @@ public sealed class RungParser
                     }
                     else
                     {
+                        // An identifier without an argument list is not an instruction; drop it and resynchronize.
                         _pos = afterName;
                         Error("RLL003", $"Expected '(' after '{mnemonic}' at offset {afterName}");
                     }
@@ -118,6 +133,7 @@ public sealed class RungParser
             }
         }
 
+        /// <summary>Parses <c>[leg, leg, ...]</c>; the cursor is on the opening bracket.</summary>
         private BranchElement ParseBranch()
         {
             var offset = _pos;
@@ -145,6 +161,10 @@ public sealed class RungParser
             return new BranchElement(offset, legs);
         }
 
+        /// <summary>
+        /// Scans the argument list of an instruction (cursor on the opening parenthesis), splitting on top-level
+        /// commas, then classifies each raw argument. Strings and nested brackets keep their commas.
+        /// </summary>
         private InstructionElement ParseInstruction(int offset, string mnemonic)
         {
             _pos++; // '('
@@ -160,6 +180,7 @@ public sealed class RungParser
                 var c = _text[_pos];
                 if (inString)
                 {
+                    // '$' escapes the next character ($' $$ $N $R $T $L $P and $hh), so a quote after '$' does not end the string.
                     if (c == '$' && _pos + 1 < _text.Length)
                     {
                         sb.Append(c).Append(_text[_pos + 1]);
@@ -229,6 +250,8 @@ public sealed class RungParser
             // Zero-argument form "AFI()" vs. a trailing empty argument "MOV(a,)".
             if (sawComma || sb.Length > 0 || rawArgs.Count > 0) rawArgs.Add(sb.ToString());
 
+            // Add-on instructions take precedence over the built-in table: a user may name an add-on like a
+            // built-in that this table does not know, and the add-on's parameter list is the authority then.
             var isAddOn = _context.IsAddOnInstruction(mnemonic);
             if (!isAddOn && !InstructionSignatures.IsKnown(mnemonic) && _reportedUnknown.Add(mnemonic))
                 _diag.Info("RLL001", $"Unknown instruction '{mnemonic}'");
@@ -245,6 +268,7 @@ public sealed class RungParser
             while (!AtEnd && char.IsWhiteSpace(_text[_pos])) _pos++;
         }
 
+        /// <summary>Rung-level problems are warnings: the rung is kept with whatever was understood. Location is attached by the caller's scoped sink.</summary>
         private void Error(string code, string message) => _diag.Warning(code, message, DiagnosticLocation.None);
 
         private static bool IsIdentStart(char c) => char.IsLetter(c) || c == '_';

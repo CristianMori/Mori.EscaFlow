@@ -3,6 +3,12 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.Validation.Tests;
 
+/// <summary>
+/// One mutation, one issue code: each test starts from the single known-valid document built by <see cref="Valid"/>,
+/// applies one targeted change that should make exactly one rule fire, and asserts that code is present (and, where
+/// it matters, that nothing more severe than a warning was raised). Mutating a shared valid baseline rather than
+/// building a fresh broken document per test keeps every test isolated to the one thing it is actually checking.
+/// </summary>
 public class ValidatorTests
 {
     /// <summary>A small, complete and valid document: a controller with one program calling a TON (logix profile), a function block, an alias, a temp, a label and a sysCall.</summary>
@@ -188,6 +194,7 @@ public class ValidatorTests
         return doc;
     }
 
+    /// <summary>A minimal service catalog registering only GSV, so <c>sysCall</c> checks (unknown service, arg count) have something real to check against without pulling in the full Logix catalog.</summary>
     private sealed class FakeCatalog : IServiceCatalog
     {
         public string Id => "logix";
@@ -202,9 +209,11 @@ public class ValidatorTests
         public ServiceDefinition? Get(string name) => Services.FirstOrDefault(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>Validates with <see cref="FakeCatalog"/> registered by default; <paramref name="withCatalog"/> = false validates with no catalogs at all, for the "catalog not registered" warning test.</summary>
     private static ValidationResult Run(IrDocument doc, bool withCatalog = true)
         => new IrValidator().Validate(doc, new ValidationOptions { ServiceCatalogs = withCatalog ? new List<IServiceCatalog> { new FakeCatalog() } : new List<IServiceCatalog>() });
 
+    /// <summary>Asserts the expected code is among the issues, including the code's own description in the failure message so a mismatch is diagnosable without cross-referencing <see cref="ValidationCodes"/> by hand.</summary>
     private static void AssertCode(ValidationResult r, string code)
         => Assert.True(r.Issues.Any(i => i.Code == code), $"expected {code} ({ValidationCodes.Describe(code)}), got:\n{string.Join("\n", r.Issues)}");
 

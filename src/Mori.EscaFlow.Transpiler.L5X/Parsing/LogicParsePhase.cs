@@ -11,22 +11,31 @@ using Mori.EscaFlow.Transpiler.L5X.Parsing.St;
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing;
 
 /// <summary>
-/// Parses every rung, structured text body and SFC snippet in parallel. Each work item writes only into its
-/// own node and a private diagnostic list; the lists are merged in file order afterwards.
+/// The second parse phase: every rung, structured text body, SFC snippet and FBD reference operand is parsed into
+/// its AST. The work items are independent, so they run in parallel; each writes only into its own model node and
+/// into a private diagnostic list, and the lists are merged back in file order so diagnostics stay deterministic.
 /// </summary>
+/// <remarks>
+/// The logic text is parsed after the XML phase rather than during it because the rung and ST grammars need to know
+/// which identifiers name add-on instructions (<c>Blink(Blk, 100)</c> is a call, <c>LIM(0, X, 10)</c> a built-in),
+/// and the add-on definitions precede the programs in the file but can be referenced by them in any order.
+/// </remarks>
 public static class LogicParsePhase
 {
+    /// <summary>One unit of parallel work; <see cref="Location"/> stamps every diagnostic the item raises.</summary>
     private abstract record WorkItem(DiagnosticLocation Location)
     {
         public abstract void Run(LogicParseContext context, RungParser rungParser, IDiagnosticSink sink);
     }
 
+    /// <summary>Parses one rung's neutral text.</summary>
     private sealed record RungItem(DiagnosticLocation Location, Rung Rung) : WorkItem(Location)
     {
         public override void Run(LogicParseContext context, RungParser rungParser, IDiagnosticSink sink)
             => Rung.Ast = rungParser.Parse(Rung.Text, sink);
     }
 
+    /// <summary>Parses a whole structured text routine (all of its lines as one block, so statements may span lines).</summary>
     private sealed record StItem(DiagnosticLocation Location, StContent Content) : WorkItem(Location)
     {
         public override void Run(LogicParseContext context, RungParser rungParser, IDiagnosticSink sink)
@@ -37,6 +46,10 @@ public static class LogicParsePhase
         }
     }
 
+    /// <summary>
+    /// Parses structured text embedded in an SFC: action bodies are statement blocks, while step presets, limits and
+    /// transition conditions are single expressions (<paramref name="IsExpression"/>).
+    /// </summary>
     private sealed record SnippetItem(DiagnosticLocation Location, StSnippet Snippet, bool IsExpression) : WorkItem(Location)
     {
         public override void Run(LogicParseContext context, RungParser rungParser, IDiagnosticSink sink)
@@ -44,6 +57,7 @@ public static class LogicParsePhase
             var comments = new List<StComment>();
             if (IsExpression)
             {
+                // An empty transition condition is legal in the export (the designer left it blank); there is nothing to parse.
                 if (Snippet.Lines.Count == 0 || Snippet.Lines.All(l => string.IsNullOrWhiteSpace(l.Text))) return;
                 Snippet.Expression = StParser.ParseExpression(Snippet.Lines, context, sink, comments);
             }
@@ -55,6 +69,7 @@ public static class LogicParsePhase
         }
     }
 
+    /// <summary>Classifies the operand text of FBD input/output references (a tag path or a literal) with the ladder operand rules.</summary>
     private sealed record FbdRefItem(DiagnosticLocation Location, FbdElement Element) : WorkItem(Location)
     {
         public override void Run(LogicParseContext context, RungParser rungParser, IDiagnosticSink sink)
@@ -71,6 +86,7 @@ public static class LogicParsePhase
         }
     }
 
+    /// <summary>Collects every work item of the project, runs them in parallel and merges the diagnostics in file order.</summary>
     public static void Run(L5xProject project, LogicParseContext context, ParseOptions options, DiagnosticBag diagnostics)
     {
         var items = new List<WorkItem>();
@@ -78,6 +94,7 @@ public static class LogicParsePhase
         foreach (var aoi in project.Controller.AddOnInstructions) Collect(aoi, items);
         if (items.Count == 0) return;
 
+        // One slot per item keeps the merge order independent of the scheduling order.
         var results = new List<ParseDiagnostic>?[items.Count];
         var rungParser = new RungParser(context);
         var parallel = new ParallelOptions { MaxDegreeOfParallelism = options.EffectiveThreads };
@@ -92,6 +109,7 @@ public static class LogicParsePhase
             }
             catch (Exception ex)
             {
+                // A parser bug on one rung must not abort the whole project: record it where the rung is and go on.
                 sink.Error("LOG999", $"Internal parser failure: {ex.GetType().Name}: {ex.Message}");
             }
             if (bag.Count > 0) results[i] = bag.ToList();
@@ -103,6 +121,7 @@ public static class LogicParsePhase
         }
     }
 
+    /// <summary>Collects the work items of every routine of a program or add-on definition, including pending and test online edits.</summary>
     private static void Collect(IRoutineContainer container, List<WorkItem> items)
     {
         foreach (var routine in container.Routines)
@@ -113,6 +132,7 @@ public static class LogicParsePhase
         }
     }
 
+    /// <summary>Collects the work items of one routine body according to its language.</summary>
     private static void Collect(RoutineContent content, DiagnosticLocation baseLoc, List<WorkItem> items)
     {
         switch (content)
@@ -125,6 +145,8 @@ public static class LogicParsePhase
                 items.Add(new StItem(baseLoc with { XmlLine = st.SourceLine }, st));
                 break;
             case SfcContent sfc:
+                // Steps carry three optional expressions (preset, limits) and their actions carry a preset and a body;
+                // transitions carry one condition. Each snippet is its own item so an error is located at its element.
                 foreach (var node in sfc.Nodes)
                 {
                     switch (node)

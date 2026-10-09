@@ -5,6 +5,11 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Values;
 
+/// <summary>
+/// Proves <c>L5kValueParser</c> reads the untyped L5K grammar correctly: scalars in every radix, nested and
+/// deeply nested lists, string escapes, empty slots and lists, and that malformed input (unterminated strings
+/// or lists, junk tokens, trailing garbage) is reported as a diagnostic and recovered from rather than thrown.
+/// </summary>
 public class L5kValueParserTests
 {
     private static (L5kValue Value, DiagnosticBag Diagnostics) Parse(string text)

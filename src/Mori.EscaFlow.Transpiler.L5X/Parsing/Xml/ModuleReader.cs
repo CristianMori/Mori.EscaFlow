@@ -3,7 +3,12 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Modules;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads a materialized <c>&lt;Module&gt;</c> element.</summary>
+/// <summary>
+/// Reads a materialized <c>&lt;Module&gt;</c> element: identity (catalog number, vendor, product type and code,
+/// revision), the port it hangs off (<c>ParentModule</c> / <c>ParentModPortId</c>), its own ports, and the
+/// communications block with the configuration image and the connections whose input and output images become
+/// the <c>Module:I</c> / <c>Module:O</c> / <c>Module:C</c> tags of the project.
+/// </summary>
 public sealed class ModuleReader
 {
     private readonly ReaderContext _ctx;
@@ -45,6 +50,7 @@ public sealed class ModuleReader
                     module.Description = child.OwnText();
                     break;
                 case "EKey":
+                    // Electronic keying (ExactMatch / CompatibleModule / Disabled): kept for round trips, no transpiler meaning.
                     module.EKey = GenericElementReader.Read(child);
                     break;
                 case "Ports":
@@ -67,6 +73,7 @@ public sealed class ModuleReader
         return module;
     }
 
+    /// <summary>A port: the upstream one is the slot/address the module sits at in its parent; downstream ports carry a bus that children attach to.</summary>
     private static ModulePort ReadPort(XElement p)
     {
         var attrs = new AttributeBag(p);
@@ -85,6 +92,7 @@ public sealed class ModuleReader
         return port;
     }
 
+    /// <summary>Configuration image (ConfigTag or the older ConfigData), connections and scripts.</summary>
     private ModuleCommunications ReadCommunications(XElement c, string moduleName)
     {
         var attrs = new AttributeBag(c);
@@ -113,6 +121,7 @@ public sealed class ModuleReader
                     foreach (var conn in child.Elements())
                     {
                         if (conn.Name.LocalName == "Connection") comm.Connections.Add(ReadConnection(conn, moduleName));
+                        // A rack-optimized chassis connection: the children's images live inside the parent's connection.
                         else if (conn.Name.LocalName == "RackConnection") comm.RackConnection = GenericElementReader.Read(conn);
                         else (comm.UnknownChildren ??= new()).Add(GenericElementReader.Read(conn));
                     }
@@ -128,6 +137,7 @@ public sealed class ModuleReader
         return comm;
     }
 
+    /// <summary>One connection with its RPI and its input / output images; each image is typed by the Decorated data it carries.</summary>
     private ModuleConnection ReadConnection(XElement c, string moduleName)
     {
         var attrs = new AttributeBag(c);
@@ -154,6 +164,10 @@ public sealed class ModuleReader
         return conn;
     }
 
+    /// <summary>
+    /// A module image: the Data children (whose Decorated structure names the module-defined type, e.g.
+    /// <c>AB:1756_DI:I:0</c>) plus per-member comments. The type is learned from this data later, never predefined.
+    /// </summary>
     private ModuleTagData ReadTagData(XElement e, string tagName)
     {
         var attrs = new AttributeBag(e);

@@ -3,8 +3,10 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.Tests;
 
+/// <summary>Verifies the JSON contract: every node kind serializes and reads back without loss, both the indented and compact forms are stable, and the document-level format/version and strictness checks behave.</summary>
 public class JsonRoundTripTests
 {
+    /// <summary>Serializing the full sample document, reading it back, and serializing again yields byte-identical JSON, in both indented and compact form; this is the strongest guarantee the format offers: no node kind silently drops or reorders data.</summary>
     [Fact]
     public void EveryNodeKindRoundTripsByteIdentically()
     {
@@ -34,6 +36,7 @@ public class JsonRoundTripTests
         Assert.IsType<IrSfcDiagram>(p.FindAction("Seq")!.Body.Diagram);
     }
 
+    /// <summary>A vendor slot entry reads back as a raw JsonElement (the core model never depends on a vendor's C# type) and converts to a typed view on demand, with the conversion cached so repeated access does not re-deserialize.</summary>
     [Fact]
     public void VendorExtensionComesBackAsJsonElementAndConvertsToTypedView()
     {
@@ -49,6 +52,7 @@ public class JsonRoundTripTests
         Assert.Null(name.GetVendor<LogixTestExt>("s7"));
     }
 
+    /// <summary>A document whose <c>format</c> is not "plc-ir" or whose <c>irVersion</c> major is not 2 fails to deserialize; a compatible minor version (2.7) is accepted so the format can grow without breaking readers.</summary>
     [Fact]
     public void FormatAndVersionAreChecked()
     {
@@ -59,6 +63,7 @@ public class JsonRoundTripTests
         Assert.Equal("2.7", ok.IrVersion);
     }
 
+    /// <summary>Strict mode (used by the validator's ValidateJson) rejects an unknown JSON member as a parse error; lenient mode (the default, for tolerant tooling) ignores it.</summary>
     [Fact]
     public void StrictReadRejectsUnknownMembers()
     {
@@ -67,6 +72,7 @@ public class JsonRoundTripTests
         Assert.Equal("plc-ir", lenient.Format);
     }
 
+    /// <summary>A named type prints as a bare string; arrays, strings and pointers print as the object form with their own fields; both forms read back as the same <see cref="IrTypeRef"/> the string shorthand was designed to make writing a named reference painless without losing the richer forms.</summary>
     [Fact]
     public void TypeRefConverterHandlesStringAndObjectForms()
     {
@@ -95,6 +101,7 @@ public class JsonRoundTripTests
         Assert.Equal("{\"kind\":\"any\"}", IrJson.Serialize(IrTypeRef.Any, indented: false));
     }
 
+    /// <summary>The document's by-name/by-id lookups (types, variables including a POU-local one, POUs, I/O channels) find their targets case-insensitively and return null rather than throwing for a missing name.</summary>
     [Fact]
     public void DocumentLookupsWork()
     {

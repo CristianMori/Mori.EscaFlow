@@ -8,6 +8,7 @@ public enum DataTypeFamily
     StringFamily,
 }
 
+/// <summary>Where a data type comes from, which decides whether its layout is known up front or only learned from the export.</summary>
 public enum DataTypeClass
 {
     /// <summary>BOOL, SINT, DINT, REAL, ...</summary>
@@ -18,12 +19,19 @@ public enum DataTypeClass
     User,
     /// <summary>The backing structure of an add-on instruction.</summary>
     AddOn,
-    /// <summary>An I/O module type such as AB:1756_DI:I:0, whose shape is only visible through Decorated data.</summary>
+    /// <summary>
+    /// An I/O module type such as <c>AB:1756_DI:I:0</c>, whose shape is only visible through Decorated data.
+    /// Module-defined types are never pre-typed in this toolchain: the catalog of every module a project might
+    /// use is far larger than Logix itself ships a schema for, and the export always carries the actual member
+    /// layout inline wherever a tag of the type has a value, so there is nothing to gain and much to get wrong
+    /// by guessing the shape ahead of time.
+    /// </summary>
     ModuleDefined,
     /// <summary>A name that was referenced but never defined.</summary>
     Unresolved,
 }
 
+/// <summary>A named data type: either an atomic scalar or a structure.</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(AtomicType), "atomic")]
 [JsonDerivedType(typeof(StructuredType), "struct")]
@@ -53,7 +61,7 @@ public sealed class StructuredType : DataTypeDefinition
     /// <summary>Members in declaration order, including hidden bit-host members.</summary>
     public List<DataTypeMember> Members { get; init; } = new();
 
-    /// <summary>True when the member list is not known (e.g. AXIS_* and other object-backed types).</summary>
+    /// <summary>True when the member list is not known (e.g. AXIS_* and other object-backed types); see <see cref="BuiltInTypes"/>.</summary>
     public bool IsOpaque { get; set; }
 
     /// <summary>
@@ -75,7 +83,7 @@ public sealed class StructuredType : DataTypeDefinition
         return null;
     }
 
-    /// <summary>Members that are not hidden bit hosts.</summary>
+    /// <summary>Members that are not hidden bit hosts: what the designer and a consumer of this model actually see.</summary>
     [JsonIgnore]
     public IEnumerable<DataTypeMember> VisibleMembers => Members.Where(m => !m.Hidden);
 
@@ -83,6 +91,7 @@ public sealed class StructuredType : DataTypeDefinition
     public bool IsStringFamily => Family == DataTypeFamily.StringFamily;
 }
 
+/// <summary>One member of a structured type.</summary>
 public sealed class DataTypeMember : L5xElement
 {
     public required string Name { get; init; }
@@ -92,6 +101,8 @@ public sealed class DataTypeMember : L5xElement
     public int Dimension { get; init; }
 
     public Radix Radix { get; init; }
+
+    /// <summary>True for a bit-host member synthesized to back one or more <see cref="IsBitOverlay"/> members; Decorated data never shows it directly.</summary>
     public bool Hidden { get; init; }
     public string? ExternalAccess { get; init; }
 
@@ -119,6 +130,7 @@ public sealed class DataTypeMember : L5xElement
     public override string ToString() => Dimension > 0 ? $"{Name} : {DataType.Name}[{Dimension}]" : $"{Name} : {DataType.Name}";
 }
 
+/// <summary>The addressing role a module member image plays: an input, an output, its configuration, or a safety variant of either.</summary>
 public enum IoDataKind
 {
     Unknown,
@@ -145,7 +157,7 @@ public sealed record ModuleTypeInfo(string Vendor, string Product, string KindCo
         _ => IoDataKind.Unknown,
     };
 
-    /// <summary>True for third-party modules identified by a hex vendor id ("_0015").</summary>
+    /// <summary>True for third-party modules identified by a hex vendor id ("_0015") rather than the "AB" literal.</summary>
     public bool IsThirdParty => Vendor.StartsWith('_');
 
     /// <summary>Parses a module-defined type name; returns null when the text is not of that form.</summary>
@@ -162,7 +174,7 @@ public sealed record ModuleTypeInfo(string Vendor, string Product, string KindCo
     }
 }
 
-/// <summary>A reference to a data type by name; <see cref="Definition"/> is filled by the linker.</summary>
+/// <summary>A reference to a data type by name; <see cref="Definition"/> is filled by the linker once every type is known.</summary>
 public sealed class DataTypeRef
 {
     public required string Name { get; init; }

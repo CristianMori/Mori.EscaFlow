@@ -7,6 +7,14 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Rll;
 
+/// <summary>
+/// Proves <c>OperandParser.Classify</c> picks the right operand kind in every case the instruction signature
+/// table and the text itself can produce: literals (integer in every radix, real, NaN/infinity, strings),
+/// placeholders and empty slots, keyword/routine/label roles (including when the text does not actually look
+/// like one), module/system/program-scoped tag paths, multi-dimensional index/member/bit combinations,
+/// indirect indices and expression-role operands, and that unparseable text becomes a raw operand with a
+/// warning instead of being silently dropped.
+/// </summary>
 public class OperandParserTests
 {
     private static Operand Classify(string text, string mnemonic = "MOV", int index = 0, LogicParseContext? ctx = null, DiagnosticBag? diag = null)

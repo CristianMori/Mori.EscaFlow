@@ -12,10 +12,25 @@ using Mori.EscaFlow.Transpiler.Catalogs;
 namespace Mori.EscaFlow.Transpiler.L5X.Import;
 
 /// <summary>Converts parsed ST / ladder operand trees into typed IR expressions and statements for one routine container (program or add-on).</summary>
+/// <remarks>
+/// <para>
+/// One builder is created per program or add-on instruction because name resolution depends on the scope: a program
+/// tag shadows a controller tag of the same name, and an add-on sees only its own parameters and locals. The parser's
+/// <see cref="ScopeResolver"/> does that lookup and reports the leaf type, bit information and alias expansion; this
+/// class turns the result into neutral nodes whose roots are variable ids rather than names.
+/// </para>
+/// <para>
+/// Everything emitted is typed: literal types follow the Logix rules (integers are DINT unless they need 64 bits, real
+/// literals are REAL), binary expressions take the wider operand type, comparisons are BOOL, and stores receive the
+/// implicit conversions Logix applies (see <see cref="Convert"/>).
+/// </para>
+/// </remarks>
 public sealed class LogixExpressionBuilder
 {
     private readonly LogixIrBuilder _owner;
     private readonly ScopeResolver _resolver;
+
+    /// <summary>The program or add-on whose routines are being emitted (null for controller-level references such as alias targets).</summary>
     private readonly IRoutineContainer? _container;
     private readonly Program? _program;
     private readonly AddOnInstructionDefinition? _aoi;
@@ -29,12 +44,22 @@ public sealed class LogixExpressionBuilder
         _aoi = container as AddOnInstructionDefinition;
     }
 
+    /// <summary>The routine container whose scope resolves names.</summary>
     public IRoutineContainer? Container => _container;
+
+    /// <summary>The owning builder (variable ids, subroutine index, controller model).</summary>
     public LogixIrBuilder Owner => _owner;
 
     // ------------------------------------------------------------------ references
 
     /// <summary>A tag path as an expression: a <c>ref</c>, a <c>bit</c> access, or a <c>keyword</c> when the path names a module (GSV/SSV/MSG instance operands).</summary>
+    /// <remarks>
+    /// The returned reference always points at the declaring variable after alias expansion, with the alias id noted,
+    /// so converters never chase aliases at run time. Module images (<c>Local:1:I</c>) resolve to the variables of the
+    /// synthetic <c>IO</c> global list; rack-optimized slots (<c>Rack:3:I</c>) resolve to the parent image's
+    /// <c>Data</c> element of that slot because that is where the controller keeps the bytes. Logix system values
+    /// (<c>S:FS</c>) have no declaration and become <c>system</c> roots.
+    /// </remarks>
     public IrExpression Ref(OperandPath path)
     {
         var r = _resolver.Resolve(path, _container);
@@ -57,15 +82,18 @@ public sealed class LogixExpressionBuilder
 
         var ir = new IrRef();
         IReadOnlyList<PathSegment> segments = path.Segments;
+        // The type at the root, used to follow the segments through string-family members (see AppendSegments).
         DataTypeDefinition? startType = null;
         int[] startDims = Array.Empty<int>();
 
         if (r.Tag is not null)
         {
             ir.Root = IrRefRoot.Variable(_owner.VarId(r.Tag));
+            // The resolver already spliced the alias target's segments in front of the written ones.
             segments = r.ExpandedPath.Segments;
             startType = r.Tag.DataType?.Definition;
             startDims = r.Tag.Dimensions;
+            // The tag found by name may be the alias the source wrote; the resolved tag is its target.
             var written = L5xLinker.FindTag(_owner.Controller, path, _program, _aoi);
             if (written is not null && !ReferenceEquals(written, r.Tag)) ir.Alias = _owner.VarId(written);
         }
@@ -117,6 +145,7 @@ public sealed class LogixExpressionBuilder
 
         if (bitAt >= 0)
         {
+            // The inner reference is the integer host; the bit access on top of it is the BOOL the logic sees.
             ir.Type = r.BitHostType is null ? null : IrTypeRef.Named(r.BitHostType.Name);
             ir.Opaque = r.BitHostType is null && r.Error is null && ir.Root.Kind == "var";
             var bit = segments[bitAt] switch
@@ -140,6 +169,10 @@ public sealed class LogixExpressionBuilder
         return e is IrRef or IrBitAccess ? e : new IrRef { Root = IrRefRoot.Unresolved(path.ToLogixText()), Error = "operand is not a tag reference" };
     }
 
+    /// <summary>
+    /// Appends the first <paramref name="count"/> path segments to the reference while following the types, so the
+    /// LEN and DATA[i] members of string-family types become the neutral <c>length</c> and <c>char</c> segments.
+    /// </summary>
     private void AppendSegments(IrRef ir, IReadOnlyList<PathSegment> segments, int count, DataTypeDefinition? type, int[] dims)
     {
         for (var i = 0; i < count; i++)
@@ -158,6 +191,7 @@ public sealed class LogixExpressionBuilder
                             dims = Array.Empty<int>();
                             continue;
                         }
+                        // DATA[i] is one character; DATA without an index stays a member (whole-array operands of COP and the like).
                         if (m.Name.Equals("DATA", StringComparison.OrdinalIgnoreCase) && i + 1 < count && segments[i + 1] is IndexSegment { Indices.Count: 1 } idx)
                         {
                             ir.Path.Add(new IrCharSegment { Index = Expr(idx.Indices[0]) });
@@ -188,8 +222,10 @@ public sealed class LogixExpressionBuilder
         }
     }
 
+    /// <summary>Logix controller status values are written <c>S:xx</c> (S:FS first scan, S:N negative, S:V overflow, ...).</summary>
     private static bool IsSystemName(string root) => root.Length > 2 && (root[0] is 'S' or 's') && root[1] == ':';
 
+    /// <summary>The leaf type of a resolved reference: BOOL for bits, otherwise the leaf type wrapped in an array type when dimensions remain unindexed.</summary>
     private static IrTypeRef? TypeOf(ResolvedReference r)
     {
         if (r.IsBit) return IrTypeRef.Named("BOOL");
@@ -200,6 +236,7 @@ public sealed class LogixExpressionBuilder
 
     // ------------------------------------------------------------------ expressions
 
+    /// <summary>A structured-text expression as a typed neutral expression.</summary>
     public IrExpression Expr(StExpression e)
     {
         switch (e)
@@ -240,6 +277,8 @@ public sealed class LogixExpressionBuilder
             }
             case StCall c:
             {
+                // A known math function becomes a standard function with the IEC name; anything else called inside
+                // an expression is a vendor function (a sysFn), typed by the catalog when it can be.
                 var args = c.Arguments.Select(a => a is null ? null : Expr(a)).ToList();
                 if (LogixInstructionMap.StFunctionFor(c.Name) is { } fn)
                 {
@@ -249,6 +288,7 @@ public sealed class LogixExpressionBuilder
                 return new IrSysFn { Catalog = LogixVendor.Id, Service = c.Name.ToUpperInvariant(), Args = args };
             }
             case StKeyword k:
+                // Keywords are produced by the linker for enumeration operands, routine names and labels.
                 return new IrKeyword { Text = k.Text, Kind = k.Kind switch { StKeywordKind.Routine => "action", StKeywordKind.Label => "label", _ => "enum" } };
             case StErrorExpression err:
                 return new IrErrorExpression { Text = err.RawText };
@@ -257,9 +297,11 @@ public sealed class LogixExpressionBuilder
         }
     }
 
+    /// <summary>A binary expression typed by its operator and operand types.</summary>
     public static IrBinary Binary(string op, IrExpression left, IrExpression right)
         => new() { Operator = op, Left = left, Right = right, Type = BinaryType(op, left.Type, right.Type) };
 
+    /// <summary>A literal typed as Logix types it: DINT for integers that fit 32 bits, LINT beyond, REAL for reals, STRING for strings; the radix is kept for printing.</summary>
     public static IrLiteral Literal(LiteralValue v) => v switch
     {
         IntegerLiteral i => new IrLiteral { Kind = "int", Int = i.Value, Radix = i.RadixBase == 10 ? null : i.RadixBase, Type = IrTypeRef.Named(AtomicTypes.IntegerTypeFor(i.Value)) },
@@ -268,6 +310,11 @@ public sealed class LogixExpressionBuilder
         _ => new IrLiteral { Kind = "string", String = v.ToLogixText() },
     };
 
+    /// <summary>
+    /// Result type of a binary operator: comparisons are BOOL; AND/OR/XOR are BOOL when both sides are BOOL (logical)
+    /// and otherwise the wider integer type (bitwise); arithmetic takes the wider operand type, which is how Logix
+    /// promotes mixed integer / REAL arithmetic.
+    /// </summary>
     private static IrTypeRef? BinaryType(string op, IrTypeRef? left, IrTypeRef? right)
     {
         var l = left?.LeafName;
@@ -303,6 +350,11 @@ public sealed class LogixExpressionBuilder
     /// <paramref name="target"/> type: REAL to integer rounds half to even, integer narrowing wraps. Widening and
     /// same-type stores need no conversion.
     /// </summary>
+    /// <remarks>
+    /// Making the conversion explicit in the middle file matters because target languages differ: C# truncates on a
+    /// float-to-int cast, Logix rounds to the nearest even value. BOOL stores are left alone (Logix treats them as
+    /// bit writes, not numeric conversions).
+    /// </remarks>
     public static IrExpression Convert(IrExpression value, IrTypeRef? target)
     {
         var to = target?.LeafName;
@@ -323,6 +375,7 @@ public sealed class LogixExpressionBuilder
 
     // ------------------------------------------------------------------ statements
 
+    /// <summary>A statement list; empty statements (a lone semicolon) and SBR declarations produce nothing.</summary>
     public List<IrStatement> Block(StBlock block)
     {
         var list = new List<IrStatement>(block.Statements.Count);
@@ -334,12 +387,14 @@ public sealed class LogixExpressionBuilder
         return list;
     }
 
+    /// <summary>Stamps the source line and column on a statement for traceability back to the routine text.</summary>
     private IrStatement WithSrc(IrStatement s, TextSpan span)
     {
         s.Src = new IrSrc { Line = span.Line, Col = span.Column };
         return s;
     }
 
+    /// <summary>One structured-text statement as a neutral statement, or null when it has no executable content.</summary>
     public IrStatement? Statement(StStatement s)
     {
         switch (s)
@@ -398,6 +453,7 @@ public sealed class LogixExpressionBuilder
 
     // ------------------------------------------------------------------ ladder operands
 
+    /// <summary>A ladder operand as an expression: tag paths resolve, literals and expressions are typed, routine names, labels and enumeration keywords become keywords, <c>?</c> and elided operands become placeholders.</summary>
     public IrExpression Operand(Operand op)
     {
         switch (op)

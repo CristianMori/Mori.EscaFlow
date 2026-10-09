@@ -4,7 +4,11 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Tags;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Reads the <c>&lt;Controller&gt;</c> element and its sections in file order.</summary>
+/// <summary>
+/// Reads the <c>&lt;Controller&gt;</c> element and its sections in file order. The sections are read with the
+/// cursor (tags and programs can be enormous) and dispatched to one reader each; small bounded elements (data
+/// types, modules, tasks) are materialized as trees first.
+/// </summary>
 public sealed class ControllerReader
 {
     private readonly ReaderContext _ctx;
@@ -29,6 +33,7 @@ public sealed class ControllerReader
     /// <summary>Raised after the AddOnInstructionDefinitions section closes, when all AOI names are known.</summary>
     public event Action<Controller>? AddOnInstructionsComplete;
 
+    /// <summary>Reads the controller positioned under the reader; the reader ends after the closing tag.</summary>
     public Controller Read(XmlReader reader)
     {
         var line = reader.LineNumber();
@@ -48,8 +53,11 @@ public sealed class ControllerReader
             ProjectSN = attrs.Take("ProjectSN"),
             SourceLine = line,
         };
+        // The controller element has dozens of rarely needed attributes; they are kept as a dictionary rather than modelled.
         foreach (var kv in attrs.Remaining() ?? new Dictionary<string, string>()) controller.Attributes[kv.Key] = kv.Value;
 
+        // The add-on section precedes tags and programs in a well-formed export; the flag guards against exports
+        // (partial ones) where it is absent, so the completion event fires exactly once either way.
         var aoisDone = false;
         reader.ForEachChild((r, child) =>
         {
@@ -107,6 +115,7 @@ public sealed class ControllerReader
                         }
                         else if (c == "EncodedData" || c == "EncryptedAOIContent")
                         {
+                            // Source-protected add-ons: only their encoded payload is in the export.
                             controller.Other.Add(_ctx.ReadGeneric(rr));
                         }
                         else
@@ -175,6 +184,7 @@ public sealed class ControllerReader
         AddOnInstructionsComplete?.Invoke(controller);
     }
 
+    /// <summary>GuardLogix safety block; the tag map is a comma separated list of <c>standard=safety</c> pairs.</summary>
     private SafetyInfo ReadSafetyInfo(XmlReader reader)
     {
         var attrs = new AttributeBag(reader);

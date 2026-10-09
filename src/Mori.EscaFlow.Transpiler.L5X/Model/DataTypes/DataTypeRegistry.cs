@@ -26,7 +26,12 @@ public sealed class DataTypeCollection : IReadOnlyList<StructuredType>
 
 /// <summary>
 /// All data types known to a project: atomics, predefined structures, user types, add-on backing types and
-/// module-defined types. Lookups are case-insensitive. Safe for concurrent reads once populated.
+/// module-defined types. Lookups are case-insensitive.
+/// <para>
+/// The logic parse phase runs many routines concurrently and some of them (module-defined type discovery)
+/// register new types as they go, so every member here is guarded by a single lock. Reads are cheap and the
+/// registry is only mutated during parsing and linking, never afterward, so contention is not a concern.
+/// </para>
 /// </summary>
 public sealed class DataTypeRegistry
 {
@@ -65,7 +70,11 @@ public sealed class DataTypeRegistry
         }
     }
 
-    /// <summary>Returns the module-defined type with this name, creating an opaque placeholder when unseen.</summary>
+    /// <summary>
+    /// Returns the module-defined type with this name, creating an opaque placeholder when unseen. Module types
+    /// are discovered on demand from tag data rather than pre-declared (see <see cref="DataTypeClass.ModuleDefined"/>),
+    /// so the first reference to e.g. <c>AB:1756_DI:I:0</c> is what creates its registry entry.
+    /// </summary>
     public StructuredType GetOrAddModuleDefined(string name)
     {
         lock (_lock)

@@ -7,6 +7,12 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Import.Tests;
 
+/// <summary>
+/// Unit-level checks of <see cref="LogixIrBuilder"/> against small, hand-written L5X snippets (not the large sample
+/// or fixture projects): configuration and global variables, type and vendor-extension mapping, I/O devices and
+/// channels, program and add-on POU shape, the ladder diagram as drawn versus how it lowers to statements,
+/// structured-text statements, synthesized prescan, and that the built document validates and round-trips.
+/// </summary>
 public class LogixIrBuilderTests
 {
     public const string Xml = """

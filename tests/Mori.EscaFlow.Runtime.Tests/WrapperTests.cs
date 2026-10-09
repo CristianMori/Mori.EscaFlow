@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Mori.EscaFlow.Runtime.Tests;
 
+/// <summary>Atomic wrappers, bit references, arrays and strings over raw tag bytes: layout, rounding and copy semantics.</summary>
 public class WrapperTests
 {
     private static Tag Bytes(int size) => new(1, "T", LogixDataTypes.SINT, LogixDataTypes.SINT, 1, size);

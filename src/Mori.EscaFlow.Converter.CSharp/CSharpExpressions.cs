@@ -6,6 +6,18 @@ using Mori.EscaFlow.Transpiler.Logix;
 namespace Mori.EscaFlow.Converter.CSharp;
 
 /// <summary>Emits C# expressions for IR expressions. Atomic leaves read <c>.Value</c>; objects (structures, arrays, whole wrappers) are passed as such.</summary>
+/// <remarks>
+/// <para>
+/// Two spellings exist for every reference: the <em>object</em> (the wrapper, structure or array bound to tag
+/// memory, used when something needs the storage itself: an assignment target, a block instance, a service argument)
+/// and the <em>value</em> (the object's <c>.Value</c> for atomics, the object itself otherwise, used inside
+/// expressions). Choosing the wrong one is the most common emitter mistake, so the two are separate methods.
+/// </para>
+/// <para>
+/// Emitters never re-evaluate a sub-tree: <see cref="Bool"/> wraps an already emitted value. Rung conditions nest
+/// one level per contact, and an emitter that evaluated both sides twice per level was exponential on real rungs.
+/// </para>
+/// </remarks>
 public sealed class CSharpExpressions
 {
     private readonly IrDocument _doc;
@@ -21,6 +33,7 @@ public sealed class CSharpExpressions
         _report = report;
     }
 
+    /// <summary>Naming scope of the controller class members: controller tags, module images and program instances.</summary>
     public const string ControllerScope = "controller";
 
     /// <summary>Field name of a program instance in the controller (keyed apart from controller tags of the same name).</summary>
@@ -30,7 +43,14 @@ public sealed class CSharpExpressions
     public string ActionMethod(IrPou pou, string action) => _names.Map(pou.Kind == "functionBlock" ? MemberScope : PouScope(pou.Name), "action:" + action);
 
     /// <summary>Structure members and function block parameters / locals share one naming scope, so member access paths agree with the declaring class.</summary>
+    /// <remarks>
+    /// A reference path only names a member (<c>M1.Timer.PRE</c>); the emitter does not know which structure or add-on
+    /// declares it. With one shared scope the member name is the same wherever it is declared, which also handles
+    /// the Logix case-insensitivity (<c>.Flags</c> and <c>FLAGS</c> map to one C# name).
+    /// </remarks>
     public const string MemberScope = "members";
+
+    /// <summary>Naming scope of one program's tags and routines.</summary>
     public static string PouScope(string pou) => "pou:" + pou;
 
     // ------------------------------------------------------------------ variable access
@@ -43,6 +63,7 @@ public sealed class CSharpExpressions
         var parts = id.Split('/');
         if (parts[0] == "global")
         {
+            // Controller tags and module images are fields of the controller class.
             var field = _names.Map(ControllerScope, v.Name);
             return ctx.Kind == EmitContext.Scope.Controller ? field : ctx.ControllerAccess + "." + field;
         }
@@ -65,6 +86,7 @@ public sealed class CSharpExpressions
         {
             case "var": root = Access(r.Root.Id ?? "", ctx); break;
             case "temp": root = r.Root.Name ?? "_t"; break;
+            // System values (S:FS and friends) are read from the system status by name.
             case "system": return $"{ctx.Sys}.GetBit({CSharpTypes.Quote(r.Root.Name ?? "")})";
             case "this": root = "this"; break;
             default: return $"/* unresolved {r.Root.Name} */ null!";
@@ -79,6 +101,7 @@ public sealed class CSharpExpressions
                     sb.Append('.').Append(MemberName(m.Name));
                     break;
                 case IrIndexSegment i:
+                    // PlcArray exposes indexers for one to three dimensions, so the indices are emitted as one list.
                     sb.Append('[').Append(string.Join(", ", i.Indices.Select(x => Int(x, ctx)))).Append(']');
                     break;
                 case IrLengthSegment:
@@ -110,6 +133,7 @@ public sealed class CSharpExpressions
         switch (e)
         {
             case IrRef r:
+                // Temporaries are plain locals; system values are already bools; atomic leaves read through the wrapper.
                 if (r.Root.Kind == "temp") return r.Root.Name ?? "_t";
                 if (r.Root.Kind == "system") return Object(r, ctx);
                 return IsAtomicLeaf(r) ? Object(r, ctx) + ".Value" : Object(r, ctx);
@@ -117,6 +141,7 @@ public sealed class CSharpExpressions
                 return Literal(l);
             case IrUnary u:
             {
+                // NOT is logical on BOOL and bitwise on integers, as in Logix.
                 var operand = Value(u.Operand, ctx);
                 if (u.Operator == "not") return CSharpTypes.IsBool(u.Operand.Type) || u.Operand.Type is null ? $"!{Paren(operand)}" : $"~{Paren(operand)}";
                 return $"-{Paren(operand)}";
@@ -133,6 +158,8 @@ public sealed class CSharpExpressions
             }
             case IrConv c:
             {
+                // Explicit conversions carry the Logix rules the C# cast does not have: REAL to integer rounds half to
+                // even (a C# cast truncates); narrowing between integers wraps (unchecked).
                 var operand = Value(c.Operand, ctx);
                 var to = CSharpTypes.ValueType(c.To.Name ?? "DINT");
                 return c.Mode switch
@@ -145,8 +172,10 @@ public sealed class CSharpExpressions
                 };
             }
             case IrBitAccess ba:
+                // Integer wrappers expose a bool indexer per bit.
                 return $"{Object((IrRef)ba.Of, ctx)}[{Int(ba.Bit, ctx)}]";
             case IrEdge ed:
+                // The storage bit is passed as an object: the runtime reads the previous value from it and stores the new one.
                 return $"PlcLogic.{(ed.Kind == "rising" ? "RisingEdge" : "FallingEdge")}({Value(ed.Clk, ctx)}, {Arg(ed.Storage, ctx)})";
             case IrSysFn sf:
             {
@@ -155,6 +184,7 @@ public sealed class CSharpExpressions
                 return $"{ctx.Services}.{SafeService(sf.Service)}({args})";
             }
             case IrKeyword k:
+                // Enumeration operands, class names and the like reach the runtime as strings.
                 return CSharpTypes.Quote(k.Text);
             case IrPlaceholder:
                 return "null";
@@ -166,6 +196,7 @@ public sealed class CSharpExpressions
     }
 
     /// <summary>An argument passed to a runtime call: wrappers and structures as objects, everything else as values.</summary>
+    /// <remarks>Services receive the storage so they can write results back (GSV destinations, MSG status bits); a bit access becomes a <c>PlcBitRef</c> for the same reason.</remarks>
     public string Arg(IrExpression e, EmitContext ctx) => e switch
     {
         IrRef r when r.Root.Kind is "var" or "this" => Object(r, ctx),
@@ -184,6 +215,7 @@ public sealed class CSharpExpressions
     public string Bool(IrExpression e, EmitContext ctx) => AsBool(e, Value(e, ctx));
 
     /// <summary>Turns an already emitted value into a bool expression (no re-evaluation of the tree).</summary>
+    /// <remarks>Logix lets an integer stand in for a contact; a non-zero value counts as true.</remarks>
     private static string AsBool(IrExpression e, string value)
     {
         if (CSharpTypes.IsBool(e.Type) || e is IrLiteral { Kind: "bool" } || e is IrBinary { IsComparison: true } || e is IrEdge || e is IrBitAccess) return value;
@@ -191,6 +223,12 @@ public sealed class CSharpExpressions
         return $"({value} != 0)";
     }
 
+    /// <summary>
+    /// A binary expression. Logical operators on BOOL become short-circuit operators, on integers the bitwise ones;
+    /// mixed BOOL / integer operands are made alike with <c>? 1 : 0</c>; division and modulo go through the runtime
+    /// so a zero divisor behaves as on the controller (no exception); power uses the runtime's Pow with a cast to the
+    /// result type.
+    /// </summary>
     private string Binary(IrBinary b, EmitContext ctx)
     {
         var l = Value(b.Left, ctx);
@@ -228,6 +266,7 @@ public sealed class CSharpExpressions
         return $"{Paren(l)} {op} {Paren(r)}";
     }
 
+    /// <summary>Parenthesizes an operand unless it is a single term (no top-level space or conditional operator), keeping the output readable without changing precedence.</summary>
     private static string Paren(string s)
     {
         if (s.Length == 0) return s;
@@ -242,6 +281,7 @@ public sealed class CSharpExpressions
         return simple ? s : "(" + s + ")";
     }
 
+    /// <summary>A C# literal for an IR literal; enumeration and time/date kinds are emitted as strings for the runtime to interpret.</summary>
     public static string Literal(IrLiteral l) => l.Kind switch
     {
         "bool" => l.Bool == true ? "true" : "false",
@@ -252,6 +292,7 @@ public sealed class CSharpExpressions
         _ => l.Int is { } i ? i.ToString(CultureInfo.InvariantCulture) : CSharpTypes.Quote(l.Text ?? ""),
     };
 
+    /// <summary>An integer literal with the suffix its IR type requires (L, UL, U, f) so C# overload resolution matches the Logix type.</summary>
     private static string IntLiteral(IrLiteral l)
     {
         var v = l.Int ?? 0;
@@ -267,6 +308,7 @@ public sealed class CSharpExpressions
         };
     }
 
+    /// <summary>A real literal in round-trip precision; REAL gets the <c>f</c> suffix, special values use the framework constants.</summary>
     private static string RealLiteral(IrLiteral l)
     {
         var v = l.Real ?? 0;
@@ -279,5 +321,6 @@ public sealed class CSharpExpressions
         return lreal ? text : text + "f";
     }
 
+    /// <summary>A service name as a C# method name (catalog names are plain mnemonics; anything else is prefixed and sanitized).</summary>
     public static string SafeService(string service) => service.All(c => char.IsLetterOrDigit(c) || c == '_') ? service : "Call_" + new string(service.Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray());
 }

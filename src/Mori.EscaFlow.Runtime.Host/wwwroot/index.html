@@ -1,10 +1,16 @@
 <!doctype html>
+<!--
+  Single-page console for a generated controller. Served embedded by PlcWebHost so a generated host has no
+  static files to deploy. No external dependencies: the host may run on an isolated machine room network.
+  Everything it shows comes from the JSON API under /api (see PlcWebHost).
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PLC console</title>
 <style>
+  /* Colour tokens; the dark set applies with the system preference or data-theme="dark" on <html>. */
   :root {
     --bg: #f5f6f8; --panel: #ffffff; --text: #1d2430; --muted: #6b7382; --line: #d9dde3;
     --accent: #2563eb; --accent-text: #ffffff; --ok: #15803d; --warn: #b45309; --bad: #b91c1c;
@@ -25,6 +31,7 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  /* Sticky header: name, state badge, mode and the run controls stay visible while browsing tags. */
   header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
   header h1 { font-size: 18px; margin: 0; }
   .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; color: #fff; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
@@ -35,6 +42,7 @@
   button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
   button:disabled { opacity: .5; cursor: default; }
   input[type=text], input[type=search] { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  /* One column on phones, two columns from 900px; the tag browser always spans the full width. */
   main { padding: 16px; display: grid; gap: 16px; grid-template-columns: 1fr; max-width: 1400px; margin: 0 auto; }
   @media (min-width: 900px) { main { grid-template-columns: 1fr 1fr; } .wide { grid-column: 1 / -1; } }
   section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
@@ -49,6 +57,7 @@
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
   .toolbar input[type=search] { flex: 1; min-width: 160px; }
   .msg { font-size: 13px; margin-top: 8px; min-height: 1.2em; } .msg.err { color: var(--bad); } .msg.ok { color: var(--ok); }
+  /* The detail panel (value + write box) opens below the table when a row is clicked. */
   #detail { display: none; border-top: 1px dashed var(--line); margin-top: 12px; padding-top: 12px; }
   #detail.open { display: block; }
   #detail dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0 0 10px; }
@@ -112,6 +121,8 @@
 <script>
 (function () {
   const $ = id => document.getElementById(id);
+  // Every API call goes through here: parses JSON when present and turns a non-2xx status into an Error whose
+  // message is the server's { error } text, so each caller only needs one catch.
   const api = async (url, opts) => {
     const r = await fetch(url, opts);
     let body = null;
@@ -119,16 +130,20 @@
     if (!r.ok) throw new Error((body && body.error) || (r.status + ' ' + r.statusText));
     return body;
   };
+  // Scan times are fractional milliseconds; integers (counts) are shown as they are.
   const fmt = n => (n === null || n === undefined) ? '' : (typeof n === 'number' ? (Number.isInteger(n) ? n : n.toFixed(3)) : n);
+  // The tag browser state: the current page as the server returned it, the selected path, and the filter debounce.
   let page = { skip: 0, take: 50, total: 0, items: [] };
   let selected = null;
   let filterTimer = null;
 
+  // Start / Stop buttons: POST, then refresh the header; a refused request shows its reason under the statistics.
   window.post = async function (url) {
     try { await api(url, { method: 'POST' }); await refreshState(); }
     catch (e) { $('started').className = 'msg err'; $('started').textContent = e.message; }
   };
 
+  // Header and statistics, polled every second. An unreachable host shows as "offline" without breaking the page.
   async function refreshState() {
     try {
       const s = await api('/api/state');
@@ -150,8 +165,10 @@
     }
   }
 
+  // Tag paths and descriptions come from the project and are inserted as HTML: always escape them.
   function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
+  // Loads one page of the tag list (paths and types only), then fetches the values of the rows just shown.
   async function loadTags() {
     const f = $('filter').value.trim();
     try {
@@ -165,6 +182,8 @@
     } catch (e) { $('pageInfo').textContent = e.message; }
   }
 
+  // Values are read lazily, one request per visible row, in parallel; the selected tag's detail is refreshed too.
+  // This keeps the cost proportional to the page size, not to the project's tag count.
   async function refreshValues() {
     const rows = Array.from($('tags').querySelectorAll('tr[data-path]'));
     await Promise.all(rows.map(async tr => {
@@ -184,6 +203,7 @@
     page.skip = next; loadTags();
   };
 
+  // Row click: open the detail panel with the write box focused so a value can be typed immediately.
   function openDetail(path) {
     selected = path;
     $('tags').querySelectorAll('tr[data-path]').forEach(tr => tr.classList.toggle('selected', tr.dataset.path === path));
@@ -195,6 +215,7 @@
   }
   window.closeDetail = function () { selected = null; $('detail').classList.remove('open'); $('tags').querySelectorAll('tr.selected').forEach(tr => tr.classList.remove('selected')); };
 
+  // PUT the typed text; the server answers with the value as stored (after rounding / clamping), which is shown back.
   window.writeTag = async function () {
     if (!selected) return;
     try {
@@ -204,8 +225,10 @@
     } catch (e) { $('writeMsg').className = 'msg err'; $('writeMsg').textContent = e.message; }
   };
   $('writeText').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); writeTag(); } });
+  // Debounced filter: reload 250 ms after the last keystroke, from the first page.
   $('filter').addEventListener('input', () => { clearTimeout(filterTimer); filterTimer = setTimeout(() => { page.skip = 0; loadTags(); }, 250); });
 
+  // Server-side snapshots: list, save under a name, load by name; plus download and upload of the raw file.
   async function loadSnapshots() {
     try {
       const s = await api('/api/snapshots');
@@ -230,6 +253,8 @@
   };
   function snapMsg(text, ok) { $('snapMsg').className = 'msg ' + (ok ? 'ok' : 'err'); $('snapMsg').textContent = text; }
 
+  // Initial load, then: state every second always; values every second only while the tab is visible,
+  // so a console left open in a background tab does not keep hammering the controller.
   refreshState(); loadTags(); loadSnapshots();
   setInterval(refreshState, 1000);
   setInterval(() => { if (!document.hidden) refreshValues(); }, 1000);

@@ -7,6 +7,13 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Rll;
 
+/// <summary>
+/// Proves the ladder rung grammar end to end: instruction and argument boundaries (including strings and
+/// nested brackets inside arguments), branches and nested branches with empty legs, operand classification for
+/// literals, tags, keywords, routines and labels, add-on instruction calls, error recovery on malformed rungs
+/// (missing parens, unterminated strings/branches/instructions, stray text, unknown mnemonics), the text writer
+/// producing the exporter's exact layout, and that real rung samples parse cleanly and round-trip.
+/// </summary>
 public class RungParserTests
 {
     private static readonly LogicParseContext NoAoi = LogicParseContext.Empty;

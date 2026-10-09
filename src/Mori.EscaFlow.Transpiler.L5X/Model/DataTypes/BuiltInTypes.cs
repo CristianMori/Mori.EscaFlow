@@ -3,6 +3,11 @@ namespace Mori.EscaFlow.Transpiler.L5X.Model.DataTypes;
 /// <summary>
 /// The atomic and predefined (controller-supplied) data types. Member lists are described in a compact DSL:
 /// <c>NAME: member:TYPE, member:TYPE[n], ...</c>. Types whose layout is not reliably known are marked opaque.
+/// <para>
+/// Why this exists at all: predefined types such as TIMER and COUNTER never appear in a project's own
+/// <c>&lt;DataTypes&gt;</c> section (only user UDTs do), yet logic freely references their members
+/// (<c>Timer.PRE</c>, <c>Timer.DN</c>). Without a built-in table those references would resolve to nothing.
+/// </para>
 /// </summary>
 public static class BuiltInTypes
 {
@@ -28,6 +33,11 @@ public static class BuiltInTypes
     //          L5K shaper falls back to best effort instead of guessing.
     //   *name  a hidden member (a bit host that Decorated data does not show).
     //   BIT(host.n) a BOOL overlaid on bit n of the hidden host.
+    //
+    // TIMER/COUNTER/CONTROL each store their status bits packed into one hidden 32-bit word
+    // (ZZZZZZZZZZ-prefixed so the name never collides with a real member and sorts after the visible ones);
+    // the BIT members below are overlays that expose individual bits of that word as BOOLs, mirroring exactly
+    // how Logix lays the structure out in controller memory.
     private static readonly string[] StructureDsl =
     {
         "STRING: LEN:DINT, DATA:SINT[82]@Ascii",
@@ -37,6 +47,9 @@ public static class BuiltInTypes
     };
 
     // Structures whose exact layout is not known here; kept opaque so that Decorated data drives the shape.
+    // Mostly motion, process/PID and safety instruction backing structures, whose member sets are large,
+    // version-dependent and not needed for logic analysis (they are read back from the export's own Decorated
+    // data when a tag of one of these types needs a value, rather than assumed from a fixed table).
     private static readonly string[] OpaqueStructures =
     {
         "ALARM", "ALARM_ANALOG", "ALARM_DIGITAL",
@@ -74,7 +87,8 @@ public static class BuiltInTypes
             defined[t.Name] = t;
         }
         // Member layouts extracted from the Rockwell reference manuals (motion, general, process, safety instructions).
-        // Entries there override the inline DSL only when the inline entry has no members.
+        // Entries there override the inline DSL only when the inline entry has no members, so a type that is
+        // both hand-written above and present in the resource keeps the hand-written (verified) definition.
         foreach (var line in ReadResourceLines("Mori.EscaFlow.Transpiler.L5X.PredefinedTypes.txt"))
         {
             var t = ParseDsl(line);
@@ -132,6 +146,7 @@ public static class BuiltInTypes
             var paren = typePart.IndexOf('(');
             if (paren >= 0)
             {
+                // "BIT(host.n)": the overlay's host member name and bit number.
                 var spec = typePart[(paren + 1)..^1];
                 var dot = spec.LastIndexOf('.');
                 target = spec[..dot];

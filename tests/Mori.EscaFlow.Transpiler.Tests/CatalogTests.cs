@@ -3,8 +3,10 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.Tests;
 
+/// <summary>Covers the embedded-resource catalogs (standard function blocks, pin profiles, atomic types, standard functions) that the validator and converters depend on.</summary>
 public class CatalogTests
 {
+    /// <summary>The std-fbs.json resource loads, and a representative block (TON) exposes the pins and catalog membership checks expect.</summary>
     [Fact]
     public void StandardFunctionBlocksLoad()
     {
@@ -20,6 +22,7 @@ public class CatalogTests
         Assert.Contains("\"TON\"", StandardFunctionBlocks.CatalogJson());
     }
 
+    /// <summary>The Logix pin profile maps TON/CTU onto the TIMER/COUNTER structures with the preset in milliseconds, the IN pin as enable, and status pins (TT) that only exist under this profile.</summary>
     [Fact]
     public void LogixProfileMapsPinsOntoTimerStructure()
     {
@@ -39,6 +42,7 @@ public class CatalogTests
         Assert.Empty(StandardFunctionBlocks.GetProfile("iec")!.ExtraPins("TON"));
     }
 
+    /// <summary>Long-form aliases resolve to their canonical type, bit access is restricted to integers and bit strings, and numeric widening picks the wider of two types.</summary>
     [Fact]
     public void AtomicTypesResolveAliasesAndPromote()
     {
@@ -55,6 +59,7 @@ public class CatalogTests
         Assert.Equal("LINT", AtomicTypes.IntegerTypeFor(1L << 40));
     }
 
+    /// <summary><c>X_TO_Y</c> conversions are recognised by pattern rather than tabulated, and each result rule (fixed type, widest operand, first-argument precision) gives the type the validator expects.</summary>
     [Fact]
     public void StandardFunctionsTypeConversionsAndResults()
     {

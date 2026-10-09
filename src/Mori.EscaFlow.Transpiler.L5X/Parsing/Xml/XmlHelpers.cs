@@ -5,7 +5,12 @@ using Mori.EscaFlow.Transpiler.L5X.Model;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Xml;
 
-/// <summary>Normalizes text that the exporter wraps in CDATA on its own line.</summary>
+/// <summary>
+/// Normalizes text that the exporter wraps in CDATA on its own line. Studio 5000 writes every free-text value
+/// (descriptions, rung text and comments, ST lines) as
+/// <c>&lt;![CDATA[</c> newline, payload, newline <c>]]&gt;</c>, so the payload gains one artificial newline on each
+/// side; those two are removed and nothing else is touched, because indentation inside descriptions is meaningful.
+/// </summary>
 public static class CdataText
 {
     /// <summary>Strips exactly one leading and one trailing newline (CRLF or LF); interior whitespace is preserved.</summary>
@@ -24,7 +29,8 @@ public static class CdataText
 
 /// <summary>
 /// Snapshot of an element's attributes that tracks which ones a reader consumed, so the rest can be preserved
-/// as <see cref="L5xElement.UnknownAttributes"/>.
+/// as <see cref="L5xElement.UnknownAttributes"/>. Readers "take" the attributes they model; whatever is left is
+/// unknown content and kept verbatim, which keeps the parser tolerant of newer format revisions.
 /// </summary>
 public sealed class AttributeBag
 {
@@ -32,6 +38,7 @@ public sealed class AttributeBag
     private readonly string[] _values;
     private readonly bool[] _taken;
 
+    /// <summary>Snapshots the attributes of the element the streaming reader is positioned on and returns the reader to the element.</summary>
     public AttributeBag(XmlReader reader)
     {
         var n = reader.AttributeCount;
@@ -54,6 +61,7 @@ public sealed class AttributeBag
         }
     }
 
+    /// <summary>Snapshots the attributes of a materialized element (namespace declarations excluded).</summary>
     public AttributeBag(XElement element)
     {
         var attrs = element.Attributes().Where(a => !a.IsNamespaceDeclaration).ToArray();
@@ -71,6 +79,7 @@ public sealed class AttributeBag
 
     public bool Has(string name) => IndexOf(name) >= 0;
 
+    /// <summary>Attribute names are case-sensitive in XML, and the format never varies their spelling.</summary>
     private int IndexOf(string name)
     {
         for (var i = 0; i < _names.Length; i++)
@@ -94,9 +103,11 @@ public sealed class AttributeBag
         return i < 0 ? null : _values[i];
     }
 
+    /// <summary>Takes an attribute the format requires; the fallback is used rather than failing when an export is incomplete.</summary>
     public string TakeRequired(string name, string fallback = "")
         => Take(name) ?? fallback;
 
+    /// <summary>Integer attribute; a few exports write integral values with a decimal point, which is accepted too.</summary>
     public int? TakeInt(string name)
     {
         var v = Take(name);
@@ -125,6 +136,7 @@ public sealed class AttributeBag
         return v is null ? null : ParseBool(v, false);
     }
 
+    /// <summary>The format spells booleans as true/false, yes/no or 1/0 depending on the element.</summary>
     public static bool ParseBool(string v, bool defaultValue)
     {
         if (v.Length == 0) return defaultValue;
@@ -140,6 +152,10 @@ public sealed class AttributeBag
         return ParseDimensions(v);
     }
 
+    /// <summary>
+    /// Tag dimensions are space separated in <c>Dimensions</c> attributes and comma separated in Decorated data;
+    /// a scalar is written as "0" or omitted, hence the empty array for both.
+    /// </summary>
     public static int[] ParseDimensions(string? v)
     {
         if (string.IsNullOrWhiteSpace(v)) return Array.Empty<int>();
@@ -176,6 +192,7 @@ public sealed class AttributeBag
     }
 }
 
+/// <summary>Cursor helpers for the streaming reader; every method leaves the reader positioned after the element it consumed.</summary>
 public static class XmlReaderExtensions
 {
     public static int LineNumber(this XmlReader reader) => reader is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
@@ -184,6 +201,11 @@ public static class XmlReaderExtensions
     /// Reads the text (and CDATA) content of the current element, normalized, and moves past its end tag.
     /// Child elements (the exporter can nest CustomProperties inside Line, Description, ...) are skipped.
     /// </summary>
+    /// <remarks>
+    /// <c>ReadElementContentAsString</c> cannot be used because it throws on child elements, and Studio 5000 does
+    /// emit <c>CustomProperties</c> inside an ST <c>Line</c> or a <c>Description</c>. The text nodes are concatenated
+    /// and the child subtrees dropped, which is what the exporter itself displays.
+    /// </remarks>
     public static string ReadNormalizedText(this XmlReader reader)
     {
         if (reader.IsEmptyElement)
@@ -193,6 +215,7 @@ public static class XmlReaderExtensions
         }
         var depth = reader.Depth;
         reader.Read();
+        // Most elements hold one text node; the builder is only allocated when there are several.
         string? single = null;
         System.Text.StringBuilder? sb = null;
         while (!reader.EOF)
@@ -263,10 +286,14 @@ public static class XmlReaderExtensions
         }
     }
 
-    /// <summary>Materializes the current element as an XElement and moves past it.</summary>
+    /// <summary>
+    /// Materializes the current element as an XElement and moves past it. Used for bounded elements (one data type,
+    /// module, task, SFC or FBD body) whose structure is easier to read as a tree than with a cursor.
+    /// </summary>
     public static XElement ReadElement(this XmlReader reader) => (XElement)XNode.ReadFrom(reader);
 }
 
+/// <summary>Helpers for the materialized (tree) readers.</summary>
 public static class XElementExtensions
 {
     public static string? Attr(this XElement e, string name) => e.Attribute(name)?.Value;
@@ -295,5 +322,6 @@ public static class XElementExtensions
         return CdataText.Normalize(sb?.ToString() ?? single);
     }
 
+    /// <summary>Line of the element in the export; available because the elements are read from a line-tracking reader.</summary>
     public static int Line(this XElement e) => e is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
 }

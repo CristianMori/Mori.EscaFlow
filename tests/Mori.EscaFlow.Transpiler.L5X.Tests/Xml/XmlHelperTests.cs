@@ -7,6 +7,12 @@ using Xunit;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Tests.Xml;
 
+/// <summary>
+/// Proves the small XML plumbing every reader relies on: CDATA newline normalization, <c>AttributeBag</c>
+/// leaving the right attributes as "unknown" once known ones are taken, that an unparseable project still
+/// parses (bad XML raises a clean exception rather than crashing partway), and that a generic element's
+/// content (text, attributes, children) survives a round trip unchanged.
+/// </summary>
 public class XmlHelperTests
 {
     [Theory]

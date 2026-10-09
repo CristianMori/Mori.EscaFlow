@@ -13,9 +13,20 @@ namespace Mori.EscaFlow.Transpiler.Schema;
 /// become <c>oneOf</c> over their derived types with the discriminator as a <c>const</c>; <see cref="IrEnumAttribute"/>
 /// values become <c>enum</c>; every object forbids unknown members except the vendor extension slot.
 /// </summary>
+/// <remarks>
+/// The schema exists for consumers outside .NET (editors, other languages) and as documentation of the wire
+/// format. Generating it from the model, with a test that fails when the committed file is stale, is cheaper
+/// and safer than maintaining it by hand. Rules: properties follow the System.Text.Json order used when writing;
+/// non-nullable strings are required (everything else is optional because nulls are omitted); dictionaries map
+/// to <c>additionalProperties</c>; <see cref="IrTypeRef"/> gets its string-or-object form; the vendor slot is the
+/// only object allowing unknown members.
+/// </remarks>
 public static class SchemaGenerator
 {
+    /// <summary>The schema's <c>$id</c>.</summary>
     public const string SchemaId = "https://plc-ir.dev/schema/2.0";
+
+    /// <summary>Logical name of the embedded copy of the committed schema.</summary>
     public const string ResourceName = "Mori.EscaFlow.Transpiler.Schema.plc-ir-2.0.schema.json";
 
     /// <summary>The embedded copy of the schema, or null when the assembly was built without it.</summary>
@@ -27,6 +38,7 @@ public static class SchemaGenerator
         return reader.ReadToEnd();
     }
 
+    /// <summary>Generates the schema text (indented, LF line endings, deterministic ordering).</summary>
     public static string Generate()
     {
         var g = new Generator();
@@ -52,22 +64,28 @@ public static class SchemaGenerator
     public static IReadOnlyList<string> SerializedProperties(Type type)
         => Generator.Properties(type).Select(p => Generator.JsonName(p)).ToList();
 
+    /// <summary>Walks the model types reachable from the document and builds one definition per class.</summary>
     private sealed class Generator
     {
+        /// <summary>Definitions by name (class name without the <c>Ir</c> prefix).</summary>
         public readonly Dictionary<string, JsonNode> Defs = new(StringComparer.Ordinal);
         private readonly Queue<Type> _pending = new();
         private readonly HashSet<Type> _seen = new();
         private readonly NullabilityInfoContext _nullability = new();
 
+        /// <summary><c>IrDocument</c> becomes <c>Document</c>; types without the prefix keep their name.</summary>
         public static string DefName(Type t) => t.Name.StartsWith("Ir", StringComparison.Ordinal) && t.Name.Length > 2 && char.IsUpper(t.Name[2]) ? t.Name[2..] : t.Name;
 
+        /// <summary>The JSON property name: an explicit attribute, else camelCase of the C# name (the format's naming policy).</summary>
         public static string JsonName(PropertyInfo p) => p.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? JsonNamingPolicy.CamelCase.ConvertName(p.Name);
 
+        /// <summary>Queues a type for definition once.</summary>
         public void Define(Type t)
         {
             if (_seen.Add(t)) _pending.Enqueue(t);
         }
 
+        /// <summary>Builds every queued definition; building one may queue more.</summary>
         public void Drain()
         {
             while (_pending.Count > 0)
@@ -78,6 +96,7 @@ public static class SchemaGenerator
         }
 
         /// <summary>Serialized properties of a class, in System.Text.Json order (JsonPropertyOrder, then derived-first declaration order).</summary>
+        /// <remarks>Matching the serializer's order keeps the schema's property order identical to a written document, which makes the two easy to read side by side.</remarks>
         public static List<PropertyInfo> Properties(Type t)
         {
             var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -93,6 +112,7 @@ public static class SchemaGenerator
                 .ToList();
         }
 
+        /// <summary>The definition of one class: a oneOf for polymorphic bases, an object with properties otherwise.</summary>
         private JsonNode Build(Type t)
         {
             if (t == typeof(IrTypeRef)) return TypeRefSchema();
@@ -139,6 +159,7 @@ public static class SchemaGenerator
             return obj;
         }
 
+        /// <summary>The discriminator property and value of a derived type, found on the nearest polymorphic base.</summary>
         private static (string Property, string Value)? FindDiscriminator(Type t)
         {
             for (var b = t.BaseType; b is not null; b = b.BaseType)
@@ -151,6 +172,7 @@ public static class SchemaGenerator
             return null;
         }
 
+        /// <summary>Only non-nullable strings are required: they are the identifying members (names, ids, kinds); everything else may be omitted because nulls are not written.</summary>
         private bool IsRequired(PropertyInfo p)
         {
             if (p.PropertyType != typeof(string)) return false;
@@ -158,6 +180,7 @@ public static class SchemaGenerator
             return info.WriteState == NullabilityState.NotNull;
         }
 
+        /// <summary>Schema of one property: the type's schema, narrowed to an enum by <see cref="IrEnumAttribute"/> and annotated with <c>x-refKind</c> by <see cref="IrRefKindAttribute"/>.</summary>
         private JsonNode PropertySchema(PropertyInfo p)
         {
             var schema = TypeSchema(p.PropertyType);
@@ -177,6 +200,7 @@ public static class SchemaGenerator
             return schema;
         }
 
+        /// <summary>Schema of a CLR type: primitives, dates, arrays and lists, dictionaries, enums, and <c>$ref</c>s to model classes (queued for definition).</summary>
         private JsonNode TypeSchema(Type t)
         {
             var underlying = Nullable.GetUnderlyingType(t);
@@ -196,6 +220,7 @@ public static class SchemaGenerator
                 if (def == typeof(Dictionary<,>) || def == typeof(IDictionary<,>) || def == typeof(IReadOnlyDictionary<,>))
                 {
                     var valueType = args[1];
+                    // Dictionary<string, object?> is the vendor slot: the one place where anything goes.
                     if (valueType == typeof(object))
                         return new JsonObject { ["type"] = "object", ["description"] = "Vendor extension slot: one entry per vendor id, any content.", ["additionalProperties"] = true };
                     return new JsonObject { ["type"] = "object", ["additionalProperties"] = TypeSchema(valueType) };
@@ -217,6 +242,7 @@ public static class SchemaGenerator
             return new JsonObject();
         }
 
+        /// <summary>The hand-shaped schema of <see cref="IrTypeRef"/>: a string, or the object form written by <see cref="IrTypeRefConverter"/>.</summary>
         private JsonNode TypeRefSchema()
         {
             Define(typeof(IrDim));

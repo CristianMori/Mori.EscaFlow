@@ -3,6 +3,7 @@ using Mori.EscaFlow.Transpiler.L5X.Model.Logic;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.St;
 
+/// <summary>Structured text token kinds: punctuation/operators followed by the IEC keywords (prefixed <c>Kw</c>).</summary>
 public enum StTokenKind
 {
     EndOfFile,
@@ -70,10 +71,12 @@ public readonly record struct StToken(StTokenKind Kind, int Start, int Length, i
 
     public TextSpan Span => new(Start, Length, Line, Column);
 
+    /// <summary>True for a keyword that closes a block (ELSIF/ELSE close IF too, since they continue it); used to detect where an open block's body ends.</summary>
     public bool IsBlockTerminator => Kind is StTokenKind.KwElsif or StTokenKind.KwElse or StTokenKind.KwEndIf
         or StTokenKind.KwEndCase or StTokenKind.KwEndFor or StTokenKind.KwEndWhile or StTokenKind.KwUntil or StTokenKind.KwEndRepeat;
 }
 
+/// <summary>The fixed IEC/Logix keyword table, matched case-insensitively.</summary>
 public static class StKeywords
 {
     private static readonly Dictionary<string, StTokenKind> Map = new(StringComparer.OrdinalIgnoreCase)
@@ -117,6 +120,7 @@ public static class StKeywords
         return lookup.TryGetValue(text, out kind);
     }
 
+    /// <summary>Human-readable spelling of a token kind, used in "expected X" diagnostics.</summary>
     public static string Describe(StTokenKind kind) => kind switch
     {
         StTokenKind.EndOfFile => "end of text",
@@ -165,9 +169,10 @@ public sealed class StLineMap
         _numbers = numbers;
     }
 
+    /// <summary>A map for text that is really a single export line (expressions parsed outside a routine body).</summary>
     public static StLineMap Single(int lineNumber) => new(new[] { 0 }, new[] { lineNumber });
 
-    /// <summary>Joins the lines with '\n' and builds the map.</summary>
+    /// <summary>Joins the lines with '\n' and builds the map; <paramref name="text"/> is the joined text the lexer runs over.</summary>
     public static StLineMap Build(IReadOnlyList<StLine> lines, out string text)
     {
         if (lines.Count == 0)
@@ -194,6 +199,7 @@ public sealed class StLineMap
         return new StLineMap(starts, numbers);
     }
 
+    /// <summary>Binary search for the line whose joined-text start is at or before <paramref name="offset"/>.</summary>
     public (int Line, int Column) Locate(int offset)
     {
         var idx = Array.BinarySearch(_starts, offset);

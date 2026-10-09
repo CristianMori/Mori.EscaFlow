@@ -17,6 +17,7 @@ using Mori.EscaFlow.Transpiler.Catalogs;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Import;
 
+/// <summary>Options controlling how much of the source project <see cref="LogixIrBuilder"/> carries into the middle file.</summary>
 public sealed class LogixBuildOptions
 {
     public static readonly LogixBuildOptions Default = new();
@@ -35,6 +36,15 @@ public sealed class LogixBuildOptions
 }
 
 /// <summary>Builds the plc-ir 2.0 document from a parsed and linked <see cref="L5xProject"/>.</summary>
+/// <remarks>
+/// This is the single entry point of the importer: it walks the controller model once, in a fixed order
+/// (configuration, then global variables, then I/O images, then add-on definitions, then programs, then the type
+/// closure those bodies touched), and hands each section to the specialized collaborators — <see cref="LogixExpressionBuilder"/>
+/// for operand and statement trees, <see cref="LadderLowering"/> and <see cref="NetLowering"/> for rung and FBD
+/// bodies, <see cref="CallEmitter"/> for subroutine and add-on calls, <see cref="LogixTypeMapper"/> for data types.
+/// Variable ids are assigned up front for every tag in the controller (including add-on parameters and locals,
+/// which are per-definition, not per-instance) so every later reference resolves to a stable id rather than a name.
+/// </remarks>
 public sealed class LogixIrBuilder
 {
     private readonly L5xProject _project;
@@ -43,8 +53,12 @@ public sealed class LogixIrBuilder
     private readonly ScopeResolver _resolver;
     private readonly Dictionary<Tag, string> _varIds = new(ReferenceEqualityComparer.Instance);
     private readonly Dictionary<ModuleTagData, string> _moduleVarIds = new(ReferenceEqualityComparer.Instance);
+
+    /// <summary>Type names reached by any variable or value while building; the closure drives <see cref="BuildTypes"/>.</summary>
     private readonly HashSet<string> _usedTypes = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<IrDiagnostic> _diagnostics = new();
+
+    /// <summary>Name of the controller-scoped global variable list; the controller name, or a fixed default for an unnamed export.</summary>
     private readonly string _gvlName;
 
     public LogixIrBuilder(L5xProject project, LogixBuildOptions? options = null)
@@ -54,9 +68,13 @@ public sealed class LogixIrBuilder
         _options = options ?? LogixBuildOptions.Default;
         _resolver = new ScopeResolver(_c);
         _gvlName = string.IsNullOrEmpty(_c.Name) ? LogixVendor.ControllerGvl : _c.Name;
+        // Every tag gets its id now, before any body is lowered, so expression building never has to create one on
+        // the fly (which would make the id depend on visitation order instead of the tag itself).
         foreach (var tag in _c.AllTags) _varIds[tag] = MakeVarId(tag);
         foreach (var m in _c.Modules)
         {
+            // Module images (config / input / output) are addressed by module name and channel, not by a Logix tag
+            // name, because a rack-optimized module's data lives on its parent's image, not its own.
             var comm = m.Communications;
             if (comm is null) continue;
             var config = comm.ConfigTag ?? comm.ConfigData;
@@ -71,14 +89,25 @@ public sealed class LogixIrBuilder
         Calls = new CallEmitter(this);
     }
 
+    /// <summary>The source controller model (needed by collaborators for lookups the builder itself does not cache, e.g. add-on definitions).</summary>
     public Controller Controller => _c;
+
+    /// <summary>JSR/SBR/RET binding information for every routine, shared by every <see cref="LogixExpressionBuilder"/> created for this project.</summary>
     public SubroutineIndex Subroutines { get; }
+
+    /// <summary>Emits JSR, SBR/RET and add-on call statements; shared because it needs the subroutine index and variable ids.</summary>
     public CallEmitter Calls { get; }
 
     // ------------------------------------------------------------------ ids
 
+    /// <summary>The variable id already assigned to a tag, or one computed on demand (for a tag discovered after construction, which should not normally happen).</summary>
     public string VarId(Tag tag) => _varIds.TryGetValue(tag, out var id) ? id : MakeVarId(tag);
 
+    /// <summary>
+    /// <c>pou/&lt;name&gt;/&lt;tag&gt;</c> for program tags and add-on parameters/locals (add-on ids are per
+    /// definition, since the backing structure is shared by every instance); <c>global/&lt;gvl&gt;/&lt;tag&gt;</c>
+    /// for controller tags.
+    /// </summary>
     private string MakeVarId(Tag tag) => tag.Scope switch
     {
         TagScope.Program => $"pou/{tag.Program?.Name}/{tag.Name}",
@@ -86,16 +115,19 @@ public sealed class LogixIrBuilder
         _ => $"global/{_gvlName}/{tag.Name}",
     };
 
+    /// <summary>The variable id of a module image, or null when the image was not registered (a connection the export did not describe).</summary>
     public string? ModuleVarId(ModuleTagData data) => _moduleVarIds.GetValueOrDefault(data);
 
     private static string ModuleVarIdFor(Module m, string suffix) => $"global/{LogixVendor.IoGvl}/{m.Name}:{suffix}";
     private static string ChannelId(Module m, string suffix) => $"io/{m.Name}/{suffix}";
     private static string DeviceId(Module m) => $"device/{m.Name}";
 
+    /// <summary>True when <paramref name="name"/> names an add-on instruction (its instances are function blocks, not structure values).</summary>
     public bool IsAddOn(string name) => _c.FindAoi(name) is not null;
 
     // ------------------------------------------------------------------ document
 
+    /// <summary>Builds the whole plc-ir document in one pass.</summary>
     public IrDocument Build()
     {
         var doc = new IrDocument
@@ -121,6 +153,8 @@ public sealed class LogixIrBuilder
             SafetyLevel = _c.SafetyInfo?.SafetyLevel,
         });
 
+        // Order matters: types are built last because every other section records the type names it touches in
+        // _usedTypes, and BuildTypes only emits that closure (unless the caller asked for every predefined type).
         BuildConfiguration(doc);
         BuildGlobals(doc);
         BuildIo(doc);
@@ -130,6 +164,7 @@ public sealed class LogixIrBuilder
 
         foreach (var d in _project.Diagnostics)
         {
+            // Purely informational parse-time notes that do not describe a property of the resulting model are dropped.
             if (d.Severity == DiagnosticSeverity.Info && d.Code is "XML001" or "LNK004") continue;
             doc.Diagnostics.Add(new IrDiagnostic { Severity = d.Severity.ToString().ToLowerInvariant(), Code = d.Code, Message = d.Message, Location = d.Location.ToString() });
         }
@@ -137,6 +172,7 @@ public sealed class LogixIrBuilder
         return doc;
     }
 
+    /// <summary>Tasks and their scheduled program instances, in the shape plc-ir's single-resource configuration expects.</summary>
     private void BuildConfiguration(IrDocument doc)
     {
         var resource = new IrResource { Name = _c.Name, ProcessorType = _c.ProcessorType };
@@ -162,6 +198,7 @@ public sealed class LogixIrBuilder
         }
         foreach (var p in _c.Programs)
         {
+            // A folder program groups other programs in the Studio 5000 tree; it has no code of its own and is not scheduled.
             if (p.UseAsFolder) continue;
             resource.Programs.Add(new IrProgramInstance { Name = p.Name, Pou = p.Name, Task = p.Task?.Name, Disabled = p.Disabled });
         }
@@ -170,6 +207,7 @@ public sealed class LogixIrBuilder
 
     // ------------------------------------------------------------------ variables
 
+    /// <summary>Controller-scoped tags as one global variable list.</summary>
     private void BuildGlobals(IrDocument doc)
     {
         var gvl = new IrGlobalVariableList { Name = _gvlName, Description = "Controller-scoped tags" };
@@ -177,6 +215,7 @@ public sealed class LogixIrBuilder
         doc.Globals.Add(gvl);
     }
 
+    /// <summary>Builds the neutral variable for a tag (controller, program, or add-on parameter/local), with its Logix vendor extension attached.</summary>
     private IrVariable BuildVariable(Tag tag, string section)
     {
         var typeName = tag.DataType?.Name ?? tag.AliasTarget?.DataType?.Name ?? "";
@@ -192,6 +231,8 @@ public sealed class LogixIrBuilder
         };
         var ext = new LogixVariableExt
         {
+            // The dotted path Logix itself would use to name this tag from outside its own scope (program tags are
+            // addressed as Program:Name.Tag, add-on members as AoiName.Member).
             Path = tag.Scope switch
             {
                 TagScope.Program => $"Program:{tag.Program?.Name}.{tag.Name}",
@@ -217,8 +258,10 @@ public sealed class LogixIrBuilder
         {
             ext.Required = p.Required;
             ext.Visible = p.Visible;
+            // EnableIn/EnableOut are implicit parameters every add-on gets from Logix, not declared by the definition's author.
             ext.Implicit = p.Name.Equals("EnableIn", StringComparison.OrdinalIgnoreCase) || p.Name.Equals("EnableOut", StringComparison.OrdinalIgnoreCase);
             v.Section = p.ParameterUsage switch { AoiParameterUsage.Output => "output", AoiParameterUsage.InOut => "inOut", _ => "input" };
+            // Parameter state lives in the instance's backing tag, which Logix always treats as non-retentive memory.
             v.Retain = "none";
         }
         else if (tag.Scope == TagScope.Program && tag.Usage is { } usage)
@@ -230,6 +273,8 @@ public sealed class LogixIrBuilder
             v.Alias = new IrAlias { Text = tag.AliasFor };
             if (tag.AliasPath is not null)
             {
+                // Resolve the alias target now, once, so every later reference to this tag already knows the real
+                // tag it stands for (see LogixExpressionBuilder.Ref, which rewrites a written alias name to its target).
                 var target = new LogixExpressionBuilder(this, _resolver, tag.Program ?? (IRoutineContainer?)tag.Aoi).Ref(tag.AliasPath);
                 switch (target)
                 {
@@ -247,6 +292,8 @@ public sealed class LogixIrBuilder
                 }
             }
         }
+        // Add-on types are never emitted as structures (they get a function block class instead), so they are kept
+        // out of the type closure even though a variable may be typed by one.
         if (v.Type.LeafName is { } leaf && !IsAddOn(leaf)) _usedTypes.Add(leaf);
         if (tag.Comments.Count > 0) v.Comments = tag.Comments.GroupBy(c => c.Operand).ToDictionary(g => g.Key, g => g.First().Text);
         var attrs = new Dictionary<string, string>();
@@ -264,12 +311,14 @@ public sealed class LogixIrBuilder
         return v;
     }
 
+    /// <summary>Flattens per-member attribute dictionaries (engineering units, min/max, state labels) into one bag keyed <c>prefix[:member]</c>.</summary>
     private static void Merge(Dictionary<string, string> attrs, string prefix, Dictionary<string, string>? values)
     {
         if (values is null) return;
         foreach (var (k, val) in values) attrs[prefix + (k.Length == 0 ? "" : ":" + k)] = val;
     }
 
+    /// <summary>MSG tag configuration as its neutral representation, with any socket (UDP/TCP) fields resolved to references.</summary>
     private LogixMessage BuildMessage(MessageConfiguration m, Tag tag)
     {
         var ir = new LogixMessage
@@ -296,6 +345,9 @@ public sealed class LogixIrBuilder
         };
         if (m.Socket is { } b)
         {
+            // A socket-aware MSG (UDP or TCP) carries operand text for its session, request, response and per-field
+            // buffers; resolve each one the same way a rung operand would be resolved, so the runtime gets references
+            // rather than text it would have to re-parse.
             var x = new LogixExpressionBuilder(this, _resolver, tag.Program ?? (IRoutineContainer?)tag.Aoi);
             var scratch = new DiagnosticBag();
             IrRef? RefOf(string? path)
@@ -319,6 +371,7 @@ public sealed class LogixIrBuilder
         return ir;
     }
 
+    /// <summary>An initial/current value tree from the export's Decorated data, recursively typed the same way the member's declared type is.</summary>
     private IrValue BuildValue(TagValue v)
     {
         switch (v)
@@ -350,6 +403,10 @@ public sealed class LogixIrBuilder
 
     // ------------------------------------------------------------------ I/O
 
+    /// <summary>
+    /// Every module as an <see cref="IrIoDevice"/> (rack position, catalog, ports, parent for a module plugged into
+    /// another), and its config/input/output images as channels referring into one synthetic global variable list.
+    /// </summary>
     private void BuildIo(IrDocument doc)
     {
         var gvl = new IrGlobalVariableList { Name = LogixVendor.IoGvl, Description = "Module input, output and configuration images" };
@@ -408,6 +465,7 @@ public sealed class LogixIrBuilder
         if (gvl.Vars.Count > 0) doc.Globals.Add(gvl);
     }
 
+    /// <summary>Registers one I/O channel and its backing variable (once per module/direction), returning the channel id for the device record to reference.</summary>
     private string AddChannel(IrDocument doc, IrGlobalVariableList gvl, Module m, string suffix, string direction, ModuleTagData data)
     {
         var id = ChannelId(m, suffix);
@@ -439,6 +497,12 @@ public sealed class LogixIrBuilder
 
     // ------------------------------------------------------------------ types
 
+    /// <summary>
+    /// Emits the closure of types reached by any variable, value or module image (breadth-first through member and
+    /// hidden-host type names), skipping atomics and add-on names; a name with no definition in the project becomes
+    /// an opaque placeholder type rather than being silently dropped, so references into it can still be recognized
+    /// (and reported) instead of crashing the generator.
+    /// </summary>
     private void BuildTypes(IrDocument doc)
     {
         var queue = new Queue<string>(_usedTypes);
@@ -460,12 +524,18 @@ public sealed class LogixIrBuilder
             foreach (var m in ir.Members ?? new()) if (m.Type.LeafName is { } leaf) queue.Enqueue(leaf);
             if (ir.Logix()?.HiddenMembers is { } hidden) foreach (var h in hidden) queue.Enqueue(h.Type);
         }
+        // A stable, alphabetic order keeps generated output (and diffs between runs) deterministic.
         doc.Types.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
         doc.InvalidateIndex();
     }
 
     // ------------------------------------------------------------------ POUs
 
+    /// <summary>
+    /// Builds one program: its tags, every routine as an action, the main routine wrapped as the body (so a program
+    /// has one entry point regardless of how many routines it declares), the fault routine recorded by name, and —
+    /// when prescan synthesis is on — a synthetic <c>Prescan</c> action gathering every routine's prescan behaviour.
+    /// </summary>
     private IrPou BuildProgram(Program p)
     {
         var pou = new IrPou { Name = p.Name, Kind = "program", Description = p.Description };
@@ -480,6 +550,8 @@ public sealed class LogixIrBuilder
         }
         foreach (var encoded in p.EncodedRoutines) AddEncodedAction(pou, encoded);
         var main = p.MainRoutine?.Name ?? p.MainRoutineName;
+        // The program's body is just a call to its main routine: every other routine is reached only by JSR/SBR or
+        // by this call, which matches how the controller actually runs a program each scan.
         pou.Body = new IrBody { Language = "st", Synthetic = true };
         if (main is not null && pou.FindAction(main) is not null)
             pou.Body.Statements.Add(new IrActionCall { Action = main });
@@ -505,6 +577,13 @@ public sealed class LogixIrBuilder
         return pou;
     }
 
+    /// <summary>
+    /// Builds one add-on instruction definition as a function block POU. The routine named <c>Logic</c> becomes the
+    /// POU's body (what <c>Execute</c> runs); <c>Prescan</c>, <c>Postscan</c> and <c>EnableInFalse</c> become their
+    /// matching hooks only when the definition is flagged to execute them (Logix lets an author opt out, in which
+    /// case the routine exists but is dead code the controller never calls); every other routine is a plain action
+    /// reached only by JSR/SBR inside the definition.
+    /// </summary>
     private IrPou BuildAoi(AddOnInstructionDefinition a)
     {
         var pou = new IrPou { Name = a.Name, Kind = "functionBlock", Description = a.Description };
@@ -538,6 +617,8 @@ public sealed class LogixIrBuilder
         pou.Body ??= new IrBody { Language = "empty" };
         if (_options.SynthesizePrescan)
         {
+            // The definition's own prescan behaviour (reset-on-prescan contacts, nested function blocks, add-on
+            // instances) comes from analyzing the Logic routine; the author's Prescan routine, when enabled, runs after it.
             var init = new IrAction { Name = UniqueActionName(pou, "Init"), Hook = "init", Synthetic = true, Body = new IrBody { Language = "st", Synthetic = true } };
             if (logic is not null && logicBody is not null) init.Body.Statements.AddRange(PrescanOf(logic, logicBody, x));
             if (a.ExecutePrescan && pou.FindAction("Prescan") is not null) init.Body.Statements.Add(new IrActionCall { Action = "Prescan" });
@@ -569,6 +650,7 @@ public sealed class LogixIrBuilder
         _diagnostics.Add(new IrDiagnostic { Severity = "info", Code = "IRB002", Message = $"Routine {pou.Name}/{name} is source-protected in the export; its body is not available", Location = pou.Name });
     }
 
+    /// <summary>Appends underscores to <paramref name="name"/> until it does not collide with an existing action (an author-defined routine literally named "Prescan", for instance).</summary>
     private static string UniqueActionName(IrPou pou, string name)
     {
         var n = name;
@@ -590,6 +672,7 @@ public sealed class LogixIrBuilder
         return action;
     }
 
+    /// <summary>Lowers one routine's content to a neutral body, dispatching on the source language (ladder, structured text, SFC, or FBD).</summary>
     private IrBody BuildBody(Routine r, LogixExpressionBuilder x)
     {
         var body = new IrBody();
@@ -600,6 +683,7 @@ public sealed class LogixIrBuilder
             {
                 body.Language = "ld";
                 var temps = new List<IrTemporary>();
+                // One LadderLowering instance for the whole routine: MCR zones and _rcN temporaries must carry across rungs.
                 var lowering = new LadderLowering(x, Calls, temps);
                 var ld = new IrLdDiagram();
                 foreach (var rung in rll.Rungs)
@@ -645,6 +729,14 @@ public sealed class LogixIrBuilder
     // ------------------------------------------------------------------ prescan synthesis
 
     /// <summary>Prescan behaviour of one routine: ladder is re-lowered in prescan mode; ST and FBD bodies invoke their function blocks and always-scan services in prescan mode.</summary>
+    /// <remarks>
+    /// Rather than interpret two execution modes in every downstream consumer, the importer produces the prescan
+    /// statements once, here, as ordinary statements the runtime just runs during prescan. Ladder is lowered a
+    /// second time under <see cref="LadderLowering.LowerPrescan"/> because its false-rung behaviour (OTE clears,
+    /// ONS pre-arms) differs element by element; ST and FBD bodies, which have no rung condition to flip, are instead
+    /// walked to find the calls that must still happen (function blocks and always-scan services), since a plain
+    /// assignment or gated service has no prescan effect.
+    /// </remarks>
     private List<IrStatement> PrescanOf(Routine r, IrBody body, LogixExpressionBuilder x)
     {
         var list = new List<IrStatement>();
@@ -664,6 +756,7 @@ public sealed class LogixIrBuilder
         return list;
     }
 
+    /// <summary>Recursively finds function block calls and always-scan service calls in an already-lowered body and re-emits them in prescan mode.</summary>
     private void CollectPrescan(IEnumerable<IrStatement> statements, List<IrStatement> list)
     {
         foreach (var s in statements)
@@ -675,11 +768,13 @@ public sealed class LogixIrBuilder
                     var p = new IrFbCall { Instance = c.Instance, Fb = c.Fb, Pou = c.Pou, Profile = c.Profile, Mode = "prescan", Src = c.Src };
                     if (c.Fb is not null)
                     {
+                        // A standard block's prescan form takes a false enable on every boolean input pin (so timers don't run, counters don't count).
                         foreach (var (pin, value) in c.Inputs)
                             if (value.IsBool) p.Inputs[pin] = IrLiteral.False;
                     }
                     else if (c.Pou is not null && _c.FindAoi(c.Pou) is { } aoi)
                     {
+                        // Add-on InOut bindings must still be made during prescan, so the instance's view of the caller's memory is correct from the first real scan.
                         foreach (var (pin, value) in c.Inputs)
                             if (aoi.FindParameter(pin) is { ParameterUsage: AoiParameterUsage.InOut }) p.Inputs[pin] = value;
                     }
@@ -690,6 +785,8 @@ public sealed class LogixIrBuilder
                     list.Add(new IrSysCall { Catalog = sc.Catalog, Service = sc.Service, Args = sc.Args, Mode = "prescan", Src = sc.Src });
                     break;
                 case IrIf i:
+                    // Prescan behaviour is unconditional: every branch is walked regardless of its condition, since the
+                    // whole point is to initialize state before the condition can be evaluated meaningfully.
                     foreach (var b in i.Branches) CollectPrescan(b.Body, list);
                     if (i.Else is not null) CollectPrescan(i.Else, list);
                     break;
@@ -706,6 +803,7 @@ public sealed class LogixIrBuilder
 
     // ------------------------------------------------------------------ SFC
 
+    /// <summary>Builds the neutral diagram of an SFC routine: steps, transitions, branches and stops with their operands and expressions resolved.</summary>
     private IrSfcDiagram BuildSfc(SfcContent sfc, LogixExpressionBuilder x)
     {
         var ir = new IrSfcDiagram();
@@ -783,6 +881,7 @@ public sealed class LogixIrBuilder
         return ir;
     }
 
+    /// <summary>Logix's verbose action qualifier names mapped to the one- or two-letter IEC 61131-3 codes (N, S, R, L, D, P, P1, P0, SL, SD, DS).</summary>
     private static string NormalizeQualifier(string? q) => q switch
     {
         null => "N",

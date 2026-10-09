@@ -7,7 +7,21 @@ using Mori.EscaFlow.Transpiler.L5X.Parsing.Values;
 
 namespace Mori.EscaFlow.Transpiler.L5X.Parsing.Rll;
 
-/// <summary>Classifies the raw text of one instruction argument into an <see cref="Operand"/>.</summary>
+/// <summary>
+/// Classifies the raw text of one instruction argument into an <see cref="Operand"/>.
+/// <para>
+/// The neutral text does not mark what an operand is: <c>JSR(Main,0)</c> names a routine, <c>GSV(Program,THIS,Name,x)</c>
+/// has a class keyword, an instance keyword and an attribute keyword, and <c>CPT(x,a*2)</c> carries an expression.
+/// The decision therefore uses, in order: the spelling (empty, placeholder, string, number), the role the
+/// instruction signature assigns to the position, and finally whether the text parses as a tag path or as an
+/// expression. Add-on instructions have no table entry; every argument of theirs is a tag or literal.
+/// </para>
+/// <para>
+/// A bare identifier in a Tag position is always classified as a tag reference here even when it is really an
+/// enumeration word (motion instructions, FAL/FSC modes written in Any positions): the logic phase cannot know
+/// which names exist yet. The linker reclassifies those that resolve to no tag as <see cref="KeywordOperand"/>.
+/// </para>
+/// </summary>
 public static class OperandParser
 {
     /// <summary>
@@ -22,6 +36,7 @@ public static class OperandParser
         if (text == "?") return PlaceholderOperand.Single;
         if (text == "??") return PlaceholderOperand.Double;
 
+        // Strings are quoted with single quotes and use '$' escapes; decode once here so consumers see real characters.
         if (text[0] == '\'')
         {
             var decoded = LogixStringDecoder.DecodeQuoted(text);
@@ -33,12 +48,14 @@ public static class OperandParser
             return new LiteralOperand(text, new StringLiteral(decoded));
         }
 
+        // Numbers in any radix (2#1010, 16#FF, 1.5e3, -3) before anything else: "16#FF" would otherwise look like an expression.
         if (LiteralParser.TryParseNumber(text, out var number))
             return new LiteralOperand(text, number);
 
         var role = isAddOn ? OperandRole.Tag : InstructionSignatures.RoleAt(mnemonic, index);
         var bare = IsBareIdentifier(text);
 
+        // Role hints only apply to bare words: "JSR(Sub[1],0)" is not a routine name and falls through to the tag path parse.
         switch (role)
         {
             case OperandRole.Keyword when bare:
@@ -83,6 +100,7 @@ public static class OperandParser
     public static Operand ClassifyStandalone(string rawText, LogicParseContext context, IDiagnosticSink diagnostics)
         => Classify("", 0, rawText, isAddOn: true, context, diagnostics);
 
+    /// <summary>Tries the text as a pure tag path; a scratch bag keeps the probe silent because failure here is normal.</summary>
     private static OperandPath? TryPath(string text, LogicParseContext context, IDiagnosticSink diagnostics)
     {
         // The path parser never reports diagnostics for non-paths, but guard against a stray one anyway.
@@ -101,6 +119,11 @@ public static class OperandParser
         }
     }
 
+    /// <summary>
+    /// Parses the text with the structured text expression grammar. A multi-word enumeration (<c>Forward Only</c>)
+    /// fails that parse and is recognized afterwards; anything else that fails becomes a raw operand with the
+    /// first parser message as the reason.
+    /// </summary>
     private static Operand ParseExpression(string mnemonic, string text, LogicParseContext context, IDiagnosticSink diagnostics)
     {
         var scratch = new DiagnosticBag();
@@ -127,10 +150,12 @@ public static class OperandParser
             return new RawOperand(text, reason);
         }
 
+        // Only a clean parse forwards the probe's diagnostics (informational ones such as unknown functions).
         foreach (var d in scratch) diagnostics.Add(d);
         return new ExpressionOperand(text, expr);
     }
 
+    /// <summary>The expression parser recovers by embedding error nodes; the whole operand is rejected if any is present.</summary>
     private static bool ContainsError(StExpression expr) => expr switch
     {
         StErrorExpression => true,
