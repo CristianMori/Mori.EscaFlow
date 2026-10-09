@@ -112,7 +112,7 @@ public class CSharpGeneratorTests
     [InlineData("types")]
     [InlineData("modules")]
     [Trait("Category", "Integration")]
-    public void GeneratedSolutionCompiles(string fixture)
+    public async Task GeneratedSolutionCompiles(string fixture)
     {
         var root = RepoRoot();
         var ir = BuildFixture(fixture);
@@ -129,10 +129,31 @@ public class CSharpGeneratorTests
             RedirectStandardError = true,
             UseShellExecute = false,
             WorkingDirectory = outDir,
+            // The nested build must never block on finding or starting a persistent MSBuild/Roslyn server node:
+            // an ephemeral, one-shot build like this should not create one, and should not wait for one left
+            // behind by a previous, unrelated build on the machine.
+            EnvironmentVariables = { ["MSBUILDDISABLENODEREUSE"] = "1" },
         };
         using var p = Process.Start(psi)!;
-        var output = p.StandardOutput.ReadToEnd() + p.StandardError.ReadToEnd();
-        p.WaitForExit();
+
+        // Both streams are redirected, so both must be drained concurrently with the process running, not read to
+        // completion one after the other: a child process that writes enough to stderr to fill its pipe buffer
+        // while nothing is reading it (because the parent is still blocked inside stdout's ReadToEnd) blocks
+        // forever on the write, and the parent then blocks forever on the read that would unblock it — the
+        // classic Process redirection deadlock. How much a given `dotnet build` writes to stderr (warnings,
+        // first-run restore chatter) is not something this test controls, so this is read as two tasks in
+        // parallel, each only ever waiting on its own stream.
+        var stdOutTask = p.StandardOutput.ReadToEndAsync();
+        var stdErrTask = p.StandardError.ReadToEndAsync();
+        var exited = p.WaitForExit(TimeSpan.FromMinutes(3));
+        if (!exited)
+        {
+            // A genuine hang (as opposed to a slow but finishing build) must fail the test instead of blocking the
+            // rest of the suite indefinitely: killing the process also unblocks the two read tasks above.
+            try { p.Kill(entireProcessTree: true); } catch { /* already gone */ }
+            Assert.Fail($"dotnet build for {fixture} did not finish within 3 minutes; killed the process tree.");
+        }
+        var output = await Task.WhenAll(stdOutTask, stdErrTask) is [var stdOut, var stdErr] ? stdOut + stdErr : "";
         var errors = output.Split('\n').Where(l => l.Contains(" error ")).Distinct().Take(15).ToList();
         foreach (var e in errors) _out.WriteLine(e);
         Assert.True(p.ExitCode == 0, $"dotnet build failed with {errors.Count} error line(s):\n{string.Join("\n", errors)}");
