@@ -55,7 +55,6 @@ public sealed class RungParser
         // Unknown mnemonics are reported once per rung, not once per occurrence.
         private readonly HashSet<string> _reportedUnknown = new(StringComparer.OrdinalIgnoreCase);
         private int _pos;
-        private bool _terminated;
 
         public State(string text, LogicParseContext context, IDiagnosticSink diag)
         {
@@ -101,8 +100,13 @@ public sealed class RungParser
                             Error("RLL004", "Unterminated branch: found ';' before ']'");
                             return elements;
                         }
+                        // A rung's trailing ';' simply ends the element list; this parser is also used (directly, in
+                        // unit tests, and implicitly by callers that just want one branch or a handful of
+                        // instructions) on fragments that never carry a ';' at all, so its absence is never reported
+                        // as an error here. A genuinely missing terminator on a real rung is harmless: the "end of
+                        // text" case a few lines up already returns the elements found so far, and the text writer
+                        // always re-adds exactly one ';' when the rung is written back out.
                         _pos++;
-                        _terminated = true;
                         SkipWhitespace();
                         if (!AtEnd) Error("RLL003", $"Text after rung terminator ';' at offset {_pos}");
                         continue;
