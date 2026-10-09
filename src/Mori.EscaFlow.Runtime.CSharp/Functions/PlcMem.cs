@@ -47,7 +47,21 @@ public static class PlcMem
     public static void CopyAtomic(object? source, object? dest, int count) => Copy(source, dest, count);
 
     /// <summary>FLL: stores <paramref name="value"/> into <paramref name="count"/> elements of the destination.</summary>
-    /// <remarks>Unlike COP, FLL converts: the value is stored into each element as a MOV would (a REAL into a DINT array rounds), strings are copied as text, and a structure value is byte-copied into each structure element.</remarks>
+    /// <remarks>
+    /// <para>
+    /// Unlike COP, FLL converts: the value is stored into each element as a MOV would (a REAL into a DINT array
+    /// rounds), strings are copied as text, and a structure value is byte-copied into each structure element.
+    /// </para>
+    /// <para>
+    /// Every shape FLL can legitimately be asked to fill in a correctly generated project is handled below. A
+    /// destination or value that reaches neither an atomic wrapper, a string, a BOOL array, a value or string
+    /// array, nor a structure paired with a structure-shaped value is not a case Logix's FLL covers either, so
+    /// rather than doing nothing and leaving the destination holding whatever it held before (which a caller could
+    /// easily mistake for "the fill ran and the value happened to already be that"), this throws: such a call can
+    /// only come from the converter emitting an argument pairing this method was never meant to receive, which is
+    /// a defect worth surfacing immediately rather than one more service to log once and route around.
+    /// </para>
+    /// </remarks>
     public static void Fill(object? value, object? dest, int count)
     {
         if (count <= 0) return;
@@ -68,7 +82,7 @@ public static class PlcMem
             case PlcArrayBase array:
             {
                 var elements = ((System.Collections.IEnumerable)array).Cast<IPlcMemory>().Take(count).ToList();
-                if (elements.Count == 0) return;
+                if (elements.Count == 0) return; // nothing asked for (count clipped to an empty array): not an error
                 switch (elements[0])
                 {
                     case PlcValue:
@@ -84,12 +98,18 @@ public static class PlcMem
                         foreach (var e in elements) Copy(sourceStruct, e, 1);
                         return;
                     default:
-                        return;
+                        throw Unsupported(value, dest);
                 }
             }
             case PlcStruct when value is IPlcMemory sourceStruct:
                 Copy(sourceStruct, dest, 1);
                 return;
+            default:
+                throw Unsupported(value, dest);
         }
     }
+
+    /// <summary>The exception <see cref="Fill"/> raises for a destination/value pairing it has no rule for.</summary>
+    private static NotSupportedException Unsupported(object? value, object? dest)
+        => new($"FLL cannot fill a {dest?.GetType().Name ?? "null"} destination with a {value?.GetType().Name ?? "null"} value; this combination is not one the runtime models, which means the converter emitted an FLL call this method was never meant to receive.");
 }

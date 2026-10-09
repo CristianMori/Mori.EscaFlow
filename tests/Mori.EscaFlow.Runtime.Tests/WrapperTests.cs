@@ -150,6 +150,26 @@ public class WrapperTests
         Assert.All(a, e => Assert.Equal(9, e.Value));
     }
 
+    /// <summary>
+    /// A destination/value pairing FLL has no rule for (here: a structure destination filled with a plain number
+    /// instead of another structure's view) must not be a silent no-op. A caller that got this far would otherwise
+    /// see the destination simply keep its previous value and have no way to tell "the fill ran and did nothing to
+    /// change" apart from "the fill was never reached at all" — this can only happen if the converter emitted an
+    /// FLL call this method was never meant to receive, so it is reported immediately rather than swallowed.
+    /// </summary>
+    [Fact]
+    public void FillThrowsForAnUnmodelledDestination()
+    {
+        var tag = Bytes(216);
+        var motor = new Motor(tag, 0);
+        Assert.Throws<NotSupportedException>(() => PlcMem.Fill(42, motor, 1));
+
+        var array = new PlcArray<Motor>(tag, 0, Motor.Layout.Size, new[] { 2 }, static (t, o) => new Motor(t, o));
+        Assert.Throws<NotSupportedException>(() => PlcMem.Fill(42, array, 2));
+
+        Assert.Throws<NotSupportedException>(() => PlcMem.Fill(1, null, 1));
+    }
+
     [Fact]
     public void StandardFunctions()
     {
