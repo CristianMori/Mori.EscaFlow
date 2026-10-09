@@ -214,9 +214,17 @@ public sealed class LadderLowering
                         drawnBranch.Legs.Add(legDrawn);
                         merged = merged is null ? legRel : Or(merged, legRel);
                     }
-                    // A leg that ended in an edge is already absolute; combine on the relative level anyway (the OR of
-                    // absolute and relative terms is still correct once ANDed with the incoming condition).
-                    rel = relIsAbsolute ? And(rel, merged ?? IrLiteral.True) : And(rel, merged ?? IrLiteral.True);
+                    // Combine the branch's contribution (merged, relative to "into") with what came before it in
+                    // this series (rel) by a plain AND. This is correct whether or not an earlier element in this
+                    // series has already made "rel" absolute (relIsAbsolute, set after a one-shot/ONS: see above):
+                    // "into" was computed by Abs() from "rel" either way (incoming-AND-rel when still relative, or
+                    // rel itself once absolute), so appending "merged" by ANDing it onto "rel" reproduces "into AND
+                    // merged" under either reading once Abs() is applied again later. relIsAbsolute therefore only
+                    // ever changes how a later Abs() call interprets "rel", never how new conditions are folded into
+                    // it here — which is why both branches of what used to be written as a condition on
+                    // relIsAbsolute were identical. See LadderLoweringTests.EdgeThenBranchCombinesWithPlainAnd for
+                    // a worked example (a one-shot immediately followed by a branch).
+                    rel = And(rel, merged ?? IrLiteral.True);
                     absolute = null;
                     break;
                 }
