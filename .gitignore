@@ -12,9 +12,3 @@ out/
 *.json.gz
 .stfolder/
 .stignore
-
-# agent tooling and editor state, never part of the product
-.claude/
-CLAUDE.md
-.mcp.json
-*.plan.md
