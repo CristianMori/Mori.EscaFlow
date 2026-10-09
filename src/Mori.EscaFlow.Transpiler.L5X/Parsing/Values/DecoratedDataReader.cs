@@ -376,7 +376,6 @@ public static class DecoratedDataReader
             var elementType = _reader.GetAttribute("DataType") ?? "";
             var dims = ParseDimensions(_reader.GetAttribute("Dimensions"));
             var radix = RadixExtensions.ParseRadix(_reader.GetAttribute("Radix"));
-            var line = CurrentLine();
             AtomicKindExtensions.TryParseAtomic(elementType, out var kind);
             var isAtomic = AtomicKindExtensions.TryParseAtomic(elementType, out _);
 
@@ -521,7 +520,6 @@ public static class DecoratedDataReader
                     elements[i] = filler;
                 }
             }
-            _ = line;
             return new ArrayValue(elementType, dims, radix, elements);
         }
 

@@ -71,15 +71,10 @@ public static class StParser
             return new StErrorExpression(new TextSpan(0, 0, first, 1), text);
         }
         var expr = core.ParseExpression();
-        // Conditions are sometimes written with a trailing ';'
-        if (!core.IsAtEnd && core.CurrentToken.Kind == StTokenKind.Semicolon)
-        {
-            var t = core.CurrentToken;
-            var after = new StParserCore(text, tokens, context, diagnostics);
-            _ = after; // no-op; keep API simple
-        }
         if (!core.IsAtEnd)
         {
+            // A condition is sometimes written with a trailing ';' (or several, across blank lines): tolerate it
+            // rather than report trailing text, since the designer lets a condition be written like a statement.
             if (core.CurrentToken.Kind == StTokenKind.Semicolon && IsOnlySemicolonsLeft(tokens, core.CurrentToken))
                 return expr;
             core.ReportTrailing();

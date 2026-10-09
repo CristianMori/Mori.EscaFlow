@@ -201,8 +201,10 @@ public static class L5kShaper
                     if (member.Target is not null) hostValues.TryGetValue(member.Target, out host);
                     var bit = member.BitNumber ?? 0;
                     var on = ((host >> bit) & 1) != 0;
-                    var kind = AtomicKindExtensions.TryParseAtomic(member.DataType.Name, out var k) && k == AtomicKind.Bit ? AtomicKind.Bool : AtomicKind.Bool;
-                    members.Add(new KeyValuePair<string, TagValue>(member.Name, _interner.Integer(kind, on ? 1 : 0, Radix.Decimal)));
+                    // A bit-overlay member is always shaped as BOOL, regardless of how its declared data type is
+                    // spelled in the export (historically "BIT"): it is one bit of its host, read out above, and the
+                    // only type that means anything for a single bit.
+                    members.Add(new KeyValuePair<string, TagValue>(member.Name, _interner.Integer(AtomicKind.Bool, on ? 1 : 0, Radix.Decimal)));
                     continue;
                 }
 
