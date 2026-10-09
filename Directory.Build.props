@@ -10,4 +10,15 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
+  <PropertyGroup>
+    <Product>EscaFlow</Product>
+    <Authors>Cristian Mori</Authors>
+    <Company>Cristian Mori</Company>
+    <Copyright>Copyright (c) 2026 Cristian Mori</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/CristianMori/EscaFlow</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CristianMori/EscaFlow.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
 </Project>
