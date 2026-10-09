@@ -3,6 +3,40 @@ using Xunit;
 
 namespace Mori.EscaFlow.Runtime.Tests;
 
+/// <summary>
+/// A packed BOOL[64] array member, exactly as the converter lays one out inside a structure: presented to the
+/// tag server as two DWORDs (<see cref="TagStore.RegisterLayout"/> turns a <c>PackedBools</c> member into a
+/// DWORD host, since CIP has no bit-array member type), with the wrapper's own bit-level view for logic.
+/// </summary>
+public sealed class PackedFlags : PlcStruct
+{
+    public static readonly PlcLayout Layout = new("PackedFlags", 8, 4, new[]
+    {
+        new PlcLayoutMember("Flags", LogixDataTypes.BOOL, null, 0, 0, new[] { 64 }, 1, packedBools: true),
+    });
+
+    public readonly PlcBoolArray Flags;
+
+    public PackedFlags(Tag tag, int offset) : base(tag, offset) => Flags = new PlcBoolArray(tag, offset, new[] { 64 });
+
+    public override object? GetMember(string name) => name.ToUpperInvariant() == "FLAGS" ? Flags : null;
+}
+
+/// <summary>A structure one level above <see cref="PackedFlags"/>, so a path to <c>Flags</c> crosses a member step (and, as an array tag, an element index) before it ever reaches the packed member.</summary>
+public sealed class Nested : PlcStruct
+{
+    public static readonly PlcLayout Layout = new("Nested", 8, 4, new[]
+    {
+        new PlcLayoutMember("Inner", 0, "PackedFlags", 0, 0, Array.Empty<int>(), 8),
+    });
+
+    public readonly PackedFlags Inner;
+
+    public Nested(Tag tag, int offset) : base(tag, offset) => Inner = new PackedFlags(tag, offset);
+
+    public override object? GetMember(string name) => name.ToUpperInvariant() == "INNER" ? Inner : null;
+}
+
 /// <summary>Layout-to-template registration, path resolution and text read/write, and snapshot round-trips, against a real <see cref="TagDatabase"/>.</summary>
 public class TagStoreTests
 {
@@ -103,6 +137,49 @@ public class TagStoreTests
         Assert.Contains(tags, t => t.Path == "M1" && t.Type == "Motor");
         Assert.Single(store.Tags("flag"));
     }
+
+    /// <summary>
+    /// A whole-array (unindexed) read of a packed BOOL array falls back to <c>TryResolveArray</c>, since the
+    /// library's path walker only resolves an indexed element of such an array, not the array as a whole. That
+    /// fallback walks the structure's <em>CIP</em> template, where a packed BOOL array member is presented as a
+    /// DWORD host (<see cref="TagStore.RegisterLayout"/>); getting the whole-array read right for such a member —
+    /// reporting it as <c>BOOL[n]</c> and reading individual bits, not as a smaller array of raw DWORDs — needs the
+    /// member's own <c>PackedBools</c> flag to be picked up, not just the root tag's. This covers both the single
+    /// level case and a path that also crosses a structure array index before reaching the packed member, which is
+    /// the shape a generated controller actually produces for an add-on or module image nested in an array of tags.
+    /// </summary>
+    [Fact]
+    public void WholeArrayReadOfNestedPackedBoolMemberReadsBitsNotHostWords()
+    {
+        var store = NewStore();
+        store.RegisterLayout(PackedFlags.Layout);
+        store.RegisterLayout(Nested.Layout);
+
+        // One level deep, no index: Root.Inner.Flags.
+        var root = new Nested(store.Define("Root", Nested.Layout, Array.Empty<int>()), 0);
+        root.Inner.Flags[3].Value = true;
+        root.Inner.Flags[40].Value = true;
+        Assert.True(store.TryRead("Root.Inner.Flags", out var v));
+        Assert.Equal("BOOL[64]", v!.Type);
+        Assert.Equal("1", Element(v.Text, 3));
+        Assert.Equal("1", Element(v.Text, 40));
+        Assert.Equal("0", Element(v.Text, 0));
+
+        // Through a structure array index and then a nested member: Elements[2].Inner.Flags.
+        var tag = store.Define("Elements", Nested.Layout, new[] { 5 });
+        var elements = new PlcArray<Nested>(tag, 0, Nested.Layout.Size, new[] { 5 }, static (t, o) => new Nested(t, o));
+        elements[2].Inner.Flags[10].Value = true;
+        Assert.True(store.TryRead("Elements[2].Inner.Flags", out v));
+        Assert.Equal("BOOL[64]", v!.Type);
+        Assert.Equal("1", Element(v.Text, 10));
+        Assert.Equal("0", Element(v.Text, 9));
+        // A different array element must read its own (all-clear) copy of the member, not element 2's.
+        Assert.True(store.TryRead("Elements[0].Inner.Flags", out v));
+        Assert.Equal("0", Element(v!.Text, 10));
+    }
+
+    /// <summary>The i-th element of a <c>[a, b, c, ...]</c> text as <see cref="TagStore.FormatArray"/> (private) renders it.</summary>
+    private static string Element(string arrayText, int index) => arrayText.Trim('[', ']').Split(", ")[index];
 
     [Fact]
     public void SnapshotRoundTrips()

@@ -421,6 +421,25 @@ public sealed class TagStore
                     if (member.Name is null) return false;
                     offset += member.Offset;
                     type = member.DataType;
+
+                    // RegisterLayout presents a packed BOOL array member as the DWORD host it is stored in (CIP has
+                    // no bit-array member type), so by this point the CIP template member above has already lost
+                    // the fact that it is a BOOL array at all: its DataType reads DWORD and its ArraySize is a count
+                    // of DWORDs, not bits. The original PlcLayout this template was registered from still has that
+                    // member's PackedBools flag and true bit count, so look it up there (by the parent structure's
+                    // own layout, found from the template's instance id) whenever one is available, and present the
+                    // member as the BOOL[n] it is to the client instead of as a smaller array of raw DWORDs.
+                    if (_layoutsById.TryGetValue(template.InstanceId, out var parentLayout)
+                        && parentLayout.FindMember(sym.Name) is { PackedBools: true } packedMember)
+                    {
+                        type = LogixDataTypes.BOOL;
+                        template = null;
+                        elementSize = 1;
+                        boolArray = true;
+                        dims = new[] { packedMember.ElementCount };
+                        break;
+                    }
+
                     boolArray = false;
                     if (LogixDataTypes.IsStruct(type))
                     {
