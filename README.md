@@ -1,21 +1,80 @@
 # EscaFlow
 
-EscaFlow turns Rockwell Logix 5000 projects (`.L5X` exports) into generated code plus a runtime that runs
-the result as a **virtual controller**: the generated program scans like the original PLC, keeps every
-tag in a byte image laid out like the source controller, and serves that image over EtherNet/IP, so
-HMIs, OPC servers, Studio 5000 and other controllers read and write it exactly as they would the real
-thing. A web console starts and stops the controller, saves and loads snapshots and browses tag values.
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![.NET 10](https://img.shields.io/badge/.NET-10-512BD4.svg)](https://dotnet.microsoft.com/)
+[![Status: active development](https://img.shields.io/badge/status-active%20development-orange.svg)](#known-gaps)
+[![Format: plc-ir 2.0](https://img.shields.io/badge/middle%20format-plc--ir%202.0-6f42c1.svg)](docs/plc-ir-2.0.md)
 
-The pipeline has three stages, each a separate package family under the root namespace `Mori.EscaFlow`:
+**A vendor-neutral PLC transpiler.** EscaFlow turns PLC projects into generated code plus a runtime
+that runs the result as a **virtual controller**: the generated program scans like the original PLC,
+keeps every tag in a byte image laid out like the source controller, and serves that image live over
+industrial protocols, so HMIs, OPC servers and other controllers read and write it exactly as they
+would the real thing. A web console starts and stops the controller, saves and loads snapshots and
+browses tag values.
 
+Rockwell Logix 5000 (`.L5X` exports) is the first supported front-end. The middle format in between is
+deliberately vendor-neutral — IEC 61131-3, not Logix — so a Siemens, Beckhoff or Codesys front-end can
+be added later without teaching any of it Rockwell's instruction set, and a new target language only
+ever has to read one format.
+
+```mermaid
+flowchart LR
+    L5X["Rockwell Logix 5000<br/>.L5X export"]
+    SIEMENS["Siemens TIA Portal<br/>(planned)"]:::planned
+    TWINCAT["Beckhoff TwinCAT<br/>(planned)"]:::planned
+    CODESYS["Codesys<br/>(planned)"]:::planned
+
+    IR(["plc-ir 2.0<br/>vendor-neutral middle format<br/>IEC 61131-3 core + vendor slots"])
+
+    CONV["Converter.&lt;Language&gt;<br/>code generation"]
+    RT["Runtime.&lt;Language&gt;<br/>scan engine + tag server"]
+    OUT["Virtual controller<br/>EtherNet/IP + web console"]
+
+    L5X --> IR
+    SIEMENS -.-> IR
+    TWINCAT -.-> IR
+    CODESYS -.-> IR
+    IR --> CONV --> RT --> OUT
+
+    classDef planned fill:#f5f5f5,stroke:#aaaaaa,stroke-dasharray: 4 3,color:#888888
 ```
-L5X export  --->  Transpiler (middle format, plc-ir 2.0)  --->  Converter.<Language>  --->  Runtime.<Language>
-                  vendor-neutral, IEC 61131-3 based            code generation                scan engine, tag server, web console
+
+Once a controller is generated and running, the web console and real clients all talk to the same tag
+image:
+
+```mermaid
+flowchart LR
+    WEB["Web console<br/>(start/stop, snapshots, tag browser)"] -- "HTTP / JSON" --> HOST["Runtime.Host"]
+    HOST --> CTRL["PlcController"]
+    CTRL --> T1["MainTask"]
+    CTRL --> T2["SafetyTask / ..."]
+    T1 --> TAGS[("Tag store<br/>byte-exact memory image")]
+    T2 --> TAGS
+    TAGS <--> EIP["EtherNet/IP server"]
+    EIP <--> HMI["HMI / SCADA"]
+    EIP <--> STUDIO["Studio 5000 / OPC server"]
 ```
 
 Written in C# for .NET 10 by Cristian Mori. Licensed under Apache-2.0 (see `LICENSE`).
 
 ## Layout and naming
+
+```mermaid
+flowchart TD
+    L5XPARSE["Transpiler.L5X<br/>L5X parser"] --> L5XIMPORT["Transpiler.L5X.Import<br/>importer, ladder/FBD lowering"]
+    L5XIMPORT --> IRCORE["Transpiler<br/>middle format core"]
+    LOGIX["Transpiler.Logix<br/>Rockwell vendor slot"] --- L5XIMPORT
+    LOGIX --- CSHARP
+    IRCORE --> VALID["Transpiler.Validation"]
+    IRCORE --> CONV["Converter<br/>language-neutral layer"]
+    CONV --> CSHARP["Converter.CSharp"]
+    CSHARP --> RTCS["Runtime.CSharp"]
+    RTCS --> RTHOST["Runtime.Host<br/>web console + JSON API"]
+    RTCS -. binds to .-> EIPSHARP[("external/EthernetIpSharp<br/>submodule")]
+    CLI["Cli — escaflow"] --> L5XIMPORT
+    CLI --> CSHARP
+    CLI --> VALID
+```
 
 | Project | Role |
 |---|---|
@@ -29,9 +88,9 @@ Written in C# for .NET 10 by Cristian Mori. Licensed under Apache-2.0 (see `LICE
 | `src/Mori.EscaFlow.Runtime.CSharp` | The C# runtime (namespace `Mori.EscaFlow.Runtime`): value wrappers over EthernetIPSharp tag memory, structures and arrays, scan engine, system status, Logix timers and counters, services, snapshots, EtherNet/IP server. |
 | `src/Mori.EscaFlow.Runtime.Host` | The web console and JSON API over `IPlcController`. |
 | `src/Mori.EscaFlow.Cli` | The `escaflow` command line tool. |
-| `external/EthernetIpSharp` | Git submodule: the EtherNet/IP and Logix tag server library (branch `feature/transpiler-gaps`). |
+| `external/EthernetIpSharp` | Git submodule: the EtherNet/IP and Logix tag server library (branch `master`). |
 | `tests/` | One test project per package plus `tests/Conformance` (crafted L5X fixtures and their golden middle files). |
-| `docs/` | `plc-ir-2.0.md` (middle format contract), `csharp-generator.md` (converter / runtime / host contract), `ir-1.0.md` (retired first format). |
+| `docs/` | `plc-ir-2.0.md` (middle format contract), `csharp-generator.md` (converter / runtime / host contract), `ir-1.0.md` (retired first format), `plc-ir-2.0-standard.docx` (work-in-progress standalone write-up of the middle format, for readers who want a document instead of the Markdown contract). |
 
 Naming rule: `Mori.EscaFlow.Transpiler.*` is everything that produces or describes the middle format,
 `Mori.EscaFlow.Converter.<Language>` turns it into a target language, `Mori.EscaFlow.Runtime.<Language>`
@@ -41,7 +100,7 @@ runs the generated code. A second front-end (Siemens, Beckhoff, Codesys) would b
 ## Build, test, run
 
 ```
-git clone --recurse-submodules https://github.com/CristianMori/EscaFlow.git
+git clone --recurse-submodules https://github.com/CristianMori/Mori.EscaFlow.git
 cd EscaFlow
 dotnet build Mori.EscaFlow.slnx
 dotnet test                                   # unit + integration (integration tests skip when the sample exports are absent)
