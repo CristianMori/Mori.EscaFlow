@@ -17,6 +17,238 @@ deliberately vendor-neutral — IEC 61131-3, not Logix — so a Siemens, Beckhof
 be added later without teaching any of it Rockwell's instruction set, and a new target language only
 ever has to read one format.
 
+## What it looks like
+
+Rung 0 of routine `Main` (program `P`) in [`tests/Conformance/fixtures/logix/ladder.L5X`](tests/Conformance/fixtures/logix/ladder.L5X). The rung comment in that export is `bits`.
+
+| Input (vendor project) | → plc-ir 2.0 | → Output |
+|---|---|---|
+| `XIC(A)XIO(B)OTE(Out1)OTL(Out2)OTU(Bits.3);` | `{ "kind": "assign",`<br>`"target": { "op": "ref", "root": { "kind": "temp", "name": "_rc1" }, "type": "BOOL" },`<br>`"value": { "op": "bin", "operator": "and",`<br>`"left": { "op": "ref", "root": { "kind": "var", "id": "global/Ladder/A" }, "type": "BOOL" },`<br>`"right": { "op": "un", "operator": "not",`<br>`"operand": { "op": "ref", "root": { "kind": "var", "id": "global/Ladder/B" }, "type": "BOOL" } } },`<br>`"src": { "rung": 0, "element": 2 } }` | `_rc1 := A AND NOT B;`<br>`Out1 := _rc1;`<br>`IF _rc1 THEN`<br>`&nbsp;&nbsp;&nbsp;&nbsp;Out2 := TRUE;`<br>`END_IF;`<br>`IF _rc1 THEN`<br>`&nbsp;&nbsp;&nbsp;&nbsp;Bits.3 := FALSE;`<br>`END_IF;` |
+
+The middle cell is the rung-condition statement (`src.rung` 0, `src.element` 2) with `path`, `io`, `opaque`, `nonRetentive`, and the `type` on the `and` / `not` nodes omitted. The four statements for the rung, every field included, are below, from action `Main` in [`tests/Conformance/golden/logix/ladder.ir.json`](tests/Conformance/golden/logix/ladder.ir.json). The output column is what `ir print` writes for those statements. The same lines sit inside `ACTION Main` in [`tests/Conformance/golden/logix/ladder.st`](tests/Conformance/golden/logix/ladder.st), one indent deeper. The structured-text printer renders the IR for review and for the conformance goldens. The runnable target shipped today is C# (`generate csharp`).
+
+The L5X element, from that fixture:
+
+```xml
+<Rung Number="0" Type="N">
+<Comment>
+<![CDATA[bits]]>
+</Comment>
+<Text>
+<![CDATA[XIC(A)XIO(B)OTE(Out1)OTL(Out2)OTU(Bits.3);]]>
+</Text>
+</Rung>
+```
+
+<details>
+<summary>plc-ir 2.0 statements for rung 0 (action <code>Main</code> in <code>ladder.ir.json</code>)</summary>
+
+The four statement objects from action `Main`, in order. Only whitespace differs from the golden file.
+
+```json
+[
+  {
+    "kind": "assign",
+    "target": {
+      "op": "ref",
+      "root": {
+        "kind": "temp",
+        "name": "_rc1"
+      },
+      "path": [],
+      "io": false,
+      "opaque": false,
+      "type": "BOOL"
+    },
+    "value": {
+      "op": "bin",
+      "operator": "and",
+      "left": {
+        "op": "ref",
+        "root": {
+          "kind": "var",
+          "id": "global/Ladder/A"
+        },
+        "path": [],
+        "io": false,
+        "opaque": false,
+        "type": "BOOL"
+      },
+      "right": {
+        "op": "un",
+        "operator": "not",
+        "operand": {
+          "op": "ref",
+          "root": {
+            "kind": "var",
+            "id": "global/Ladder/B"
+          },
+          "path": [],
+          "io": false,
+          "opaque": false,
+          "type": "BOOL"
+        },
+        "type": "BOOL"
+      },
+      "type": "BOOL"
+    },
+    "nonRetentive": false,
+    "src": {
+      "rung": 0,
+      "element": 2
+    }
+  },
+  {
+    "kind": "assign",
+    "target": {
+      "op": "ref",
+      "root": {
+        "kind": "var",
+        "id": "global/Ladder/Out1"
+      },
+      "path": [],
+      "io": false,
+      "opaque": false,
+      "type": "BOOL"
+    },
+    "value": {
+      "op": "ref",
+      "root": {
+        "kind": "temp",
+        "name": "_rc1"
+      },
+      "path": [],
+      "io": false,
+      "opaque": false,
+      "type": "BOOL"
+    },
+    "nonRetentive": false,
+    "src": {
+      "rung": 0,
+      "element": 2
+    }
+  },
+  {
+    "kind": "if",
+    "branches": [
+      {
+        "condition": {
+          "op": "ref",
+          "root": {
+            "kind": "temp",
+            "name": "_rc1"
+          },
+          "path": [],
+          "io": false,
+          "opaque": false,
+          "type": "BOOL"
+        },
+        "body": [
+          {
+            "kind": "assign",
+            "target": {
+              "op": "ref",
+              "root": {
+                "kind": "var",
+                "id": "global/Ladder/Out2"
+              },
+              "path": [],
+              "io": false,
+              "opaque": false,
+              "type": "BOOL"
+            },
+            "value": {
+              "op": "lit",
+              "kind": "bool",
+              "bool": true,
+              "type": "BOOL"
+            },
+            "nonRetentive": false
+          }
+        ]
+      }
+    ],
+    "src": {
+      "rung": 0,
+      "element": 3
+    }
+  },
+  {
+    "kind": "if",
+    "branches": [
+      {
+        "condition": {
+          "op": "ref",
+          "root": {
+            "kind": "temp",
+            "name": "_rc1"
+          },
+          "path": [],
+          "io": false,
+          "opaque": false,
+          "type": "BOOL"
+        },
+        "body": [
+          {
+            "kind": "assign",
+            "target": {
+              "op": "bit",
+              "of": {
+                "op": "ref",
+                "root": {
+                  "kind": "var",
+                  "id": "global/Ladder/Bits"
+                },
+                "path": [],
+                "io": false,
+                "opaque": false,
+                "type": "DINT"
+              },
+              "bit": {
+                "op": "lit",
+                "kind": "int",
+                "int": 3,
+                "type": "DINT"
+              },
+              "type": "BOOL"
+            },
+            "value": {
+              "op": "lit",
+              "kind": "bool",
+              "bool": false,
+              "type": "BOOL"
+            },
+            "nonRetentive": false
+          }
+        ]
+      }
+    ],
+    "src": {
+      "rung": 0,
+      "element": 4
+    }
+  }
+]
+```
+
+</details>
+
+## Quickstart
+
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/). `global.json` pins SDK `10.0.100` and rolls forward to the latest 10.0 feature band.
+
+```bash
+git clone https://github.com/CristianMori/Mori.EscaFlow
+cd Mori.EscaFlow
+dotnet run -c Release --project src/Mori.EscaFlow.Cli -- ir build tests/Conformance/fixtures/logix/ladder.L5X out/ladder.ir.json --indent --validate
+```
+
+`dotnet run` builds the `escaflow` tool and writes plc-ir 2.0 for the ladder fixture above. The conformance suite runs this conversion and requires validation to pass with no errors. Aside from `source.generator` and `source.generatedAt` (stamped at build time; the golden pins both), the file matches [`ladder.ir.json`](tests/Conformance/golden/logix/ladder.ir.json).
+
+Print routine `Main` — the output column above — with `dotnet run -c Release --project src/Mori.EscaFlow.Cli -- ir print out/ladder.ir.json P/Main`.
+
+This clone does not fetch the EtherNet/IP submodule. Building the whole solution, running the tests, and generating a controller need it. See [Build, test, run](#build-test-run).
+
 ```mermaid
 flowchart LR
     L5X["Rockwell Logix 5000<br/>.L5X export"]
@@ -38,6 +270,8 @@ flowchart LR
 
     classDef planned fill:#f5f5f5,stroke:#aaaaaa,stroke-dasharray: 4 3,color:#888888
 ```
+
+<!-- TODO: owner — add a screenshot of the web console (start/stop, snapshots, tag browser). -->
 
 Once a controller is generated and running, the web console and real clients all talk to the same tag
 image:
@@ -101,7 +335,7 @@ runs the generated code. A second front-end (Siemens, Beckhoff, Codesys) would b
 
 ```
 git clone --recurse-submodules https://github.com/CristianMori/Mori.EscaFlow.git
-cd EscaFlow
+cd Mori.EscaFlow
 dotnet build Mori.EscaFlow.slnx
 dotnet test                                   # unit + integration (integration tests skip when the sample exports are absent)
 dotnet test --filter Category!=Integration    # unit tests only
@@ -166,3 +400,13 @@ resolves, the middle files validate, the generated solutions compile, and the ge
 
 Designed and written by Cristian Mori. EtherNet/IP transport and the Logix tag server come from the
 author's EthernetIPSharp library. Rockwell data type layouts follow the Logix 5000 reference manuals.
+
+## Related projects
+
+Part of a family of open-source robotics / industrial-automation libraries by @CristianMori:
+
+- **EtherNet/IP + CIP Safety:** [Python](https://github.com/CristianMori/EthernetIpPython) · [C#](https://github.com/CristianMori/EthernetIpSharp) · [Rust](https://github.com/CristianMori/EthernetIpRust) · [C++](https://github.com/CristianMori/EthernetIpCpp)
+- **PLC tooling:** [MoriFixPlc](https://github.com/CristianMori/MoriFixPlc) (portable PLC HAL) · [EscaFlow](https://github.com/CristianMori/Mori.EscaFlow) (PLC transpiler)
+- **ROS in pure C#:** [Mori.RosSharp](https://github.com/CristianMori/Mori.RosSharp) (ROS 1) · [Mori.Ros2Sharp](https://github.com/CristianMori/Mori.Ros2Sharp) (ROS 2)
+- **Simulation & vision:** [GemelliStudio](https://github.com/CristianMori/GemelliStudio) · [LocateAnythingSharp](https://github.com/CristianMori/LocateAnythingSharp) · [Mori.SkyScope](https://github.com/CristianMori/Mori.SkyScope)
+- **AI agents:** [Deckhand](https://github.com/CristianMori/DeckHand)
